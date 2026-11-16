@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block titulo %}Certificados — MADeCa{% endblock %}
+{% block contenido %}
+<h1>Certificados de firma electrónica</h1>
+
+{% if error %}<div class="alerta error">{{ error }}</div>{% endif %}
+
+<div class="alerta info">
+    La firma AdES solo es obligatoria si un DeCA se marca con finalidad
+    contractual (Apartado Cuarto, BOE-A-2026-12784). Sin certificado
+    activo, los DeCA se emiten igualmente, sin firmar.
+</div>
+
+<div class="card">
+    <h2>Subir certificado (.p12 / .pfx)</h2>
+    <form method="post" action="/dashboard/certificados" enctype="multipart/form-data">
+        <div class="form-fila">
+            <label for="nombre">Nombre descriptivo</label>
+            <input type="text" id="nombre" name="nombre" placeholder="p. ej. Sello de empresa 2026" required>
+        </div>
+        <div class="form-fila">
+            <label for="archivo">Fichero .p12/.pfx</label>
+            <input type="file" id="archivo" name="archivo" accept=".p12,.pfx" required>
+        </div>
+        <div class="form-fila">
+            <label for="password">Contraseña del certificado</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn">Subir y validar</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Certificados</h2>
+    <form class="filtros" hx-get="/dashboard/certificados" hx-target="#tabla-certificados" hx-select="#tabla-certificados"
+          hx-swap="outerHTML" hx-push-url="true" hx-trigger="keyup changed delay:400ms from:input[type=search], change">
+        <label class="campo ancho">Buscar
+            <input type="search" name="buscar" value="{{ filtros.buscar }}" maxlength="100" placeholder="Nombre o titular">
+        </label>
+        <label class="campo">Caducidad
+            <select name="caducidad">
+                <option value="">Todos</option>
+                <option value="vigentes" {% if filtros.caducidad == 'vigentes' %}selected{% endif %}>Vigentes</option>
+                <option value="30d" {% if filtros.caducidad == '30d' %}selected{% endif %}>Caducan en 30 días</option>
+                <option value="caducados" {% if filtros.caducidad == 'caducados' %}selected{% endif %}>Caducados</option>
+            </select>
+        </label>
+        <label class="casilla"><input type="checkbox" name="ocultar_desactivados" value="1" {% if filtros.ocultar_desactivados %}checked{% endif %}> Ocultar desactivados</label>
+        <a class="btn secundario limpiar" href="/dashboard/certificados">Quitar filtros</a>
+    </form>
+    <div id="tabla-certificados">
+    <table>
+        <thead><tr><th>Nombre</th><th>Titular</th><th>Caduca</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+        {% for c in certs %}
+            <tr>
+                <td>{{ c.nombre }}</td>
+                <td class="text-light">{{ c.titular_cn or '-' }}</td>
+                <td>{{ c.fecha_caducidad | fecha('-') }}</td>
+                <td><span class="badge {{ 'activa' if c.activo else 'inactiva' }}">{{ 'activo' if c.activo else 'desactivado' }}</span>
+                    {% if c.fecha_caducidad and c.fecha_caducidad < ahora %}<span class="badge anulado">caducado</span>{% endif %}</td>
+                <td>
+                    {% if c.activo %}
+                    <form method="post" action="/dashboard/certificados/{{ c.id }}/desactivar">
+                        <button type="submit" class="btn peligro">Desactivar</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5" class="text-light">{% if filtros.buscar or filtros.caducidad or filtros.ocultar_desactivados %}No hay certificados que coincidan con el filtro.{% else %}Todavía no hay certificados subidos.{% endif %}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

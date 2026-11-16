@@ -1,0 +1,68 @@
+# --- Framework web y servidor ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-multipart>=0.0.12
+jinja2>=3.1.4
+
+# --- Configuración y validación ---
+pydantic>=2.9.0
+pydantic-settings>=2.5.2
+email-validator>=2.2.0
+
+# --- Base de datos ---
+sqlalchemy>=2.0.35
+alembic>=1.13.3
+psycopg[binary]>=3.2.3
+
+# --- Autenticación y seguridad ---
+bcrypt>=4.1.0
+pyjwt>=2.9.0
+itsdangerous>=2.2.0
+redis>=5.1.1
+slowapi>=0.1.9
+
+# --- PDF y QR ---
+# pypdf/reportlab: estampado de QR sobre el PDF del ERP (camino
+# passthrough), puro Python, sin libs nativas.
+# >=6.14.2: corrige las CVE-2026-54530/54531/54651/57204/59935/59936/59937
+# (bucles infinitos y consumo de memoria con PDF manipulados).
+pypdf>=6.14.2
+reportlab>=4.2.5
+qrcode[pil]>=8.0
+pillow>=10.4.0
+# weasyprint: redactado del PDF completo cuando el ERP no genera uno
+# propio (camino de generación). Necesita librerías nativas (Pango/
+# Cairo/GDK-Pixbuf) — ver Dockerfile. En Windows sin GTK solo falla esta
+# función concreta (import perezoso), no el resto de la aplicación.
+weasyprint>=62.3
+
+# --- Firma electrónica AdES / eIDAS ---
+pyhanko>=0.25.1
+pyhanko-certvalidator>=0.26.5
+cryptography>=43.0.1
+
+# --- Adaptadores ERP (hot-folder + REST) ---
+watchdog>=5.0.3
+httpx>=0.27.2
+
+# --- Obtención de datos de documentos (bandeja de revisión) ---
+# pytesseract: OCR local (necesita el programa Tesseract + idioma spa;
+# en Docker se instala con apt, ver Dockerfile).
+pytesseract>=0.3.13
+# pypdfium2: dibuja las páginas de los PDF con texto y da la posición de
+# cada letra, para señalar en la revisión de dónde se leyó cada dato.
+# Opcional en ejecución: sin él se ve el PDF como antes. BSD/Apache.
+pypdfium2>=5.14.0
+# openpyxl: exportación a Excel (.xlsx) de Expediciones e Historial. MIT.
+openpyxl>=3.1.5
+# paramiko: conector SFTP (NAS/servidores de ficheros).
+paramiko>=5.0.0
+
+# --- Almacenamiento S3/MinIO (opcional, solo si STORAGE_BACKEND=s3) ---
+boto3>=1.35.36
+
+# --- Utilidades ---
+python-dateutil>=2.9.0
+# Base de zonas horarias para zoneinfo (Europe/Madrid) aunque la imagen o
+# el Windows de destino no la traigan.
+tzdata>=2024.1

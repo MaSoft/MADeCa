@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MADeCa — Guía rápida de pruebas y demostración</title>
+<style>
+:root {
+  --primary: #1a3a5c;
+  --primary-light: #2c5f8a;
+  --accent: #1d4ed8;
+  --bg: #f7f9fc;
+  --card-bg: #ffffff;
+  --text: #1a1a2e;
+  --text-light: #555;
+  --border: #dde3ea;
+  --code-bg: #0d1117;
+  --code-text: #e6edf3;
+  --success: #16a34a;
+  --warning: #ca8a04;
+  --danger: #dc2626;
+  --info: #2563eb;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+nav { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; background: var(--primary); overflow-y: auto; padding: 24px 0 40px; }
+nav .nav-title { color: #fff; font-size: 20px; font-weight: 600; padding: 0 24px; margin-bottom: 2px; }
+nav .nav-subtitle { color: rgba(255,255,255,0.6); font-size: 12px; padding: 0 24px; margin-bottom: 20px; }
+nav ul { list-style: none; margin: 0; padding: 0; }
+nav li.section-title { color: rgba(255,255,255,0.45); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; padding: 16px 24px 6px; }
+nav ul li a { display: block; padding: 7px 24px; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px; border-left: 3px solid transparent; }
+nav ul li a:hover { background: rgba(255,255,255,0.08); border-left-color: var(--accent); }
+nav ul li a.sub { padding-left: 40px; font-size: 13px; color: rgba(255,255,255,0.65); }
+main { margin-left: 280px; padding: 0 0 80px; }
+.page-header { background: linear-gradient(135deg, var(--primary) 0%, #0d2038 100%); color: #fff; padding: 56px 48px; }
+.page-header h1 { font-size: 36px; font-weight: 300; margin: 0 0 8px; }
+.page-header .version { display: inline-block; background: rgba(255,255,255,0.15); padding: 3px 12px; border-radius: 20px; font-size: 13px; margin-bottom: 12px; }
+.page-header .tagline { font-size: 16px; color: rgba(255,255,255,0.8); max-width: 680px; }
+section { padding: 40px 48px; border-bottom: 1px solid var(--border); }
+h2 { font-size: 24px; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-top: 0; }
+h3 { font-size: 18px; color: var(--primary-light); margin-top: 32px; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 16px 0; }
+.card-header { font-weight: 600; color: var(--primary); margin-bottom: 10px; }
+table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--primary); color: #fff; font-weight: 500; }
+tbody tr:nth-child(even) { background: #f2f5fa; }
+tbody tr:hover { background: #e9eef7; }
+.table-wrap { overflow-x: auto; }
+.param-name { font-family: "SFMono-Regular", Consolas, monospace; color: var(--accent); font-weight: 600; }
+code { font-family: "SFMono-Regular", Consolas, monospace; background: #eef2f7; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+.badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 12px; margin-left: 6px; }
+.badge-required { background: #fde2e2; color: var(--danger); }
+.badge-optional { background: #e2ecfd; color: var(--info); }
+.badge-default { background: #eaf7ed; color: var(--success); }
+pre { background: var(--code-bg); color: var(--code-text); padding: 16px 20px; border-radius: 8px; overflow-x: auto; font-family: "SFMono-Regular", Consolas, monospace; font-size: 13.5px; line-height: 1.6; }
+pre .cmd { color: #79c0ff; }
+pre .param { color: #ffa657; }
+pre .string { color: #a5d6ff; }
+pre .comment { color: #8b949e; font-style: italic; }
+.alert-info, .alert-warning, .alert-danger, .alert-success { border-radius: 8px; padding: 14px 18px; margin: 18px 0; font-size: 14.5px; border-left: 4px solid; }
+.alert-info { background: #eaf1fd; border-color: var(--info); color: #1e3a6d; }
+.alert-warning { background: #fdf3e0; border-color: var(--warning); color: #6b4c05; }
+.alert-danger { background: #fbe6e6; border-color: var(--danger); color: #7a1a1a; }
+.alert-success { background: #e8f7ec; border-color: var(--success); color: #14532d; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 18px 0; }
+.flow-step { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 14px; }
+.flow-step::after { content: '\25B6'; color: var(--accent); margin-left: 12px; font-size: 12px; }
+.flow-step:last-child::after { content: ''; margin: 0; }
+.dir-tree { font-family: "SFMono-Regular", Consolas, monospace; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-size: 13.5px; line-height: 1.7; white-space: pre; overflow-x: auto; }
+.dir-tree .folder { color: var(--primary); font-weight: 600; }
+.dir-tree .file { color: var(--text-light); }
+.dir-tree .highlight-file { color: var(--accent); font-weight: 600; }
+footer { text-align: center; padding: 32px; color: var(--text-light); font-size: 13px; }
+@media (max-width: 900px) { nav { display: none; } main { margin-left: 0; } .page-header, section { padding-left: 24px; padding-right: 24px; } }
+@media (max-width: 640px) { .page-header { padding: 32px 16px; } .page-header h1 { font-size: 28px; } section { padding: 28px 16px; } th, td { padding: 8px 10px; } .table-wrap table { min-width: 560px; } }
+@media print { nav { display: none; } main { margin-left: 0; } section { padding: 20px 0; page-break-inside: avoid; } body { font-size: 10pt; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-title">MADeCa</div>
+  <div class="nav-subtitle">Guía rápida de pruebas &middot; v0.4.0</div>
+  <ul>
+    <li class="section-title">Preparar</li>
+    <li><a href="#requisitos">1. Qué necesitas</a></li>
+    <li><a href="#arrancar">2. Arrancar (primera vez)</a></li>
+    <li><a href="#demo">3. Cargar la demo</a></li>
+    <li><a href="#documentos">4. Documentos de demo</a></li>
+    <li class="section-title">Probar</li>
+    <li><a href="#panel">5. Pruebas en el panel</a></li>
+    <li><a href="#p-expediciones" class="sub">Expediciones</a></li>
+    <li><a href="#p-bandeja" class="sub">Bandeja de revisión</a></li>
+    <li><a href="#p-filtros" class="sub">Filtros y búsqueda</a></li>
+    <li><a href="#p-v030" class="sub">Novedades 0.3.0</a></li>
+    <li><a href="#p-v040" class="sub">Novedades 0.4.0</a></li>
+    <li><a href="#p-admin" class="sub">Administración</a></li>
+    <li><a href="#api">6. Pruebas de la API</a></li>
+    <li><a href="#hotfolder">7. Hot-folder</a></li>
+    <li><a href="#conector">8. Conector local</a></li>
+    <li><a href="#fuentes">9. Fuentes de datos</a></li>
+    <li><a href="#firma">10. Firma con certificado</a></li>
+    <li><a href="#tests">11. Tests automáticos</a></li>
+    <li class="section-title">Otros</li>
+    <li><a href="#reiniciar">12. Parar y volver a empezar</a></li>
+    <li><a href="#problemas">13. Si algo falla</a></li>
+  </ul>
+</nav>
+
+<main>
+<div class="page-header">
+  <span class="version">Versión 0.4.0</span>
+  <h1>Guía rápida de pruebas</h1>
+  <div class="tagline">Pasos para arrancar MADeCa en tu equipo, cargar la empresa de demostración y comprobar cada función con los documentos de ejemplo.</div>
+</div>
+
+<section id="requisitos">
+  <h2>1. Qué necesitas</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><td>Docker Desktop en marcha</td><td>Levanta base de datos, Redis, la aplicación, el hot-folder y los conectores. Incluye WeasyPrint y Tesseract (PDF generado y OCR).</td></tr>
+      <tr><td>PowerShell 7 (<code>pwsh</code>)</td><td>Script de pruebas de la API (<code>demo\pruebas_api.ps1</code>).</td></tr>
+      <tr><td>Navegador</td><td>Panel de empresa (<code>http://localhost:8000/login</code>) y de operador (<code>/superadmin/login</code>).</td></tr>
+      <tr><td>El entorno <code>.venv</code> del proyecto</td><td>Tests automáticos y conector local (ya existe en la carpeta del proyecto).</td></tr>
+    </tbody>
+  </table></div>
+  <div class="alert-info">Todo lo de esta guía son <strong>datos ficticios de prueba</strong>. No uses la demo en una instalación real.</div>
+</section>
+
+<section id="arrancar">
+  <h2>2. Arrancar (primera vez)</h2>
+  <p>Desde la carpeta del proyecto (<code>LAUNCHER\SCRIPTS\MADECA</code>):</p>
+<pre><span class="comment"># 1. Configuración: revisa .env (si no existe, copia el de ejemplo)</span>
+<span class="cmd">Copy-Item</span> <span class="string">.env.example</span> <span class="string">.env</span>          <span class="comment"># solo si no tienes .env</span>
+<span class="comment">#    En .env deja:  APP_ENV=development   APP_BASE_URL=http://localhost:8000</span>
+<span class="comment">#    y pon claves propias en APP_SECRET_KEY y JWT_SECRET_KEY (distintas). Para generarlas:</span>
+<span class="cmd">.venv\Scripts\python</span> <span class="param">-c</span> <span class="string">"import secrets; print(secrets.token_urlsafe(48))"</span>
+
+<span class="comment"># 2. Construir y arrancar todos los servicios</span>
+<span class="cmd">docker compose up</span> <span class="param">-d --build</span>
+
+<span class="comment"># 3. Crear o actualizar las tablas (también después de cada actualización)</span>
+<span class="cmd">docker compose exec</span> <span class="string">app</span> <span class="cmd">alembic upgrade head</span></pre>
+  <p>Comprueba que responde: <code>http://localhost:8000/salud</code> debe devolver <code>{"estado":"ok"}</code>.</p>
+  <div class="alert-warning">Si cambias <code>APP_SECRET_KEY</code> después de subir certificados, no se podrán descifrar: vuelve a subirlos.</div>
+</section>
+
+<section id="demo">
+  <h2>3. Cargar la demo</h2>
+<pre><span class="cmd">docker compose exec</span> <span class="string">app</span> <span class="cmd">python</span> <span class="param">-m scripts.cargar_demo --con-operador</span></pre>
+  <p>Crea la empresa ficticia <strong>Distribuciones Demo SL</strong> (B00345678) y muestra <strong>una sola vez</strong>:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Dato</th><th>Uso</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">admin@demo.madeca.local</span> + contraseña</td><td>Panel de empresa con todo: usuarios, integraciones, certificados, fuentes.</td></tr>
+      <tr><td><span class="param-name">operador@demo.madeca.local</span> + contraseña</td><td>Crear, modificar y finalizar expediciones; bandeja.</td></tr>
+      <tr><td><span class="param-name">lectura@demo.madeca.local</span> + contraseña</td><td>Solo consulta (para comprobar que no puede crear nada).</td></tr>
+      <tr><td><span class="param-name">operador-plataforma@demo.madeca.local</span> + contraseña</td><td>Panel de operador <code>/superadmin</code> (alta de empresas).</td></tr>
+      <tr><td>Clave de API <code>mad_live_…</code></td><td>Pruebas de la API y conector local. Guárdala en PowerShell: <code>$env:MADECA_API_KEY = "mad_live_…"</code></td></tr>
+      <tr><td>Id de la empresa</td><td>Nombre de su carpeta en el hot-folder.</td></tr>
+    </tbody>
+  </table></div>
+  <p>¿Has perdido las contraseñas o la clave? <code>docker compose exec app python -m scripts.cargar_demo --con-operador --nuevas-claves</code> genera otras y cierra las sesiones abiertas.</p>
+</section>
+
+<section id="documentos">
+  <h2>4. Documentos de demo</h2>
+  <p>Están en <code>demo\documentos\</code>. Para regenerarlos con fechas de mañana: <code>.venv\Scripts\python demo\generar_documentos.py</code>.</p>
+  <div class="dir-tree"><span class="folder">demo\documentos\</span>
+&#9500;&#9472;&#9472; <span class="highlight-file">01_albaran_erp.pdf</span>          <span class="file">PDF propio de un ERP (camino 1: se le estampa el QR)</span>
+&#9500;&#9472;&#9472; <span class="highlight-file">02_albaran_escaneado.png</span>    <span class="file">foto/escaneo: para la bandeja (OCR)</span>
+&#9500;&#9472;&#9472; <span class="highlight-file">02_albaran_escaneado.pdf</span>    <span class="file">escaneo en PDF: el camino 1 debe RECHAZARLO</span>
+&#9500;&#9472;&#9472; <span class="highlight-file">03_cmr_incompleto.pdf</span>       <span class="file">CMR con datos que faltan: la bandeja avisa</span>
+&#9500;&#9472;&#9472; <span class="highlight-file">05_expedicion_datos.json</span>    <span class="file">datos completos para la API (camino 2)</span>
+&#9500;&#9472;&#9472; <span class="highlight-file">06_modificacion.json</span>        <span class="file">cambio de vehículo por avería (Apartado Quinto)</span>
+&#9500;&#9472;&#9472; <span class="folder">lote\</span>                       <span class="file">alb_lote_1.pdf, alb_lote_2.pdf, metadatos.csv</span>
+&#9492;&#9472;&#9472; <span class="folder">hotfolder\</span>
+    &#9500;&#9472;&#9472; <span class="folder">pdf\</span>                    <span class="file">ALB-DEMO-HF-001.pdf + ALB-DEMO-HF-001.json</span>
+    &#9492;&#9472;&#9472; <span class="folder">datos\</span>                  <span class="file">pedido_demo.json</span></div>
+</section>
+
+<section id="panel">
+  <h2>5. Pruebas en el panel</h2>
+  <p>Entra en <code>http://localhost:8000/login</code>. En cada prueba: qué haces y qué debe pasar.</p>
+
+  <h3 id="p-expediciones">Expediciones</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Usuario</th><th>Qué haces</th><th>Resultado esperado</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>operador</td><td>Expediciones &rarr; <em>+ Nueva expedición</em> &rarr; <em>Subir PDF propio</em>: <code>01_albaran_erp.pdf</code>, referencia <code>ALB-DEMO-001</code>, matrícula <code>1234BCD</code>, remolque <code>R5678BBC</code>, fecha de mañana.</td><td>Se abre el detalle. <em>Ver PDF público</em> muestra el albarán con el QR abajo a la derecha.</td></tr>
+      <tr><td>2</td><td>operador</td><td>Igual que la 1 con <code>02_albaran_escaneado.pdf</code>.</td><td>Error: «parece resultado de escanear» (Apartado Segundo.2). No se crea nada.</td></tr>
+      <tr><td>3</td><td>operador</td><td><em>Generar documento con MADeCa</em>: rellena con los datos de <code>05_expedicion_datos.json</code>. Prueba antes a dejar vacío el domicilio del cargador.</td><td>Sin domicilio: error del Art. 6.a. Completo: PDF redactado por MADeCa con QR, fecha de emisión real y hora peninsular.</td></tr>
+      <tr><td>4</td><td>operador</td><td><em>Carga por lotes</em>: los dos PDF de <code>lote\</code> + <code>metadatos.csv</code>.</td><td>«2 de 2 expediciones creadas».</td></tr>
+      <tr><td>5</td><td>operador</td><td>En el detalle de la prueba 1, <em>Modificaciones durante el servicio</em>: motivo «Avería», dato <em>Matrícula del vehículo</em>, anterior <code>1234BCD</code>, nuevo <code>5678CDF</code>.</td><td>Aviso de entregar el PDF al conductor; historial con la modificación. El PDF público (misma URL) tiene una página final «MODIFICACIÓN N.º 1» con el valor anterior «NO VÁLIDO». La matrícula de la expedición pasa a 5678CDF.</td></tr>
+      <tr><td>6</td><td>operador</td><td>Detalle &rarr; <em>Descargar PDF para el conductor</em> y <em>Descargar QR</em>.</td><td>Se descargan el PDF vigente y un PNG con el QR.</td></tr>
+      <tr><td>7</td><td>cualquiera</td><td>Copia el <em>Enlace para la otra parte</em> del detalle y ábrelo en una ventana privada (sin sesión).</td><td>Se descarga el PDF sin pedir usuario.</td></tr>
+      <tr><td>8</td><td>sin sesión</td><td>Abre la URL pública (<code>/inspect/…</code>) en otra ventana privada, y escanea el QR con el móvil si el móvil llega a tu equipo.</td><td>El PDF se abre directamente, sin login. En el detalle aparece la consulta en <em>Registro de accesos</em> con fecha y hora separadas.</td></tr>
+      <tr><td>9</td><td>operador</td><td><em>Marcar como entregado</em>.</td><td>Estado «entregado»; desaparece el formulario de modificación; aviso de que la URL podrá desactivarse a los 7 días.</td></tr>
+      <tr><td>10</td><td>operador</td><td>Nueva expedición con matrícula <code>AB12CD</code> y país <code>ES</code>; luego con país <code>PT</code>.</td><td>Con ES: matrícula rechazada. Con PT (cabotaje): aceptada.</td></tr>
+      <tr><td>11</td><td>lectura</td><td>Intenta <em>+ Nueva expedición</em> o abrir <code>/dashboard/expediciones/nueva</code>.</td><td>No tiene el botón y la página responde «No tiene permisos para esta acción».</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="p-bandeja">Bandeja de revisión</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Usuario</th><th>Qué haces</th><th>Resultado esperado</th></tr></thead>
+    <tbody>
+      <tr><td>12</td><td>operador</td><td>Bandeja de revisión &rarr; <em>Subir documentos</em>: <code>02_albaran_escaneado.png</code> y <code>03_cmr_incompleto.pdf</code>.</td><td>«2 documento(s) en la bandeja». Pendientes (2).</td></tr>
+      <tr><td>13</td><td>operador</td><td><em>Revisar</em> el escaneo.</td><td>Documento a la izquierda, datos leídos por OCR a la derecha. Corrige lo que el OCR lea mal y pulsa <em>Confirmar datos y emitir el DeCA</em> &rarr; se abre la expedición creada.</td></tr>
+      <tr><td>14</td><td>operador</td><td><em>Revisar</em> el CMR.</td><td>Aviso rojo con todo lo que falta (NIF del transportista, origen, destino, matrícula…). Pulsa <em>&#10005; Descartar este borrador</em> &rarr; pasa a «Descartados».</td></tr>
+      <tr><td>15</td><td>operador</td><td>Vuelve a abrir el borrador emitido desde «Emitidos».</td><td>Enlace a la expedición; el documento original ya no se conserva.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="p-admin">Administración</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Usuario</th><th>Qué haces</th><th>Resultado esperado</th></tr></thead>
+    <tbody>
+      <tr><td>16</td><td>admin</td><td>Usuarios: cambia el rol de <em>lectura</em> a <em>operador</em> con el desplegable y <em>Cambiar</em>.</td><td>El rol queda cambiado. El usuario puede crear expediciones en su siguiente página.</td></tr>
+      <tr><td>17</td><td>admin</td><td>Integraciones ERP: <em>Generar API key</em>.</td><td>La clave aparece una vez; al recargar ya no se ve (solo el prefijo). <em>Revocar</em> la deja inactiva.</td></tr>
+      <tr><td>18</td><td>operador de plataforma</td><td><code>/superadmin/login</code> &rarr; Empresas &rarr; <em>Usuarios</em> de la demo &rarr; <em>Resetear contraseña</em> del operador.</td><td>Contraseña nueva mostrada una vez (no en la barra de direcciones). La sesión que tuviera abierta ese usuario deja de valer.</td></tr>
+      <tr><td>19</td><td>operador de plataforma</td><td><em>Desactivar</em> la empresa demo y prueba a entrar como admin; luego <em>Activar</em>.</td><td>Desactivada: no deja entrar y la API responde 403. Activada: todo vuelve a funcionar.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="p-filtros">Filtros y búsqueda</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Usuario</th><th>Qué haces</th><th>Resultado esperado</th></tr></thead>
+    <tbody>
+      <tr><td>20</td><td>operador</td><td>Expediciones: escribe en <em>Buscar</em> parte del nombre del cargador o del destino de la prueba 3; luego desmarca <em>Entregados</em> en «Mostrar».</td><td>La lista se filtra al escribir e indica cuántas hay; cada casilla muestra su número. Al desmarcar desaparece la expedición entregada en la prueba 9 y aparece <em>Limpiar filtros</em>.</td></tr>
+      <tr><td>21</td><td>operador</td><td>Expediciones: botón <em>Fecha</em> &rarr; <em>Emisión</em> y «Hoy»; pulsa la ✕ de la ficha «Emisión: Hoy»; luego pulsa dos veces la cabecera <em>Referencia</em>.</td><td>El botón pasa a «Hoy» en azul y aparece la ficha; la ✕ la quita. La cabecera ordena A-Z y luego Z-A (flecha azul). Recarga la página (F5): los filtros se mantienen.</td></tr>
+      <tr><td>22</td><td>operador</td><td>Bandeja &rarr; pestaña «Emitidos»: activa <em>Ocultar entregados</em>; vuelve a «Pendientes» con <em>Solo con datos que faltan</em> y elige un <em>Origen</em>.</td><td>Desaparece el borrador cuya expedición se entregó; la columna <em>Expedición</em> muestra su estado. En pendientes solo quedan los que tienen avisos del origen elegido.</td></tr>
+      <tr><td>23</td><td>admin</td><td>Certificados: <em>Caducidad</em> «Caducados» y <em>Ocultar desactivados</em>. Usuarios: <em>Buscar</em> parte de un correo, <em>Rol</em> «lectura».</td><td>Solo los certificados y usuarios que cumplen el filtro; <em>Quitar filtros</em> vuelve a mostrarlos todos.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="p-v030">Novedades 0.3.0</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Usuario</th><th>Qué haces</th><th>Resultado esperado</th></tr></thead>
+    <tbody>
+      <tr><td>24</td><td>operador</td><td>Entra en el panel.</td><td>Abre el <em>Inicio</em>: indicadores (cada uno abre la lista filtrada), «Necesita atención» y últimos pendientes y expediciones. Pie «MADeCa - Desarrollado por Masoft.es».</td></tr>
+      <tr><td>25</td><td>operador</td><td>Bandeja &rarr; sube <code>03_cmr_incompleto.pdf</code> y pulsa <em>Revisar</em>.</td><td>Panel rojo «Faltan N de 11»: pulsa un dato y el cursor va a su campo, resaltado. Al escribirlo se tacha con &#10003;. Con todos, el panel se pone verde.</td></tr>
+      <tr><td>26</td><td>operador</td><td>En la revisión de un escaneo, entra en el campo <em>NIF/CIF</em> del cargador y activa <em>Ver dónde se leyó cada dato</em>.</td><td>El NIF se recuadra en naranja en el documento; con el interruptor se ven todos. Pulsar un recuadro lleva a su campo.</td></tr>
+      <tr><td>27</td><td>operador</td><td>Escribe un NIF con la letra mal y sal del campo; luego escribe 2 letras del nombre de un cargador ya usado.</td><td>El campo se pone en rojo con «se esperaba…». La agenda propone el cargador; al elegirlo se rellenan nombre, NIF y domicilio.</td></tr>
+      <tr><td>28</td><td>operador</td><td><em>Emitir el DeCA y revisar el siguiente</em>.</td><td>Se abre el siguiente pendiente con el aviso «DeCA … emitido».</td></tr>
+      <tr><td>29</td><td>operador</td><td>Bandeja &rarr; marca dos pendientes &rarr; <em>Emitir los completos</em> (sin y con la casilla de confirmación); luego <em>Descartar</em> otro.</td><td>Sin la casilla no deja emitir. Con ella emite solo los completos y válidos y avisa de los que siguen pendientes.</td></tr>
+      <tr><td>30</td><td>operador</td><td>Expediciones &rarr; filtra y pulsa <em>Exportar a Excel</em>.</td><td>Libro .xlsx con «Resumen» y «Expediciones»: mismas filas que la pantalla (todas las páginas), cabecera fija, filtros y totales.</td></tr>
+      <tr><td>31</td><td>operador</td><td>Abre una expedición entregada.</td><td>Tarjeta <em>Actividad</em> con quién la emitió y la marcó como entregada.</td></tr>
+      <tr><td>32</td><td>admin</td><td>Con <code>SMTP_*</code> configurado y un certificado que caduque en menos de 30 días, espera a la hora de <code>AVISOS_CORREO_HORA</code>.</td><td>Llega un correo con los avisos del día a los administradores; no se repite ese día.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="p-v040">Novedades 0.4.0</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Usuario</th><th>Qué haces</th><th>Resultado esperado</th></tr></thead>
+    <tbody>
+      <tr><td>33</td><td>operador</td><td>Con más de 100 expediciones, baja al pie de Expediciones y pasa de página; luego cambia un filtro.</td><td>«101–200 de N» y la página siguiente; al filtrar vuelve a la página 1. Igual en la Bandeja.</td></tr>
+      <tr><td>34</td><td>admin</td><td>Menú <em>Historial</em>. Prueba Diario, Semanal, Mensual, Trimestral, Anual y A elegir, las flechas y <em>Fecha de</em> Emisión/Entrega.</td><td>Cambian el periodo, la etiqueta y todas las cifras. El operador no ve el menú y la dirección le responde «sin permisos».</td></tr>
+      <tr><td>35</td><td>admin</td><td>Pulsa un destinatario del desglose, luego una barra de la evolución y luego la tarjeta <em>Entregadas</em>.</td><td>Cada clic añade una ficha y recalcula todo; la fila queda resaltada. La &#10005; de cada ficha lo quita.</td></tr>
+      <tr><td>36</td><td>admin</td><td>Abajo, pestañas <em>Expediciones</em> y <em>Bandeja</em> de los registros.</td><td>Solo los registros que cumplen el periodo y los filtros, paginados.</td></tr>
+      <tr><td>37</td><td>admin</td><td><em>Exportar a Excel</em> desde el Historial.</td><td>Libro con Resumen, Evolución, una hoja por desglose, Expediciones y Bandeja, con los mismos filtros y totales.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="api">
+  <h2>6. Pruebas de la API</h2>
+  <p>Con la aplicación en marcha y la clave de la demo:</p>
+<pre><span class="cmd">$env:MADECA_API_KEY</span> = <span class="string">"mad_live_..."</span>
+<span class="cmd">pwsh</span> <span class="string">demo\pruebas_api.ps1</span>                      <span class="comment"># contra http://localhost:8000</span>
+<span class="cmd">pwsh</span> <span class="string">demo\pruebas_api.ps1</span> <span class="param">-Url</span> <span class="string">https://deca.tudominio.es</span></pre>
+  <p>Recorre en orden: salud, PDF propio con QR, rechazo del escaneo, datos completos (camino 2), modificación, descarga de PDF y QR, escaneo a la bandeja, borrador del conector, entrega. Cada paso imprime lo que responde MADeCa en verde, o el motivo en amarillo/rojo. La documentación interactiva de todos los parámetros está en <code>http://localhost:8000/docs</code>.</p>
+</section>
+
+<section id="hotfolder">
+  <h2>7. Hot-folder</h2>
+  <p>Con el <em>Id de la empresa</em> que mostró <code>cargar_demo</code>:</p>
+<pre><span class="cmd">$id</span> = <span class="string">"pega-aqui-el-id-de-la-empresa"</span>
+<span class="cmd">$base</span> = <span class="string">"hotfolder_watch\incoming\$id\generico"</span>
+<span class="cmd">New-Item</span> <span class="param">-ItemType Directory -Force</span> <span class="string">"$base\pdf"</span>, <span class="string">"$base\datos"</span> | <span class="cmd">Out-Null</span>
+<span class="cmd">Copy-Item</span> <span class="string">demo\documentos\hotfolder\pdf\*</span>   <span class="string">"$base\pdf"</span>
+<span class="cmd">Copy-Item</span> <span class="string">demo\documentos\hotfolder\datos\*</span> <span class="string">"$base\datos"</span></pre>
+  <p>En unos segundos los ficheros pasan a <code>hotfolder_watch\processed\</code> y aparecen dos expediciones (<code>ALB-DEMO-HF-001</code> y <code>ALB-DEMO-HF-002</code>). Si algo falla, van a <code>hotfolder_watch\errores\</code> con un <code>.errores.txt</code> que explica el motivo. Registro: <code>docker compose logs -f hotfolder-watcher</code>.</p>
+</section>
+
+<section id="conector">
+  <h2>8. Conector local</h2>
+<pre><span class="comment"># Carpeta de prueba con un albarán</span>
+<span class="cmd">New-Item</span> <span class="param">-ItemType Directory -Force</span> <span class="string">C:\Temp\madeca_conector</span> | <span class="cmd">Out-Null</span>
+<span class="cmd">Copy-Item</span> <span class="string">demo\documentos\01_albaran_erp.pdf</span> <span class="string">C:\Temp\madeca_conector\</span>
+
+<span class="comment"># conector.ini de prueba</span>
+@<span class="string">"
+[madeca]
+url = http://localhost:8000
+[carpetas]
+rutas = C:\Temp\madeca_conector
+[estado]
+fichero = C:\Temp\madeca_conector_estado.json
+registro = C:\Temp\madeca_conector.log
+"</span>@ | <span class="cmd">Set-Content</span> <span class="string">conector_local\conector.ini</span> <span class="param">-Encoding utf8</span>
+
+<span class="cmd">$env:MADECA_API_KEY</span> = <span class="string">"mad_live_..."</span>
+<span class="cmd">.venv\Scripts\python</span> <span class="string">conector_local\conector.py</span> <span class="param">--una-vez</span></pre>
+  <p>Resultado: «Enviado 01_albaran_erp.pdf &rarr; borrador …» y un borrador nuevo en la bandeja (origen <code>api:conector_local</code>), <strong>sin documento original</strong> (no salió del equipo). Si lo ejecutas otra vez no repite el envío. Sin Tesseract instalado en Windows, los escaneos llegan sin datos y con aviso; los PDF con texto funcionan siempre.</p>
+</section>
+
+<section id="fuentes">
+  <h2>9. Fuentes de datos</h2>
+  <p>Como admin, menú <em>Fuentes de datos</em>. Sin credenciales reales de SharePoint, Odoo, etc. puedes comprobar:</p>
+  <ul>
+    <li>Crear una fuente (p. ej. Dropbox con datos inventados) &rarr; aparece en la lista; al editarla, los secretos salen vacíos con «Guardado».</li>
+    <li><em>Probar</em> &rarr; mensaje rojo con el motivo (credenciales rechazadas): es lo esperado.</li>
+    <li>Odoo o SAP con dirección <code>https://127.0.0.1</code> o <code>https://10.0.0.5</code> &rarr; <em>Probar</em> responde «apunta a una red privada… no permitido» (protección SSRF).</li>
+    <li><em>Pausar</em>/<em>Activar</em> y <em>&#10005;</em> (eliminar).</li>
+    <li>OCR de documentos escaneados: sin Azure configurado indica «Esta instalación no tiene Azure configurado».</li>
+  </ul>
+  <p>Para una prueba completa sin servicios externos, activa la <strong>carpeta del servidor</strong>: en <code>.env</code> pon <code>FUENTES_CARPETA_BASE=/app/storage/fuentes</code>, reinicia (<code>docker compose up -d</code>), crea la carpeta de la empresa con <code>docker compose exec app mkdir -p /app/storage/fuentes/&lt;id&gt;</code>, copia un PDF con <code>docker compose cp demo\documentos\01_albaran_erp.pdf app:/app/storage/fuentes/&lt;id&gt;/</code> y crea la fuente «Carpeta del servidor». <em>Leer ahora</em> &rarr; «1 nuevo(s) en la bandeja».</p>
+</section>
+
+<section id="firma">
+  <h2>10. Firma con certificado</h2>
+  <p>Certificado autofirmado solo para pruebas (no vale como firma real):</p>
+<pre><span class="cmd">$c</span> = <span class="cmd">New-SelfSignedCertificate</span> <span class="param">-Subject</span> <span class="string">"CN=Demo MADeCa"</span> <span class="param">-CertStoreLocation</span> <span class="string">Cert:\CurrentUser\My</span> <span class="param">-KeyExportPolicy</span> Exportable <span class="param">-KeySpec</span> Signature <span class="param">-KeyAlgorithm</span> RSA <span class="param">-KeyLength</span> 2048
+<span class="cmd">Export-PfxCertificate</span> <span class="param">-Cert</span> <span class="cmd">$c</span> <span class="param">-FilePath</span> <span class="string">C:\Temp\certificado_demo.p12</span> <span class="param">-CryptoAlgorithmOption</span> AES256_SHA256 <span class="param">-Password</span> (<span class="cmd">ConvertTo-SecureString</span> <span class="string">"demo1234"</span> <span class="param">-AsPlainText -Force</span>)</pre>
+  <p>Como admin: Certificados &rarr; sube <code>certificado_demo.p12</code> con contraseña <code>demo1234</code>. Crea una expedición marcando <em>Finalidad contractual</em> &rarr; en el detalle aparece «Firma: AdES». Desactiva el certificado y repite &rarr; error «no tiene ningún certificado de firma activo y vigente». Al terminar puedes borrar el certificado de Windows desde <code>certmgr.msc</code> (Personal &rarr; Certificados &rarr; «Demo MADeCa»).</p>
+</section>
+
+<section id="tests">
+  <h2>11. Tests automáticos</h2>
+<pre><span class="cmd">.venv\Scripts\python</span> <span class="param">-m pytest</span> <span class="string">tests</span> <span class="param">-q</span></pre>
+  <p>Resultado esperado: <strong>120 passed, 2 skipped</strong>. Los 2 omitidos son del PDF generado con WeasyPrint, que en Windows sin GTK no puede ejecutarse (en Docker sí). No necesitan base de datos ni Docker: los servicios externos se simulan.</p>
+</section>
+
+<section id="reiniciar">
+  <h2>12. Parar y volver a empezar</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Comando</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td><code>docker compose stop</code></td><td>Para los servicios. Los datos se conservan.</td></tr>
+      <tr><td><code>docker compose up -d</code></td><td>Los vuelve a arrancar con los datos que había.</td></tr>
+      <tr><td><code>docker compose up -d --build</code></td><td>Tras actualizar el código. Después: <code>docker compose exec app alembic upgrade head</code>.</td></tr>
+      <tr><td><code>docker compose down -v</code></td><td><strong>Borra todo</strong>: base de datos, PDF y certificados de los volúmenes. Solo para empezar la demo desde cero.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="alert-danger"><code>docker compose down -v</code> no tiene vuelta atrás. No lo uses en una instalación con datos reales.</div>
+</section>
+
+<section id="problemas">
+  <h2>13. Si algo falla</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Problema</th><th>Causa</th><th>Solución</th></tr></thead>
+    <tbody>
+      <tr><td>La app no arranca: «APP_SECRET_KEY debe ser un valor aleatorio…»</td><td><code>APP_ENV</code> no es <code>development</code> y las claves son las de ejemplo.</td><td>Pon <code>APP_ENV=development</code> para pruebas, o claves propias de 32+ caracteres.</td></tr>
+      <tr><td>«relation … does not exist»</td><td>Faltan las tablas o las migraciones nuevas.</td><td><code>docker compose exec app alembic upgrade head</code>.</td></tr>
+      <tr><td>«APP_BASE_URL debe usar HTTPS»</td><td>URL base con http y distinta de localhost.</td><td>En pruebas: <code>APP_BASE_URL=http://localhost:8000</code>.</td></tr>
+      <tr><td>El QR del móvil no abre nada</td><td>El QR apunta a <code>localhost</code>, que en el móvil es el propio móvil.</td><td>Normal en local. Pruébalo abriendo la URL en el equipo, o usa la IP del equipo en <code>APP_BASE_URL</code> (solo pruebas).</td></tr>
+      <tr><td>El OCR no lee nada en la bandeja</td><td>Imagen ilegible o sin Tesseract (fuera de Docker).</td><td>En Docker viene instalado. Fuera, instala Tesseract con el idioma español o indica su ruta en <code>TESSERACT_RUTA</code>.</td></tr>
+      <tr><td>Camino 2 / «Generar documento» falla con «WeasyPrint no puede cargar…»</td><td>Se está ejecutando fuera de Docker en Windows.</td><td>Usa Docker (la imagen trae las librerías).</td></tr>
+      <tr><td>El hot-folder no procesa</td><td>Carpeta mal formada o empresa inexistente/desactivada.</td><td>Mira <code>hotfolder_watch\errores\*.errores.txt</code> y <code>docker compose logs hotfolder-watcher</code>.</td></tr>
+      <tr><td>La API responde 401</td><td>Clave revocada, mal copiada o no definida.</td><td>Revisa <code>$env:MADECA_API_KEY</code>; genera otra en Integraciones ERP.</td></tr>
+      <tr><td>Fuente con error «apunta a una red privada»</td><td>Protección SSRF.</td><td>Correcto en la nube. Solo en instalaciones propias: <code>FUENTES_PERMITIR_RED_PRIVADA=true</code>.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>MADeCa &middot; Guía rápida de pruebas &middot; Versión 0.4.0 &middot; Actualizado el 11/10/2026<br>Aplicación desarrollada por Masoft.es</footer>
+</main>
+</body>
+</html>

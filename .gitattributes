@@ -1,0 +1,20 @@
+# Ficheros binarios: sin conversión de finales de línea (core.autocrlf
+# los dañaría al descargarlos).
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.p12 binary
+*.pfx binary
+*.ico binary
+*.webp binary
+*.exe binary
+
+# Scripts y configuración de Linux/Docker: siempre LF (con CRLF no arrancan),
+# también en la descarga ZIP de GitHub. Los de Windows, siempre CRLF.
+*.sh        text eol=lf
+Dockerfile* text eol=lf
+Caddyfile*  text eol=lf
+*.yml       text eol=lf
+*.bat       text eol=crlf
+*.ps1       text eol=crlf

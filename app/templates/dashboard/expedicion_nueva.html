@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block titulo %}Nueva expedición — MADeCa{% endblock %}
+{% block contenido %}
+<p><a href="/dashboard/expediciones" class="text-light">&larr; Volver al listado</a></p>
+<h1>Nueva expedición</h1>
+
+{% if error %}<div class="alerta error">{{ error }}</div>{% endif %}
+
+<div class="card" style="margin-bottom:0;">
+    <div style="display:flex; gap:10px;">
+        <a class="btn {{ 'secundario' if modo != 'pdf' else '' }}" href="/dashboard/expediciones/nueva?modo=pdf">Subir PDF propio</a>
+        <a class="btn {{ 'secundario' if modo != 'datos' else '' }}" href="/dashboard/expediciones/nueva?modo=datos">Generar documento con MADeCa</a>
+        <a class="btn {{ 'secundario' if modo != 'lote' else '' }}" href="/dashboard/expediciones/nueva?modo=lote">Carga por lotes</a>
+    </div>
+</div>
+
+{% if modo == 'pdf' %}
+<div class="card">
+    <h2>Subir PDF propio</h2>
+    <p class="text-light">Sube el albarán, factura o declaración de contenido tal como lo genera tu ERP o tu propio
+        programa. MADeCa solo le añade el código QR de verificación — no modifica el contenido.</p>
+    <form method="post" action="/dashboard/expediciones/nueva-pdf" enctype="multipart/form-data">
+        <div class="form-fila">
+            <label for="archivo">Fichero PDF</label>
+            <input type="file" id="archivo" name="archivo" accept=".pdf" required>
+            <p class="text-light" style="margin:4px 0 0 0;">Si el formulario da error, tendrás que volver a seleccionar el fichero (el navegador no permite recordarlo).</p>
+        </div>
+        <div class="form-fila">
+            <label for="referencia_externa">Referencia (nº de albarán/factura)</label>
+            <input type="text" id="referencia_externa" name="referencia_externa" value="{{ valores.referencia_externa or '' }}" required>
+        </div>
+        <div class="form-fila">
+            <label for="matricula_vehiculo">Matrícula del vehículo</label>
+            <input type="text" id="matricula_vehiculo" name="matricula_vehiculo" placeholder="1234BBC" value="{{ valores.matricula_vehiculo or '' }}" required>
+        </div>
+        <div class="form-fila">
+            <label for="matricula_remolque">Matrícula del remolque (opcional)</label>
+            <input type="text" id="matricula_remolque" name="matricula_remolque" value="{{ valores.matricula_remolque or '' }}">
+        </div>
+        <div class="form-fila">
+            <label>País de las matrículas (ES salvo cabotaje)</label>
+            <input type="text" name="pais_matricula_vehiculo" maxlength="2" value="{{ valores.pais_matricula_vehiculo or 'ES' }}" style="width:4em;" title="Vehículo">
+            <input type="text" name="pais_matricula_remolque" maxlength="2" value="{{ valores.pais_matricula_remolque or 'ES' }}" style="width:4em;" title="Remolque">
+        </div>
+        <div class="form-fila">
+            <label for="fecha_transporte">Fecha y hora del transporte</label>
+            <input type="datetime-local" id="fecha_transporte" name="fecha_transporte" value="{{ valores.fecha_transporte or '' }}" required>
+            {% include 'dashboard/_zona_horaria.html' %}
+        </div>
+        <div class="form-fila">
+            <label><input type="checkbox" name="finalidad_contractual" value="true" style="width:auto;" {% if valores.finalidad_contractual %}checked{% endif %}> Finalidad contractual (firmar con AdES)</label>
+        </div>
+        <button type="submit" class="btn">Crear expedición</button>
+    </form>
+</div>
+{% elif modo == 'datos' %}
+<div class="card">
+    <h2>Generar documento con MADeCa</h2>
+    <p class="text-light">Usa este formulario si no tienes un PDF propio para esta expedición — MADeCa redacta el
+        documento completo a partir de estos datos.</p>
+    {% set accion_datos = "/dashboard/expediciones/nueva-datos" %}
+    {% set texto_boton_datos = "Crear expedición" %}
+    {% include "dashboard/_form_datos.html" %}
+</div>
+{% else %}
+<div class="card">
+    <h2>Carga por lotes</h2>
+    <p class="text-light">Para dar de alta muchas expediciones a la vez: sube varios PDF (cada uno ya generado por tu
+        ERP) y un único fichero de metadatos (CSV o JSON) con una fila por PDF. Cada fila debe indicar el nombre
+        exacto del fichero PDF al que corresponde.</p>
+    <div class="alerta info">
+        Formato del fichero de metadatos — columnas/campos: <span class="mono">archivo</span> (nombre exacto del PDF),
+        <span class="mono">referencia_externa</span>, <span class="mono">matricula_vehiculo</span>,
+        <span class="mono">matricula_remolque</span> (opcional), <span class="mono">fecha_transporte</span>,
+        <span class="mono">finalidad_contractual</span> (opcional, true/false).
+        <br>Ejemplo CSV:
+        <pre style="margin-top:8px;">archivo,referencia_externa,matricula_vehiculo,fecha_transporte
+alb1.pdf,ALB-001,1234BBC,2026-08-10T09:00:00Z
+alb2.pdf,ALB-002,5678CCD,2026-08-10T10:00:00Z</pre>
+    </div>
+    <form method="post" action="/dashboard/expediciones/nueva-lote" enctype="multipart/form-data">
+        <div class="form-fila">
+            <label for="archivos">Ficheros PDF (puedes seleccionar varios)</label>
+            <input type="file" id="archivos" name="archivos" accept=".pdf" multiple required>
+        </div>
+        <div class="form-fila">
+            <label for="metadatos">Fichero de metadatos (.csv o .json)</label>
+            <input type="file" id="metadatos" name="metadatos" accept=".csv,.json" required>
+        </div>
+        <button type="submit" class="btn">Procesar lote</button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}

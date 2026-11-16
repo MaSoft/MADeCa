@@ -1,0 +1,24 @@
+; Conector local de MADeCa — copia este fichero como conector.ini y ajústalo.
+; La clave de API NO va aquí: ponla en la variable de entorno MADECA_API_KEY
+; del usuario de Windows que ejecuta el conector.
+
+[madeca]
+; Dirección de tu MADeCa (siempre https://)
+url = https://deca.tudominio.es
+
+[carpetas]
+; Carpetas a vigilar, separadas por punto y coma. Admite rutas de red.
+rutas = \\NAS\albaranes\pendientes;D:\Escaneos\Albaranes
+; Opcional: mover cada documento ya enviado a esta carpeta.
+mover_procesados_a = \\NAS\albaranes\enviados
+; Cada cuánto se revisan las carpetas (mínimo 30).
+intervalo_segundos = 120
+
+[ocr]
+; Ruta de Tesseract si no está en el PATH (necesario para escaneos y fotos).
+tesseract_ruta = C:\Program Files\Tesseract-OCR\tesseract.exe
+
+[estado]
+; Dónde guarda el conector qué ficheros ya envió y su registro.
+fichero = C:\ProgramData\MADeCa\estado_conector.json
+registro = C:\ProgramData\MADeCa\conector.log

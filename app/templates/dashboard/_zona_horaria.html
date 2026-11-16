@@ -1,0 +1,6 @@
+{# Zona de la hora del transporte: en Canarias es una hora menos. #}
+<select id="zona_horaria" name="zona_horaria" title="Zona horaria de la fecha y hora indicadas" style="width:auto;">
+    {% for clave, texto in zonas_horarias.items() %}
+    <option value="{{ clave }}" {% if (valores.zona_horaria or zona_predeterminada()) == clave %}selected{% endif %}>{{ texto | capitalize }}</option>
+    {% endfor %}
+</select>

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% import "dashboard/_filtros.html" as f with context %}
+{% block titulo %}Expediciones — MADeCa{% endblock %}
+{% block contenido %}
+<div class="cabecera-pagina">
+    <h1>Expediciones DeCA</h1>
+    {% if sesion.rol in ("admin", "operador") %}
+    <a href="/dashboard/expediciones/nueva" class="btn">+ Nueva expedición</a>
+    {% endif %}
+</div>
+
+<form class="barra-filtros" data-filtros action="/dashboard/expediciones" method="get"
+      hx-get="/dashboard/expediciones" hx-target="#resultados" hx-select="#resultados" hx-swap="outerHTML"
+      hx-select-oob="#resumen-fecha,#contador-avanzados,#n-en_transito,#n-entregado,#n-anulado"
+      hx-push-url="true" hx-indicator="#resultados" hx-sync="this:replace"
+      hx-trigger="input changed delay:350ms from:input[type=search], change">
+    <input type="hidden" name="f" value="1">
+    <input type="hidden" name="orden" value="{{ filtros.orden }}">
+    <input type="hidden" name="pagina" value="{{ filtros.pagina }}">
+
+    <div class="fila-principal">
+        {{ f.buscador(filtros.buscar, "Buscar por referencia, matrícula, cliente, NIF, origen, destino o mercancía") }}
+        {{ f.desplegable_fecha(fechas_de) }}
+
+        <details class="desplegable" data-desplegable>
+            <summary class="boton-filtro">
+                {{ f.icono("ajustes") }}
+                <span class="etiqueta-filtro">Más filtros</span>
+                <span id="contador-avanzados" class="contador"{% if not avanzados %} hidden{% endif %}>{{ avanzados }}</span>
+                {{ f.icono("flecha", 14) }}
+            </summary>
+            <div class="panel-desplegable derecha">
+                <label class="campo-panel">Matrícula
+                    <input type="search" name="matricula" value="{{ filtros.matricula }}" maxlength="100" placeholder="Vehículo o remolque" autocomplete="off">
+                </label>
+                <label class="campo-panel">Referencia externa
+                    <input type="search" name="referencia" value="{{ filtros.referencia }}" maxlength="100" placeholder="N.º de albarán del ERP" autocomplete="off">
+                </label>
+                <div class="panel-titulo">Firma electrónica</div>
+                <div class="segmentado">
+                    {% for clave, texto in firmas.items() %}
+                    <label><input type="radio" name="firmado" value="{{ clave }}" {% if filtros.firmado == clave %}checked{% endif %}><span>{{ texto }}</span></label>
+                    {% endfor %}
+                </div>
+                <label class="campo-panel">ERP de origen
+                    <select name="erp">
+                        <option value="">Todos</option>
+                        {% for e in erps %}<option value="{{ e }}" {% if filtros.erp == e %}selected{% endif %}>{{ e }}</option>{% endfor %}
+                    </select>
+                </label>
+            </div>
+        </details>
+    </div>
+
+    <div class="fila-estados" role="group" aria-label="Estados que se muestran">
+        <span class="rotulo">Mostrar</span>
+        {% for clave, texto in estados.items() %}
+        <label class="casilla-estado {{ clave }}">
+            <input type="checkbox" name="estado" value="{{ clave }}" {% if clave in visibles %}checked{% endif %}>
+            <span class="caja" aria-hidden="true"></span>{{ texto }}
+            <span class="n" id="n-{{ clave }}">{{ por_estado.get(clave, 0) }}</span>
+        </label>
+        {% endfor %}
+    </div>
+</form>
+
+<div class="card resultados" id="resultados">
+    {% include "dashboard/_tabla_expediciones.html" %}
+</div>
+{% endblock %}

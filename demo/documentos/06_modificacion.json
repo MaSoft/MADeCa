@@ -1,0 +1,10 @@
+{
+  "motivo": "Cambio de vehículo por avería de la tractora",
+  "cambios": [
+    {
+      "campo": "matricula_vehiculo",
+      "anterior": "1234BCD",
+      "nuevo": "5678CDF"
+    }
+  ]
+}

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MADeCa — Guía de instalación y configuración</title>
+<style>
+:root {
+  --primary: #1a3a5c;
+  --primary-light: #2c5f8a;
+  --accent: #1d4ed8;
+  --bg: #f7f9fc;
+  --card-bg: #ffffff;
+  --text: #1a1a2e;
+  --text-light: #555;
+  --border: #dde3ea;
+  --code-bg: #0d1117;
+  --code-text: #e6edf3;
+  --success: #16a34a;
+  --warning: #ca8a04;
+  --danger: #dc2626;
+  --info: #2563eb;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+nav { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; background: var(--primary); overflow-y: auto; padding: 24px 0 40px; }
+nav .nav-title { color: #fff; font-size: 20px; font-weight: 600; padding: 0 24px; margin-bottom: 2px; }
+nav .nav-subtitle { color: rgba(255,255,255,0.6); font-size: 12px; padding: 0 24px; margin-bottom: 20px; }
+nav ul { list-style: none; margin: 0; padding: 0; }
+nav li.section-title { color: rgba(255,255,255,0.45); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; padding: 16px 24px 6px; }
+nav ul li a { display: block; padding: 7px 24px; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px; border-left: 3px solid transparent; }
+nav ul li a:hover { background: rgba(255,255,255,0.08); border-left-color: var(--accent); }
+nav ul li a.sub { padding-left: 40px; font-size: 13px; color: rgba(255,255,255,0.65); }
+main { margin-left: 280px; padding: 0 0 80px; }
+.page-header { background: linear-gradient(135deg, var(--primary) 0%, #0d2038 100%); color: #fff; padding: 56px 48px; }
+.page-header h1 { font-size: 36px; font-weight: 300; margin: 0 0 8px; }
+.page-header .version { display: inline-block; background: rgba(255,255,255,0.15); padding: 3px 12px; border-radius: 20px; font-size: 13px; margin-bottom: 12px; }
+.page-header .tagline { font-size: 16px; color: rgba(255,255,255,0.8); max-width: 720px; }
+section { padding: 40px 48px; border-bottom: 1px solid var(--border); }
+h2 { font-size: 24px; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-top: 0; }
+h3 { font-size: 18px; color: var(--primary-light); margin-top: 32px; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 16px 0; }
+.card-header { font-weight: 600; color: var(--primary); margin-bottom: 10px; }
+table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--primary); color: #fff; font-weight: 500; }
+tbody tr:nth-child(even) { background: #f2f5fa; }
+tbody tr:hover { background: #e9eef7; }
+.table-wrap { overflow-x: auto; }
+.param-name { font-family: "SFMono-Regular", Consolas, monospace; color: var(--accent); font-weight: 600; }
+code { font-family: "SFMono-Regular", Consolas, monospace; background: #eef2f7; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+.badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 12px; margin-left: 6px; }
+.badge-required { background: #fde2e2; color: var(--danger); }
+.badge-optional { background: #e2ecfd; color: var(--info); }
+.badge-default { background: #eaf7ed; color: var(--success); }
+pre { background: var(--code-bg); color: var(--code-text); padding: 16px 20px; border-radius: 8px; overflow-x: auto; font-family: "SFMono-Regular", Consolas, monospace; font-size: 13.5px; line-height: 1.6; }
+pre .cmd { color: #79c0ff; }
+pre .param { color: #ffa657; }
+pre .string { color: #a5d6ff; }
+pre .comment { color: #8b949e; font-style: italic; }
+pre .ok { color: #56d364; }
+pre .paso { color: #79c0ff; font-weight: 600; }
+pre .aviso { color: #e3b341; }
+.alert-info, .alert-warning, .alert-danger, .alert-success { border-radius: 8px; padding: 14px 18px; margin: 18px 0; font-size: 14.5px; border-left: 4px solid; }
+.alert-info { background: #eaf1fd; border-color: var(--info); color: #1e3a6d; }
+.alert-warning { background: #fdf3e0; border-color: var(--warning); color: #6b4c05; }
+.alert-danger { background: #fbe6e6; border-color: var(--danger); color: #7a1a1a; }
+.alert-success { background: #e8f7ec; border-color: var(--success); color: #14532d; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 18px 0; }
+.flow-step { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 14px; }
+.flow-step::after { content: '\25B6'; color: var(--accent); margin-left: 12px; font-size: 12px; }
+.flow-step:last-child::after { content: ''; margin: 0; }
+.dir-tree { font-family: "SFMono-Regular", Consolas, monospace; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-size: 13.5px; line-height: 1.7; white-space: pre; overflow-x: auto; }
+.dir-tree .folder { color: var(--primary); font-weight: 600; }
+.dir-tree .file { color: var(--text-light); }
+.dir-tree .highlight-file { color: var(--accent); font-weight: 600; }
+.module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; margin-top: 20px; }
+.module-card { background: var(--card-bg); border: 1px solid var(--border); border-top: 4px solid var(--accent); border-radius: 10px; padding: 18px 20px; }
+.feature-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 20px; }
+.feature-item { display: flex; gap: 12px; align-items: flex-start; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.feature-icon { font-size: 22px; line-height: 1; }
+.feature-text strong { display: block; margin-bottom: 3px; color: var(--primary); }
+.feature-text span { font-size: 13.5px; color: var(--text-light); }
+.card ul, .card ol { margin: 0; padding-left: 20px; color: var(--text-light); line-height: 1.8; }
+/* Capturas de pantalla */
+figure.captura { margin: 20px 0 28px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+figure.captura img { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid #e6ebf1; }
+figure.captura figcaption { font-size: 13px; color: var(--text-light); padding: 10px 6px 2px; }
+.pasos { counter-reset: paso; list-style: none; padding: 0; }
+.pasos > li { counter-increment: paso; position: relative; padding: 0 0 18px 46px; }
+.pasos > li::before { content: counter(paso); position: absolute; left: 0; top: -2px; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 600; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+footer { text-align: center; padding: 32px; color: var(--text-light); font-size: 13px; }
+@media (max-width: 900px) { nav { display: none; } main { margin-left: 0; } .page-header, section { padding-left: 24px; padding-right: 24px; } }
+@media (max-width: 640px) { .page-header { padding: 32px 16px; } .page-header h1 { font-size: 28px; } section { padding: 28px 16px; } th, td { padding: 8px 10px; } .table-wrap table { min-width: 560px; } }
+@media print { nav { display: none; } main { margin-left: 0; } section { padding: 20px 0; page-break-inside: avoid; } body { font-size: 10pt; } figure.captura { page-break-inside: avoid; } .salto { page-break-before: always; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-title">MADeCa</div>
+  <div class="nav-subtitle">Guía de instalación y configuración &middot; v0.4.4</div>
+  <ul>
+    <li class="section-title">Antes de empezar</li>
+    <li><a href="#introduccion">1. Introducción</a></li>
+    <li><a href="#caracteristicas">2. Características</a></li>
+    <li><a href="#requisitos">3. Requisitos</a></li>
+    <li><a href="#red" class="sub">Dominio, puertos y HTTPS</a></li>
+    <li class="section-title">Instalación</li>
+    <li><a href="#instalacion">4. Instalación</a></li>
+    <li><a href="#paso-paquete" class="sub">Copiar el paquete</a></li>
+    <li><a href="#paso-instalar" class="sub">Ejecutar el instalador</a></li>
+    <li><a href="#paso-comprobar" class="sub">Comprobar</a></li>
+    <li><a href="#desatendida" class="sub">Instalación desatendida</a></li>
+    <li><a href="#windows" class="sub">Windows</a></li>
+    <li><a href="#sin-internet" class="sub">Sin internet</a></li>
+    <li class="section-title">Configuración</li>
+    <li><a href="#configuracion">5. Configuración inicial</a></li>
+    <li><a href="#cfg-acceso" class="sub">Primer acceso y contraseña</a></li>
+    <li><a href="#cfg-usuarios" class="sub">Usuarios y roles</a></li>
+    <li><a href="#cfg-certificado" class="sub">Certificado de firma</a></li>
+    <li><a href="#cfg-erp" class="sub">ERP por API</a></li>
+    <li><a href="#cfg-carpeta" class="sub">Carpeta compartida</a></li>
+    <li><a href="#cfg-fuentes" class="sub">Fuentes de datos</a></li>
+    <li><a href="#cfg-correo" class="sub">Avisos por correo</a></li>
+    <li><a href="#cfg-empresas" class="sub">Varias empresas</a></li>
+    <li class="section-title">Uso</li>
+    <li><a href="#interfaz">6. La aplicación</a></li>
+    <li><a href="#mantenimiento">7. Mantenimiento</a></li>
+    <li><a href="#parametros">8. Referencia</a></li>
+    <li><a href="#ejemplos">9. Ejemplos</a></li>
+    <li><a href="#problemas">10. Problemas</a></li>
+    <li><a href="#legal">11. Aviso legal</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<header class="page-header">
+  <span class="version">Versión 0.4.4 &middot; Masoft.es</span>
+  <h1>MADeCa &mdash; Guía de instalación y configuración</h1>
+  <p class="tagline">Instalar MADeCa en el servidor Linux del cliente y dejarlo listo para emitir el Documento Electrónico de Control Administrativo (DeCA) del transporte de mercancías por carretera. Pensada para el técnico que lo instala y para el administrador de la empresa que lo configura.</p>
+</header>
+
+<!-- 1 -->
+<section id="introduccion">
+  <h2>1. Introducción y propósito</h2>
+  <p>MADeCa emite y gestiona el <strong>DeCA</strong>, el documento de control que exige la Orden FOM/2861/2012 en cada envío de transporte público de mercancías por carretera, en el formato electrónico que fija la Resolución de 5 de junio de 2026 de la Dirección General de Transporte por Carretera y Ferrocarril (BOE-A-2026-12784): un PDF nativo digital con un código QR que el inspector escanea para descargarlo.</p>
+  <p>Este paquete instala <strong>MADeCa completa</strong>, la misma versión que está en servicio, <strong>en blanco</strong>: sin empresas, usuarios ni DeCA. Se instala en un servidor del cliente con un único script, y el código de la aplicación va compilado.</p>
+  <div class="alert-info"><strong>Software libre y gratuito bajo licencia MIT.</strong> Ver <code>LICENCIA.txt</code>.</div>
+  <div class="flow">
+    <div class="flow-step">Servidor Linux + dominio</div>
+    <div class="flow-step">sudo ./madeca.sh instalar</div>
+    <div class="flow-step">Entrar con el administrador</div>
+    <div class="flow-step">Usuarios, certificado y ERP</div>
+    <div class="flow-step">Emitir DeCA</div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="caracteristicas">
+  <h2>2. Características principales</h2>
+  <div class="feature-list">
+    <div class="feature-item"><div class="feature-icon">&#128196;</div><div class="feature-text"><strong>DeCA nativo digital</strong><span>MADeCa redacta el PDF con los datos del art. 6, o estampa el QR en el PDF que ya genera tu ERP.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128279;</div><div class="feature-text"><strong>QR con descarga directa</strong><span>URL única por DeCA, sin credenciales, que descarga el PDF (Apartado Tercero).</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#9999;</div><div class="feature-text"><strong>Modificaciones durante el servicio</strong><span>Cambios añadidos al mismo PDF con el motivo; la URL y el QR no cambian (Apartado Quinto).</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128269;</div><div class="feature-text"><strong>Bandeja de revisión con OCR</strong><span>Albaranes escaneados o fotografiados: lee los datos y una persona los confirma antes de emitir.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128268;</div><div class="feature-text"><strong>Integración con el ERP</strong><span>API REST con clave, carpeta compartida y conectores a nubes, SFTP y ERP.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128273;</div><div class="feature-text"><strong>Firma electrónica</strong><span>Firma AdES con el certificado de la empresa para los DeCA con finalidad contractual (Apartado Cuarto).</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#127970;</div><div class="feature-text"><strong>Varias empresas</strong><span>Una instalación puede atender a varias empresas, cada una con sus usuarios y sus datos separados.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128202;</div><div class="feature-text"><strong>Historial y Excel</strong><span>Estadísticas por periodo, actividad de cada expedición y exportación a Excel.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128190;</div><div class="feature-text"><strong>Copias y actualizaciones</strong><span>Copia completa, restauración y actualización con una sola orden.</span></div></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="requisitos">
+  <h2>3. Requisitos del sistema</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Mínimo</th><th>Recomendado / notas</th></tr></thead>
+    <tbody>
+      <tr><td>Sistema operativo</td><td>Cualquier Linux x86_64 (Ubuntu, Debian, Rocky, Alma, RHEL, Fedora, openSUSE...) o Windows 10 (2004+), 11 y Windows Server 2022/2025</td><td>Servidor propio, máquina virtual, VPS o PC de la oficina. En Windows se instala sobre WSL2, sin Docker Desktop (apartado 4.5).</td></tr>
+      <tr><td>Procesador</td><td>x86_64 (Intel/AMD), 2 núcleos</td><td>4 núcleos si se leen muchos documentos escaneados. El paquete no funciona en ARM (Raspberry Pi, Ampere).</td></tr>
+      <tr><td>Memoria</td><td>2 GB</td><td>4 GB. Con menos de 4 GB y sin memoria de intercambio, el instalador crea 2 GB.</td></tr>
+      <tr><td>Disco</td><td>10 GB libres</td><td>20 GB o más: los DeCA se conservan al menos un año.</td></tr>
+      <tr><td>Software</td><td>Ninguno previo</td><td>El instalador pone Docker y Docker Compose v2 si no están: del repositorio oficial de Docker o, sin internet, desde el propio paquete (también iptables).</td></tr>
+      <tr><td>Acceso</td><td>Usuario con <code>sudo</code></td><td>Por consola o SSH.</td></tr>
+      <tr><td>Internet</td><td>No hace falta para instalar</td><td>El paquete trae la aplicación, PostgreSQL, Redis, Caddy y Docker. Con el acceso «publico» Caddy pide el certificado a Let's Encrypt.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="red">Dominio, puertos y HTTPS</h3>
+  <p>El QR del DeCA lo escanea un inspector con su móvil, en carretera. Por eso MADeCa <strong>tiene que estar publicado en internet con HTTPS</strong>: la URL empieza necesariamente por <code>https://</code>, con TLS 1.2 o superior (Apartado Tercero.1), y debe descargar el PDF sin pedir credenciales (Apartado Tercero.3 y 4). Antes de instalar hace falta:</p>
+  <div class="card"><ol>
+    <li>Un <strong>dominio o subdominio</strong> propio, por ejemplo <code>deca.miempresa.es</code>, con un registro DNS <strong>A</strong> que apunte a la IP pública del servidor.</li>
+    <li>Los puertos <strong>80 y 443 (TCP)</strong> abiertos desde internet hasta el servidor. Si está detrás de un router, reenvíalos a la IP interna del servidor.</li>
+    <li>Que nada más use los puertos 80 y 443 en ese servidor (Apache, nginx...).</li>
+  </ol></div>
+  <p>El certificado HTTPS lo pide y lo renueva solo Caddy (Let's Encrypt). No hay que comprar nada ni copiar certificados. Basta con que el dominio apunte al servidor y el puerto 80 llegue desde internet.</p>
+  <p>El instalador pregunta <strong>cómo se llega a MADeCa</strong> (opción <code>--acceso</code>), para que valga en cualquier configuración:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Acceso</th><th>Cuándo usarlo</th><th>Qué hace el instalador</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">publico</td><td>VPS, o servidor propio de la oficina con el router reenviando 80 y 443 al servidor.</td><td>Certificado de Let's Encrypt automático y renovado solo.</td></tr>
+      <tr><td class="param-name">propio</td><td>La empresa tiene su certificado (comprado o de su entidad) para el dominio, por ejemplo detrás de su cortafuegos.</td><td>Usa ese certificado (PEM con la cadena completa y clave sin contraseña). Se cambia con <code>madeca.sh certificado</code>.</td></tr>
+      <tr><td class="param-name">proxy</td><td>Ya hay un proxy HTTPS delante (nginx, IIS, Traefik, el del cortafuegos).</td><td>No instala Caddy: MADeCa escucha en HTTP en el puerto que digas y tu proxy pone el HTTPS (TLS 1.2 o superior).</td></tr>
+      <tr><td class="param-name">prueba</td><td>Ver la aplicación en la red local antes de publicarla.</td><td>Certificado interno. No vale para DeCA reales.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Si los puertos 80 o 443 del equipo ya están ocupados, elige otros con <code>--puerto-http</code> y <code>--puerto-https</code> (con «publico», el router reenvía los 80/443 de internet a esos puertos).</p>
+  <div class="alert-warning">El dominio puede ser cualquiera y no hay que comunicarlo a la Administración (Apartado Primero.3). Pero si el servidor se apaga o pierde la conexión, los inspectores no podrán descargar los DeCA: el servidor debe estar siempre disponible. No pongas delante ninguna contraseña, VPN ni filtro por IP.</div>
+</section>
+
+<!-- 4 -->
+<section id="instalacion" class="salto">
+  <h2>4. Instalación</h2>
+  <p>Todo se hace con el script <code>madeca.sh</code> del paquete. Queda instalado en <code>/opt/madeca</code>.</p>
+  <div class="dir-tree"><span class="folder">INSTALL/</span>                           <span class="file">lo que se entrega</span>
+&#9500;&#9472;&#9472; <span class="file">LEEME_INSTALACION.txt</span>          <span class="file">qué usar en cada caso</span>
+&#9500;&#9472;&#9472; <span class="highlight-file">INSTALAR_EN_WINDOWS.bat</span>        <span class="file">Windows (WSL2)</span>
+&#9500;&#9472;&#9472; <span class="folder">windows/</span>                       <span class="file">script de Windows y la Ubuntu para WSL2</span>
+&#9492;&#9472;&#9472; <span class="highlight-file">madeca-0.4.4.tar.gz</span>            <span class="file">paquete para Linux:</span>
+
+<span class="folder">madeca-0.4.4/</span>
+&#9500;&#9472;&#9472; <span class="highlight-file">madeca.sh</span>                      <span class="file">instalación y mantenimiento</span>
+&#9500;&#9472;&#9472; <span class="file">docker-compose.yml</span>             <span class="file">servicios (no hace falta tocarlo)</span>
+&#9500;&#9472;&#9472; <span class="file">Caddyfile</span>                      <span class="file">HTTPS con Let's Encrypt</span>
+&#9500;&#9472;&#9472; <span class="file">Caddyfile.propio</span>               <span class="file">HTTPS con el certificado de la empresa</span>
+&#9500;&#9472;&#9472; <span class="file">Caddyfile.prueba</span>               <span class="file">solo para probar en una red local</span>
+&#9500;&#9472;&#9472; <span class="file">LICENCIA.txt</span>                   <span class="file">licencia de uso</span>
+&#9500;&#9472;&#9472; <span class="file">LEEME.txt</span>
+&#9500;&#9472;&#9472; <span class="file">VERSION</span>
+&#9500;&#9472;&#9472; <span class="file">SHA256SUMS</span>                     <span class="file">comprobación de integridad</span>
+&#9500;&#9472;&#9472; <span class="file">GUIA_INSTALACION_MADeCa.html</span>   <span class="file">esta guía</span>
+&#9500;&#9472;&#9472; <span class="folder">img_guia/</span>
+&#9500;&#9472;&#9472; <span class="folder">docker/</span>                        <span class="file">Docker, Compose e iptables para instalar sin internet</span>
+&#9492;&#9472;&#9472; <span class="folder">imagen/</span>
+    &#9500;&#9472;&#9472; <span class="file">madeca-0.4.4.tar.gz</span>        <span class="file">la aplicación compilada (imagen de Docker)</span>
+    &#9492;&#9472;&#9472; <span class="file">base.tar.gz</span>                <span class="file">PostgreSQL, Redis y Caddy</span></div>
+
+  <h3 id="paso-paquete">4.1 Copiar el paquete al servidor</h3>
+  <p>Desde el equipo donde tengas el paquete (en Windows sirven <code>scp</code> de PowerShell o WinSCP):</p>
+<pre><span class="cmd">scp</span> madeca-0.4.4.tar.gz <span class="param">usuario@IP-DEL-SERVIDOR</span>:/tmp/</pre>
+  <p>En el servidor, descomprímelo:</p>
+<pre><span class="cmd">cd</span> /tmp
+<span class="cmd">tar</span> xzf madeca-0.4.4.tar.gz
+<span class="cmd">cd</span> madeca-0.4.4</pre>
+
+  <h3 id="paso-instalar">4.2 Ejecutar el instalador</h3>
+<pre><span class="cmd">sudo ./madeca.sh instalar</span></pre>
+  <p>El instalador va paso a paso y se detiene con un mensaje claro si algo no cumple los requisitos:</p>
+  <ol class="pasos">
+    <li><strong>Licencia de uso.</strong> Muestra <code>LICENCIA.txt</code>. Escribe <code>ACEPTO</code> para seguir.</li>
+    <li><strong>Comprobación del equipo:</strong> procesador x86_64, memoria y disco (también dentro de WSL2 en Windows).</li>
+    <li><strong>Docker:</strong> si no está, lo instala desde su repositorio oficial (<code>download.docker.com</code>; en Ubuntu, Debian, Rocky, Alma, RHEL y Fedora) o desde la distribución (openSUSE), con Docker Compose v2. Sin internet, o si no hay paquete para el sistema, usa el Docker que trae el paquete (y su iptables si falta).</li>
+    <li><strong>Datos de la instalación.</strong> Pregunta:
+      <ul>
+        <li>cómo se llega a MADeCa (<strong>acceso</strong> <code>publico</code>, <code>propio</code>, <code>proxy</code> o <code>prueba</code>, apartado 3) y, según el caso, el certificado propio o el puerto para tu proxy; comprueba que los puertos estén libres;</li>
+        <li>el <strong>dominio</strong> (<code>deca.miempresa.es</code>);</li>
+        <li>con «publico», el <strong>correo técnico</strong> (Let's Encrypt avisa ahí si hay algún problema con el certificado);</li>
+        <li>la <strong>zona horaria</strong>: <code>peninsula</code> (también Baleares, Ceuta y Melilla) o <code>canarias</code>. De ella depende la hora impresa en los DeCA.</li>
+      </ul></li>
+    <li><strong>Comprobación del dominio</strong> (solo «publico»): que apunta a la IP pública de este equipo. Si no, avisa y pregunta si continuar.</li>
+    <li><strong>Configuración:</strong> crea <code>/opt/madeca/.env</code> con claves aleatorias propias de la instalación, y la memoria de intercambio si hace falta. Si el cortafuegos (<code>ufw</code> o <code>firewalld</code>) está activo, abre los puertos; si no hay cortafuegos activo, no lo toca.</li>
+    <li><strong>Imagen y arranque:</strong> carga la aplicación (y PostgreSQL, Redis y Caddy desde el paquete), crea la base de datos y arranca los servicios.</li>
+    <li><strong>Comprobación del acceso:</strong> espera a que el certificado esté listo y comprueba que la aplicación responde (con «proxy», en el puerto HTTP para tu proxy).</li>
+    <li><strong>Empresa y administrador.</strong> Pregunta el nombre o razón social, el NIF/CIF y el correo del administrador, y muestra su <strong>contraseña inicial</strong>.</li>
+  </ol>
+  <p>Así queda una instalación completa (salida real en un Ubuntu 24.04 recién instalado, sin Docker, con la empresa ficticia del ejemplo y con el acceso «prueba»; con «publico» aparece además el paso <strong>4/9 Comprobación del dominio</strong> y el certificado es el de Let's Encrypt). Las líneas <code>debconf: ...</code>, si salen, son avisos normales de los sistemas mínimos, sin importancia:</p>
+<pre id="salida-instalacion"><span class="cmd">$ sudo ./madeca.sh instalar</span> <span class="comment"># (respuestas: acceso, dominio, correo si es «publico», zona, empresa, NIF y administrador)</span>
+MADeCa 0.4.4 — Masoft.es.
+
+<span class="paso">== Condiciones de uso</span>
+Aceptadas (--acepto-condiciones).
+
+<span class="paso">== 1/9 Comprobación del equipo</span>
+Sistema: Ubuntu 24.04.5 LTS
+Memoria: 15937 MB
+Disco libre: 905 GB
+
+<span class="paso">== 2/9 Docker</span>
+debconf: delaying package configuration, since apt-utils is not installed
+Instalando Docker desde su repositorio oficial (download.docker.com)...
+debconf: delaying package configuration, since apt-utils is not installed
+Docker instalado: Docker version 29.9.1, build dfc520d
+
+<span class="paso">== 3/9 Datos de la instalación</span>
+<span class="aviso">[AVISO] MODO PRUEBA: certificado interno, NO vale para DeCA reales (el móvil del inspector no lo aceptaría).</span>
+
+<span class="paso">== 5/9 Ficheros en /opt/madeca</span>
+
+<span class="paso">== 6/9 Configuración, memoria y cortafuegos</span>
+.env creado con claves aleatorias.
+No hay cortafuegos activo en el equipo (ufw/firewalld): no se toca. Comprueba tu cortafuegos o router (80 443).
+Cargando la imagen de MADeCa (puede tardar unos minutos)...
+Cargando PostgreSQL, Redis y Caddy desde el paquete...
+
+<span class="paso">== 7/9 Base de datos y arranque</span>
+Base de datos preparada.
+Servicios en marcha.
+
+<span class="paso">== 8/9 Comprobación del acceso</span>
+<span class="ok">MADeCa responde en https://deca.transcanarias.test (certificado de prueba)</span>
+
+<span class="paso">== 9/9 Empresa y administrador</span>
+Empresa:        TransCanarias LogÃ�stica SL (B00419028)
+Id de la empresa: f5d8bdd8-d232-4be2-9e92-e83d3c505232
+Administrador:  admin@transcanarias.test
+Contraseña:     •••••••••••••••• (aquí sale la contraseña)
+Guárdala ahora: no se vuelve a mostrar.
+Para cambiarla o si se pierde: sudo /opt/madeca/madeca.sh clave admin@transcanarias.test
+(Copia en /opt/madeca/estado/ALTA.txt, solo para root: bórrala cuando la hayas guardado.)
+
+<span class="ok">Instalación terminada: https://deca.transcanarias.test</span>
+En los equipos de la red, deca.transcanarias.test debe apuntar a la IP de este equipo (DNS interno o fichero hosts).
+Siguientes pasos (ver la guía): entrar con el administrador, completar los datos de la empresa,
+subir el certificado de firma si se usa, crear los usuarios y configurar las fuentes de datos.
+Desde ahora usa: sudo /opt/madeca/madeca.sh &lt;orden&gt;</pre>
+  <div class="alert-danger"><strong>Guarda la contraseña inicial en cuanto aparezca:</strong> no se vuelve a mostrar. Queda una copia en <code>/opt/madeca/estado/ALTA.txt</code>, legible solo por root: bórrala cuando la tengas guardada. Si se pierde, se genera otra con <code>sudo /opt/madeca/madeca.sh clave CORREO</code>.</div>
+
+  <h3 id="paso-comprobar">4.3 Comprobar</h3>
+<pre><span class="cmd">sudo /opt/madeca/madeca.sh estado</span></pre>
+  <p>Los seis servicios deben estar <code>running</code>: <code>app</code> (la aplicación), <code>caddy</code> (HTTPS), <code>db</code> (PostgreSQL), <code>redis</code>, <code>hotfolder-watcher</code> (carpeta compartida) y <code>conectores</code> (fuentes de datos). Después abre <code>https://TU-DOMINIO</code> en el navegador: debe salir la pantalla de acceso con el candado del navegador correcto.</p>
+  <p>Comprueba también desde un móvil con datos (fuera de la red de la empresa) que la dirección abre: así la verá el inspector.</p>
+
+  <h3 id="desatendida">4.4 Instalación desatendida</h3>
+  <p>Para instalar sin preguntas (por un script de administración o un sistema de despliegue), pasa todas las respuestas como opciones. Con <code>--acepto-condiciones</code> se acepta la licencia de <code>LICENCIA.txt</code>:</p>
+<pre><span class="cmd">sudo ./madeca.sh instalar</span> <span class="param">--acepto-condiciones</span> \
+     <span class="param">--dominio</span> <span class="string">deca.miempresa.es</span> <span class="param">--correo</span> <span class="string">it@miempresa.es</span> <span class="param">--zona</span> <span class="string">peninsula</span> \
+     <span class="param">--empresa</span> <span class="string">"Transportes Ejemplo SL"</span> <span class="param">--nif</span> <span class="string">B00345678</span> <span class="param">--admin</span> <span class="string">admin@miempresa.es</span></pre>
+  <div class="alert-info"><strong>Prueba en una red local:</strong> con <code>--acceso prueba</code> (o <code>--prueba-local</code>) se instala con un certificado interno, sin dominio público. Sirve para ver la aplicación antes de publicarla, <strong>no para emitir DeCA reales</strong>: el navegador avisa del certificado y el móvil de un inspector no lo aceptaría.</div>
+<pre><span class="comment"># Certificado propio, con los puertos 8080/8443 porque 80/443 los usa otro servicio</span>
+<span class="cmd">sudo ./madeca.sh instalar</span> <span class="param">--acceso</span> <span class="string">propio</span> <span class="param">--cert</span> <span class="string">/root/certificado.pem</span> <span class="param">--clave</span> <span class="string">/root/clave.pem</span> \
+     <span class="param">--puerto-http</span> <span class="string">8080</span> <span class="param">--puerto-https</span> <span class="string">8443</span> <span class="param">--dominio</span> <span class="string">deca.miempresa.es</span> ...
+<span class="comment"># Detrás del proxy de la empresa (nginx, IIS...), que está en otro equipo</span>
+<span class="cmd">sudo ./madeca.sh instalar</span> <span class="param">--acceso</span> <span class="string">proxy</span> <span class="param">--puerto-app</span> <span class="string">8080</span> <span class="param">--ip-app</span> <span class="string">0.0.0.0</span> <span class="param">--ip-proxy</span> <span class="string">10.0.0.5</span> <span class="param">--dominio</span> <span class="string">deca.miempresa.es</span> ...</pre>
+
+  <h3 id="windows">4.5 Windows (servidor o PC de la oficina)</h3>
+  <p>En Windows 10 (versión 2004 o posterior), Windows 11 o Windows Server 2022/2025 de 64 bits, MADeCa se instala dentro de WSL2 (el Subsistema de Windows para Linux) en una Ubuntu propia llamada <code>MADeCa</code>. No hace falta Docker Desktop ni la Microsoft Store.</p>
+  <div class="flow"><div class="flow-step">INSTALAR_EN_WINDOWS.bat</div><div class="flow-step">Activa WSL2 (reiniciar si lo pide)</div><div class="flow-step">Crea la Ubuntu «MADeCa»</div><div class="flow-step">madeca.sh instalar</div><div class="flow-step">Arranque con el equipo</div></div>
+  <ol>
+    <li>Copia la carpeta <code>INSTALL</code> al equipo y haz doble clic en <code>INSTALAR_EN_WINDOWS.bat</code>. Pide permisos de administrador.</li>
+    <li>Si WSL2 no estaba activado, lo activa y pide <strong>reiniciar</strong>: reinicia y vuelve a lanzarlo. Necesita la virtualización activada en la BIOS/UEFI (en una máquina virtual, la virtualización anidada).</li>
+    <li>Después hace las mismas preguntas que en Linux. Las opciones se pasan igual: <code>INSTALAR_EN_WINDOWS.bat instalar --acceso prueba --dominio madeca.local</code>.</li>
+    <li>Al terminar crea la tarea programada <em>MADeCa - arranque</em>: MADeCa arranca solo al encender el equipo, aunque nadie inicie sesión. También reenvía los puertos de Windows a MADeCa y los abre en el cortafuegos de Windows, para entrar desde otros equipos de la red.</li>
+  </ol>
+<pre><span class="cmd">INSTALAR_EN_WINDOWS.bat</span> <span class="string">estado</span>        <span class="comment"># cualquier orden de madeca.sh: copia, parar, arrancar, registros, clave CORREO...</span>
+<span class="cmd">INSTALAR_EN_WINDOWS.bat</span> <span class="string">desinstalar</span>   <span class="comment"># quita tarea, puertos y cortafuegos; borra los datos solo si escribes BORRAR DATOS</span></pre>
+  <p>Las copias quedan en <code>\\wsl.localhost\MADeCa\opt\madeca\copias</code> (se abre desde el Explorador de Windows).</p>
+
+  <h3 id="sin-internet">4.6 Sin internet</h3>
+  <p>El paquete lleva todo: la aplicación, PostgreSQL, Redis, Caddy, Docker, Docker Compose e iptables. En un equipo sin salida a internet, añade <code>--sin-internet</code> para que no intente descargar nada:</p>
+<pre><span class="cmd">sudo ./madeca.sh instalar</span> <span class="param">--sin-internet</span> <span class="param">--acceso</span> <span class="string">propio</span> ...</pre>
+  <p>En Windows, la Ubuntu para WSL2 va en la carpeta <code>windows</code>: tampoco necesita internet (salvo para activar WSL2 si nunca se activó).</p>
+</section>
+
+<!-- 5 -->
+<section id="configuracion" class="salto">
+  <h2>5. Configuración inicial</h2>
+  <p>Las capturas de esta guía son de una instalación de prueba con <strong>TransCanarias Logística SL, una empresa ficticia</strong>: sus datos, NIF y matrículas (serie Z, aún no emitida) son inventados.</p>
+
+  <h3 id="cfg-acceso">5.1 Primer acceso y contraseña</h3>
+  <p>Abre <code>https://TU-DOMINIO</code> y entra con el correo del administrador y la contraseña inicial.</p>
+  <figure class="captura"><img src="img_guia/01_acceso.webp" alt="Pantalla de acceso de MADeCa" loading="lazy"><figcaption>Pantalla de acceso.</figcaption></figure>
+  <p>Las contraseñas las genera el servidor: <code>sudo /opt/madeca/madeca.sh clave CORREO</code> da una nueva a cualquier usuario (se muestra una vez y cierra sus sesiones abiertas). El administrador de la empresa también puede poner la contraseña de cada usuario al crearlo en <strong>Usuarios</strong>.</p>
+  <p>Al entrar se ve el <strong>Inicio</strong>: lo pendiente de revisar, lo que está en tránsito y lo que necesita atención.</p>
+  <figure class="captura"><img src="img_guia/02_inicio.webp" alt="Inicio del panel" loading="lazy"><figcaption>Inicio: resumen y avisos.</figcaption></figure>
+
+  <h3 id="cfg-usuarios">5.2 Usuarios y roles</h3>
+  <p>En <strong>Usuarios</strong> el administrador crea las cuentas del resto del personal. Cada persona debe tener la suya: la actividad de cada expedición registra quién hizo qué.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Rol</th><th>Puede</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">admin</td><td>Todo: usuarios, certificados, claves de API, fuentes de datos e historial.</td></tr>
+      <tr><td class="param-name">operador</td><td>Emitir, modificar y dar por entregados DeCA, revisar la bandeja y exportar.</td></tr>
+      <tr><td class="param-name">lectura</td><td>Consultar, sin cambiar nada.</td></tr>
+    </tbody>
+  </table></div>
+  <figure class="captura"><img src="img_guia/05_usuarios.webp" alt="Usuarios de la empresa" loading="lazy"><figcaption>Usuarios: alta, rol, desactivación.</figcaption></figure>
+
+  <h3 id="cfg-certificado">5.3 Certificado de firma (si se usa)</h3>
+  <p>La firma electrónica avanzada solo es obligatoria en los DeCA con <strong>finalidad contractual</strong> (Apartado Cuarto). Sin certificado, el resto se emite igualmente, sin firmar. Si la empresa los necesita, sube en <strong>Certificados</strong> su certificado <code>.p12</code>/<code>.pfx</code> con su contraseña: se guarda cifrado y la aplicación avisa antes de que caduque.</p>
+  <figure class="captura"><img src="img_guia/06_certificados.webp" alt="Certificados de firma" loading="lazy"><figcaption>Certificados de firma electrónica.</figcaption></figure>
+
+  <h3 id="cfg-erp">5.4 Conectar el ERP por API</h3>
+  <p>Si el programa de gestión puede llamar a una API, crea en <strong>Integraciones ERP</strong> una clave para él. La clave completa se muestra <strong>una sola vez</strong>: cópiala en la configuración del ERP. Se envía en la cabecera <code>X-API-Key</code>.</p>
+  <figure class="captura"><img src="img_guia/07_integraciones.webp" alt="Claves de API del ERP" loading="lazy"><figcaption>Integraciones ERP: claves de API (solo se guarda su huella; se pueden revocar).</figcaption></figure>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Petición</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><td><code>POST /api/v1/expediciones/datos</code></td><td>El ERP manda los datos (JSON) y MADeCa redacta el DeCA.</td></tr>
+      <tr><td><code>POST /api/v1/expediciones</code></td><td>El ERP manda su propio PDF (albarán, carta de porte) y MADeCa le estampa el QR.</td></tr>
+      <tr><td><code>POST /api/v1/expediciones/{id}/modificaciones</code></td><td>Modificación durante el servicio (Apartado Quinto).</td></tr>
+      <tr><td><code>PATCH /api/v1/expediciones/{id}/finalizar</code></td><td>Servicio terminado (entregado o anulado).</td></tr>
+      <tr><td><code>GET /api/v1/expediciones/{id}/pdf</code> y <code>/qr.png</code></td><td>Copia para el conductor (PDF o solo el QR).</td></tr>
+      <tr><td><code>POST /api/v1/borradores/documento</code></td><td>Un documento escaneado o una foto a la bandeja de revisión.</td></tr>
+    </tbody>
+  </table></div>
+  <p>La descripción completa de cada petición (especificación OpenAPI) está en <code>https://TU-DOMINIO/openapi.json</code>: se abre con cualquier herramienta compatible con OpenAPI, como Postman o Swagger Editor.</p>
+
+  <h3 id="cfg-carpeta">5.5 Carpeta compartida</h3>
+  <p>Para un ERP que solo sabe dejar ficheros en una carpeta: lo que se copie en</p>
+<pre>/opt/madeca/intercambio/hotfolder/incoming/<span class="param">ID-DE-LA-EMPRESA</span>/generico/pdf/     <span class="comment"># PDF + .json con los metadatos</span>
+/opt/madeca/intercambio/hotfolder/incoming/<span class="param">ID-DE-LA-EMPRESA</span>/generico/datos/   <span class="comment"># .json o .csv con los datos</span></pre>
+  <p>se emite solo. Lo procesado pasa a <code>processed/</code> y lo que falla, a <code>errores/</code> con un fichero que explica el motivo. El identificador de la empresa lo muestra <code>sudo /opt/madeca/madeca.sh estado</code>. Los ficheros deben pertenecer al usuario 1000 (<code>sudo chown -R 1000:1000 /opt/madeca/intercambio</code>) para que MADeCa pueda moverlos.</p>
+
+  <h3 id="cfg-fuentes">5.6 Fuentes de datos</h3>
+  <p>En <strong>Fuentes de datos</strong> el administrador conecta carpetas en la nube (SharePoint/OneDrive, Google Drive, Dropbox), servidores SFTP, la carpeta <code>/opt/madeca/intercambio/nas/ID-DE-LA-EMPRESA</code> del propio servidor, o un ERP (Business Central, Odoo; SAP Business One y Holded sin verificar todavía con instalaciones reales). Los documentos que lleguen se leen y quedan en la bandeja de revisión: nunca se emite nada sin que una persona lo confirme.</p>
+  <figure class="captura"><img src="img_guia/08_fuentes.webp" alt="Fuentes de datos" loading="lazy"><figcaption>Fuentes de datos automáticas.</figcaption></figure>
+  <div class="alert-info">Por seguridad, las fuentes no pueden apuntar a direcciones de la red interna (un NAS o un ERP en la oficina). Si lo necesitas, pon <code>FUENTES_PERMITIR_RED_PRIVADA=true</code> en <code>/opt/madeca/.env</code> y reinicia (<code>sudo /opt/madeca/madeca.sh reiniciar</code>).</div>
+
+  <h3 id="cfg-correo">5.7 Avisos por correo (opcional)</h3>
+  <p>MADeCa puede mandar cada día a los administradores un resumen de lo que necesita atención (certificados por caducar, borradores atascados, fuentes con error). Para activarlo, quita el <code>#</code> de las líneas <code>SMTP_*</code> de <code>/opt/madeca/.env</code>, rellénalas con los datos del servidor de correo de la empresa y reinicia.</p>
+
+  <h3 id="cfg-empresas">5.8 Varias empresas en la misma instalación</h3>
+  <p>Una instalación puede atender a más de una empresa (por ejemplo, las de un mismo grupo). Cada una tiene sus usuarios, sus DeCA, sus certificados y su carpeta compartida, separados de las demás. Hay dos formas de darlas de alta:</p>
+<pre><span class="comment"># Desde la consola del servidor (pregunta razón social, NIF y correo del administrador):</span>
+<span class="cmd">sudo /opt/madeca/madeca.sh alta</span>
+<span class="comment"># O desde el navegador, en https://TU-DOMINIO/superadmin, con un superadministrador:</span>
+<span class="cmd">sudo /opt/madeca/madeca.sh superadmin</span> <span class="string">operador@miempresa.es</span></pre>
+  <p>El superadministrador gestiona las empresas (alta, activar y desactivar) y sus usuarios (alta, rol, contraseña y desactivación); no ve sus DeCA. Si una sola empresa usa la instalación, no hace falta crearlo.</p>
+</section>
+
+<!-- 6 -->
+<section id="interfaz" class="salto">
+  <h2>6. La aplicación en el día a día</h2>
+  <div class="module-grid">
+    <div class="module-card"><div class="card-header">Expediciones</div>Todos los DeCA, con filtros por estado, fechas, matrícula y texto, paginación y exportación a Excel.</div>
+    <div class="module-card"><div class="card-header">Nueva expedición</div>Formulario con los datos del art. 6 que avisa al escribir de lo que falta o no es válido; o un PDF propio al que se le estampa el QR.</div>
+    <div class="module-card"><div class="card-header">Bandeja de revisión</div>Documentos escaneados, fotos y lo que llega de las fuentes: datos leídos junto al original, para confirmar y emitir.</div>
+    <div class="module-card"><div class="card-header">Historial</div>Estadísticas por día, semana, mes, trimestre o año, con desgloses y Excel (solo administradores).</div>
+  </div>
+  <figure class="captura"><img src="img_guia/09_expediciones.webp" alt="Listado de expediciones" loading="lazy"><figcaption>Expediciones: listado con filtros.</figcaption></figure>
+  <figure class="captura"><img src="img_guia/10_nueva_expedicion.webp" alt="Formulario de nueva expedición" loading="lazy"><figcaption>Nueva expedición: los datos obligatorios del art. 6 están marcados.</figcaption></figure>
+  <figure class="captura"><img src="img_guia/11_detalle_expedicion.webp" alt="Detalle de una expedición" loading="lazy"><figcaption>Detalle de una expedición: URL pública del QR, copia para el conductor (PDF o QR), enlace para la otra parte (un año, Apartado Segundo.4), modificaciones y actividad. Aquí, un cambio de vehículo durante el servicio.</figcaption></figure>
+  <figure class="captura"><img src="img_guia/12_bandeja.webp" alt="Bandeja de revisión" loading="lazy"><figcaption>Bandeja de revisión: documentos pendientes y los datos que les faltan.</figcaption></figure>
+  <figure class="captura"><img src="img_guia/13_revision_borrador.webp" alt="Revisión de un borrador" loading="lazy"><figcaption>Revisión de un albarán escaneado: los datos que faltan se señalan en rojo y se puede ver de qué parte del documento se leyó cada dato.</figcaption></figure>
+  <figure class="captura"><img src="img_guia/14_historial.webp" alt="Historial" loading="lazy"><figcaption>Historial: estadísticas del periodo.</figcaption></figure>
+  <div class="alert-warning"><strong>Al conductor:</strong> antes de salir debe llevar el DeCA (PDF o solo el QR) en el móvil o en papel (Apartado Séptimo). Si se modifica durante el servicio, el PDF modificado también debe llegarle.</div>
+</section>
+
+<!-- 7 -->
+<section id="mantenimiento">
+  <h2>7. Mantenimiento</h2>
+  <h3>Copias de seguridad</h3>
+<pre><span class="cmd">sudo /opt/madeca/madeca.sh copia</span></pre>
+  <p>Crea en <code>/opt/madeca/copias/</code> un único fichero con la base de datos, los PDF, los certificados y las claves de la instalación. <strong>Llévalo fuera del servidor</strong> (otro equipo, NAS, nube) y guárdalo en lugar seguro: contiene las claves. Los DeCA deben conservarse al menos un año (Apartado Segundo.4). Para hacerla cada noche, por ejemplo a las 2:30, añade con <code>sudo crontab -e</code>:</p>
+<pre><span class="string">30 2 * * *</span> /opt/madeca/madeca.sh copia &gt;&gt; /var/log/madeca-copia.log 2&gt;&amp;1</pre>
+  <p>Las copias no se borran solas: revisa de vez en cuando el espacio de <code>/opt/madeca/copias/</code>.</p>
+  <h3>Restaurar</h3>
+<pre><span class="cmd">sudo /opt/madeca/madeca.sh restaurar</span> <span class="param">/opt/madeca/copias/madeca-20261016-195632.tar.gz</span></pre>
+  <p>Sustituye todos los datos actuales por los de la copia (pide escribir <code>RESTAURAR</code>). Sirve también para pasar a otro servidor: instala allí el mismo paquete con el mismo dominio y restaura la copia.</p>
+  <h3>Actualizar a una versión nueva</h3>
+<pre><span class="cmd">tar</span> xzf madeca-NUEVA.tar.gz &amp;&amp; <span class="cmd">cd</span> madeca-NUEVA
+<span class="cmd">sudo ./madeca.sh actualizar</span></pre>
+  <p>Hace antes una copia de seguridad, carga la versión nueva, conserva claves y datos, y aplica los cambios de la base de datos. No admite volver a una versión anterior.</p>
+  <h3>Servidor</h3>
+  <p>Mantén el sistema al día con su gestor de paquetes (<code>apt</code>, <code>dnf</code>, <code>zypper</code>; en Windows, Windows Update y <code>wsl --update</code>). Los servicios arrancan solos al reiniciar el servidor.</p>
+</section>
+
+<!-- 8 -->
+<section id="parametros">
+  <h2>8. Referencia: órdenes y configuración</h2>
+  <h3>Órdenes de madeca.sh</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Orden</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">instalar</td><td>Instalación completa (desde la carpeta del paquete).</td></tr>
+      <tr><td class="param-name">actualizar</td><td>Copia de seguridad y actualización (desde la carpeta del paquete nuevo).</td></tr>
+      <tr><td class="param-name">estado</td><td>Servicios, versión, empresas y su identificador.</td></tr>
+      <tr><td class="param-name">alta</td><td>Alta de otra empresa y su administrador (la primera se da al instalar).</td></tr>
+      <tr><td class="param-name">clave CORREO</td><td>Contraseña nueva para ese usuario (se muestra una vez; cierra sus sesiones).</td></tr>
+      <tr><td class="param-name">superadmin CORREO</td><td>Crea el superadministrador de <code>/superadmin</code> o le da una contraseña nueva.</td></tr>
+      <tr><td class="param-name">certificado CERT CLAVE</td><td>Cambia el certificado propio (acceso «propio»): comprueba que sea válido y que la clave le corresponda.</td></tr>
+      <tr><td class="param-name">copia</td><td>Copia de seguridad completa en <code>/opt/madeca/copias</code>.</td></tr>
+      <tr><td class="param-name">restaurar FICHERO</td><td>Restaura una copia (sustituye los datos actuales).</td></tr>
+      <tr><td class="param-name">parar &middot; arrancar &middot; reiniciar</td><td>Para, arranca o reinicia los servicios.</td></tr>
+      <tr><td class="param-name">registros [servicio]</td><td>Últimas líneas de registro (<code>app</code>, <code>caddy</code>, <code>db</code>...).</td></tr>
+      <tr><td class="param-name">desinstalar</td><td>Quita los servicios; ofrece una copia antes y conserva los datos salvo que se escriba <code>BORRAR DATOS</code>.</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Opciones de «instalar»</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Opción</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">--acceso</span><span class="badge badge-default">publico</span></td><td><code>publico</code>, <code>propio</code>, <code>proxy</code> o <code>prueba</code> (apartado 3). Si falta, se pregunta.</td></tr>
+      <tr><td><span class="param-name">--dominio</span><span class="badge badge-required">obligatoria</span></td><td>Dominio de MADeCa. Si falta, se pregunta.</td></tr>
+      <tr><td><span class="param-name">--correo</span><span class="badge badge-required">con «publico»</span></td><td>Correo técnico para Let's Encrypt.</td></tr>
+      <tr><td><span class="param-name">--cert</span>, <span class="param-name">--clave</span><span class="badge badge-required">con «propio»</span></td><td>Certificado (PEM, cadena completa) y su clave privada sin contraseña.</td></tr>
+      <tr><td><span class="param-name">--puerto-app</span>, <span class="param-name">--ip-app</span><span class="badge badge-default">8080 · 127.0.0.1</span></td><td>Con «proxy»: puerto HTTP de MADeCa y dónde escucha (<code>0.0.0.0</code> si el proxy está en otro equipo).</td></tr>
+      <tr><td><span class="param-name">--ip-proxy</span><span class="badge badge-required">con «proxy» en otro equipo</span></td><td>IP del proxy (o varias, separadas por comas). Solo las peticiones que llegan de ella pueden indicar la IP real del usuario; sin esto, cualquiera que alcanzase el puerto podría falsearla y saltarse el límite de intentos de acceso.</td></tr>
+      <tr><td><span class="param-name">--puerto-http</span>, <span class="param-name">--puerto-https</span><span class="badge badge-default">80 · 443</span></td><td>Puertos del equipo si 80/443 están ocupados.</td></tr>
+      <tr><td><span class="param-name">--sin-internet</span><span class="badge badge-optional">opcional</span></td><td>No descarga nada: Docker y las imágenes salen del paquete.</td></tr>
+      <tr><td><span class="param-name">--zona</span><span class="badge badge-default">peninsula</span></td><td><code>peninsula</code> o <code>canarias</code>.</td></tr>
+      <tr><td><span class="param-name">--empresa</span>, <span class="param-name">--nif</span>, <span class="param-name">--admin</span><span class="badge badge-required">obligatorias</span></td><td>Razón social, NIF/CIF y correo del administrador.</td></tr>
+      <tr><td><span class="param-name">--acepto-condiciones</span><span class="badge badge-optional">opcional</span></td><td>Acepta <code>LICENCIA.txt</code> sin preguntar (instalación desatendida).</td></tr>
+      <tr><td><span class="param-name">--si</span><span class="badge badge-optional">opcional</span></td><td>Continúa aunque el dominio aún no apunte al servidor.</td></tr>
+      <tr><td><span class="param-name">--prueba-local</span><span class="badge badge-optional">opcional</span></td><td>Igual que <code>--acceso prueba</code>. Solo para probar, no para DeCA reales.</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Ajustes de /opt/madeca/.env</h3>
+  <p>Lo crea el instalador. Tras cambiarlo: <code>sudo /opt/madeca/madeca.sh reiniciar</code>. <strong>No cambies las claves</strong> (<code>APP_SECRET_KEY</code>, <code>JWT_SECRET_KEY</code>, <code>POSTGRES_PASSWORD</code>): los certificados guardados y la base de datos dependen de ellas.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Ajuste</th><th>Valor</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">DOMINIO / APP_BASE_URL</td><td>el dominio</td><td>Dirección pública. Va dentro de cada QR: no se cambia con DeCA vigentes.</td></tr>
+      <tr><td class="param-name">ZONA_HORARIA</td><td><code>Europe/Madrid</code> o <code>Atlantic/Canary</code></td><td>Hora impresa en los DeCA y la del panel.</td></tr>
+      <tr><td class="param-name">RETENTION_DAYS</td><td><span class="badge badge-default">365</span></td><td>Días que se conservan los DeCA (mínimo legal: un año).</td></tr>
+      <tr><td class="param-name">PUBLIC_URL_DEACTIVATION_DAYS</td><td><span class="badge badge-default">7</span></td><td>Días tras el fin del servicio en que la URL del QR deja de descargar (Apartado Tercero.5).</td></tr>
+      <tr><td class="param-name">FUENTES_PERMITIR_RED_PRIVADA</td><td><span class="badge badge-default">false</span></td><td>Permite que las fuentes de datos apunten a la red interna.</td></tr>
+      <tr><td class="param-name">OCR_SIMULTANEOS</td><td><span class="badge badge-default">1</span></td><td>Documentos que se leen a la vez. Súbelo solo con más núcleos.</td></tr>
+      <tr><td class="param-name">AZURE_DI_ENDPOINT, AZURE_DI_CLAVE</td><td><span class="badge badge-optional">opcional</span></td><td>Lectura de documentos con Azure AI Document Intelligence, solo para las empresas que lo autoricen (tercero que trata los datos: usar un recurso en la UE).</td></tr>
+      <tr><td class="param-name">SMTP_HOST, SMTP_PUERTO, SMTP_USUARIO, SMTP_CLAVE, SMTP_REMITENTE</td><td><span class="badge badge-optional">opcional</span></td><td>Servidor de correo para los avisos diarios. <code>SMTP_SEGURIDAD</code>: <code>starttls</code> (por defecto), <code>ssl</code> o <code>ninguna</code>.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 9 -->
+<section id="ejemplos">
+  <h2>9. Ejemplos</h2>
+  <h3>Emitir un DeCA desde el ERP (MADeCa redacta el PDF)</h3>
+<pre><span class="cmd">curl</span> <span class="param">-X POST</span> https://deca.miempresa.es/api/v1/expediciones/datos \
+  <span class="param">-H</span> <span class="string">"X-API-Key: mad_live_..."</span> <span class="param">-H</span> <span class="string">"Content-Type: application/json"</span> \
+  <span class="param">-d</span> <span class="string">'{
+    "referencia_externa": "ALB-2026-001",
+    "cargador": {"nombre_razon_social": "Cargador Ejemplo SL", "nif_cif": "B00345678",
+                 "domicilio": "Calle Industria 14, 28001 Madrid"},
+    "transportista": {"nombre_razon_social": "Transportes Ejemplo SL", "nif_cif": "B00654327"},
+    "origen_direccion": "Calle Industria 14, 28001 Madrid",
+    "destino_direccion": "Polígono Sur, parcela 4, 41001 Sevilla",
+    "mercancia": {"naturaleza": "Palés de material eléctrico", "peso_kg": 850.5},
+    "fecha_transporte": "2026-10-15T08:00:00+02:00",
+    "matricula_vehiculo": "1234BBC"
+  }'</span>
+<span class="comment"># 201: devuelve el id y la url_publica del QR.
+# 422: datos que faltan o no válidos (la respuesta dice cuáles).</span></pre>
+  <h3>Estampar el QR en el PDF del ERP</h3>
+<pre><span class="cmd">curl</span> <span class="param">-X POST</span> https://deca.miempresa.es/api/v1/expediciones <span class="param">-H</span> <span class="string">"X-API-Key: mad_live_..."</span> \
+  <span class="param">-F</span> referencia_externa=ALB-2026-002 <span class="param">-F</span> matricula_vehiculo=1234BBC \
+  <span class="param">-F</span> fecha_transporte=2026-10-15T08:00:00+02:00 <span class="param">-F</span> archivo=@albaran.pdf</pre>
+  <h3>Ver el estado</h3>
+<pre><span class="cmd">sudo /opt/madeca/madeca.sh estado</span>
+<span class="comment">(antes, la tabla de servicios)</span>
+MADeCa 0.4.4
+Empresa: TransCanarias Logística SL (B00419028) · usuarios: 3 · DeCA emitidos: 16
+Id de la empresa: 68e39641-ae4f-482e-bea2-23d8ba04e8a6   <span class="comment"># el de la carpeta compartida</span>
+Dirección: https://deca.transcanarias.test</pre>
+  <h3>Un usuario ha olvidado su contraseña</h3>
+<pre><span class="cmd">sudo /opt/madeca/madeca.sh clave</span> <span class="string">trafico@miempresa.es</span></pre>
+</section>
+
+<!-- 10 -->
+<section id="problemas">
+  <h2>10. Resolución de problemas</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Problema</th><th>Causa probable</th><th>Solución</th></tr></thead>
+    <tbody>
+      <tr><td>El instalador dice que el servidor no es x86_64</td><td>Servidor ARM</td><td>Usa un servidor Intel/AMD: la imagen solo existe para x86_64.</td></tr>
+      <tr><td>«El puerto 80 ya lo usa otro programa»</td><td>Apache, nginx, IIS u otro servicio web en el equipo</td><td>Elige otros puertos (<code>--puerto-http</code>, <code>--puerto-https</code>) o pon MADeCa detrás de ese servicio con <code>--acceso proxy</code>.</td></tr>
+      <tr><td>Windows: «No se pudo activar WSL2»</td><td>Virtualización desactivada en la BIOS/UEFI, o máquina virtual sin virtualización anidada</td><td>Actívala y vuelve a lanzar <code>INSTALAR_EN_WINDOWS.bat</code>.</td></tr>
+      <tr><td>Windows: «WSL2 activado. REINICIA el equipo»</td><td>Primera vez que se usa WSL2</td><td>Reinicia y vuelve a lanzar el .bat: sigue donde lo dejó.</td></tr>
+      <tr><td>Windows: desde otro equipo de la red no abre</td><td>El nombre del dominio no apunta a la IP del equipo Windows, o un cortafuegos de red lo corta</td><td>Crea el registro en el DNS interno (o el fichero hosts) hacia la IP del equipo Windows; la regla de su cortafuegos ya la crea el instalador.</td></tr>
+      <tr><td>«La clave no corresponde al certificado» o «está caducado»</td><td>Ficheros del certificado propio equivocados</td><td>Usa el PEM con la cadena completa y su clave; si la clave tiene contraseña, quítasela.</td></tr>
+      <tr><td>«El núcleo de este sistema no admite nf_tables»</td><td>Linux muy antiguo y sin iptables</td><td>Instala iptables de la distribución y repite.</td></tr>
+      <tr><td>Instalado, pero la dirección no abre o el navegador avisa del certificado</td><td>El dominio no apunta al servidor o el puerto 80/443 no llega desde internet; Let's Encrypt no pudo emitir el certificado</td><td>Comprueba el registro A y el reenvío de puertos del router; mira <code>madeca.sh registros caddy</code>. Al corregirlo, Caddy lo reintenta solo.</td></tr>
+      <tr><td>Abre en la oficina pero no desde el móvil con datos</td><td>Solo funciona en la red interna (DNS interno, sin reenvío de puertos)</td><td>El inspector accede desde internet: publica el dominio y los puertos.</td></tr>
+      <tr><td>La API responde 401</td><td>Clave de API mal copiada o revocada</td><td>Crea otra en «Integraciones ERP» (solo se muestra una vez).</td></tr>
+      <tr><td>Un DeCA con finalidad contractual da error</td><td>No hay certificado de firma activo y vigente</td><td>Sube el certificado en «Certificados» (Apartado Cuarto).</td></tr>
+      <tr><td>Los ficheros de la carpeta compartida no se procesan</td><td>Ruta incorrecta o permisos</td><td>Revisa la ruta con el identificador de <code>estado</code> y ejecuta <code>chown -R 1000:1000 /opt/madeca/intercambio</code>. Mira <code>errores/</code>.</td></tr>
+      <tr><td>Un documento de la bandeja aparece sin datos</td><td>Escaneo ilegible</td><td>Rellena los datos a mano o vuelve a escanearlo.</td></tr>
+      <tr><td>«Ya hay una empresa con el NIF...»</td><td>Se intenta dar de alta otra vez la misma empresa</td><td>Cada NIF solo una vez por instalación: mira <code>madeca.sh estado</code>.</td></tr>
+      <tr><td>«Hubo MADeCa X, más nueva que este paquete» o «no se puede volver atrás»</td><td>Se intenta instalar o actualizar con un paquete más antiguo que el de los datos del servidor</td><td>Usa el paquete de la versión instalada o una posterior: la base de datos de una versión nueva puede no valer con una anterior.</td></tr>
+      <tr><td>Se perdió la contraseña del administrador</td><td>&mdash;</td><td><code>sudo /opt/madeca/madeca.sh clave CORREO</code>.</td></tr>
+      <tr><td>La aplicación no arranca (<code>app</code> no está <code>running</code>)</td><td>Base de datos aún arrancando, o disco lleno</td><td><code>madeca.sh registros app</code>; comprueba el espacio con <code>df -h</code>.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 11 -->
+<section id="legal">
+  <h2>11. Aviso legal</h2>
+  <div class="alert-warning"><strong>Software libre y gratuito bajo licencia MIT.</strong> Se entrega «tal cual», sin garantía de ningún tipo; el soporte y el mantenimiento no están incluidos salvo acuerdo aparte con Masoft.es.</div>
+  <div class="card">
+    <div class="card-header">Responsabilidades de la empresa que usa MADeCa</div>
+    <ul>
+      <li>Los datos de cada DeCA y el cumplimiento de la normativa de transporte: Orden FOM/2861/2012 y Resolución de 5 de junio de 2026 de la Dirección General de Transporte por Carretera y Ferrocarril (BOE-A-2026-12784), incluida la conservación de los DeCA durante al menos un año (Apartado Segundo.4).</li>
+      <li>Que el servidor esté disponible para que los inspectores puedan descargar los DeCA durante el servicio (Apartado Tercero).</li>
+      <li>Es la responsable del tratamiento de los datos personales que guarde (Reglamento (UE) 2016/679). Si Masoft.es accede a la instalación para darle soporte, lo hace como encargado del tratamiento, con el contrato que exige el art. 28.</li>
+      <li>Las referencias a la normativa de esta guía son orientativas: no sustituyen al texto oficial publicado en el BOE ni al asesoramiento profesional.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>MADeCa &middot; Guía de instalación y configuración &middot; versión 0.4.4 &middot; Masoft.es &middot; actualizada el 16/11/2026</footer>
+</main>
+</body>
+</html>

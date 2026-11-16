@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% import "dashboard/_filtros.html" as f with context %}
+{% block titulo %}Historial — MADeCa{% endblock %}
+{% block contenido %}
+{% macro numero(valor, decimales=0) -%}
+{{ ("{:,.%df}" % decimales).format(valor or 0).replace(",", "X").replace(".", ",").replace("X", ".") }}
+{%- endmacro %}
+{% macro horas(h) -%}
+{% if h is none %}—{% elif h < 48 %}{{ numero(h, 1) }} h{% else %}{{ numero(h / 24, 1) }} días{% endif %}
+{%- endmacro %}
+
+<div class="cabecera-pagina">
+    <h1>Historial</h1>
+    <a class="btn" href="{{ url_exportar }}" title="Descargar un libro de Excel con todo lo de esta consulta">{{ f.icono("descargar", 15) }} Exportar a Excel</a>
+</div>
+
+{# ---------------- Periodo ---------------- #}
+<div class="barra-filtros barra-historial">
+    <div class="fila-periodo">
+        <nav class="segmentado-enlaces" aria-label="Periodo">
+            {% for clave, texto in periodos.items() %}
+            <a href="{{ enlace(periodo=clave, ref=None, tramo=None, desde=None, hasta=None) }}" class="{{ 'activo' if c.periodo.tipo == clave }}">{{ texto }}</a>
+            {% endfor %}
+        </nav>
+        <nav class="segmentado-enlaces" aria-label="Fecha que cuenta">
+            <span class="rotulo">Fecha de</span>
+            {% for clave, texto in fechas.items() %}
+            <a href="{{ enlace(fecha=clave, tramo=None) }}" class="{{ 'activo' if c.fecha == clave }}">{{ texto }}</a>
+            {% endfor %}
+        </nav>
+    </div>
+    <div class="fila-periodo">
+        {% if c.periodo.tipo == "personalizado" %}
+        <form class="rango-historial" method="get" action="/dashboard/historial">
+            {% for k, v in p.items() if k not in ("desde", "hasta", "pagina", "tramo") %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+            <input type="hidden" name="periodo" value="personalizado">
+            <label>Desde <input type="date" name="desde" value="{{ c.periodo.inicio.isoformat() }}"></label>
+            <label>Hasta <input type="date" name="hasta" value="{{ hasta_incluido }}"></label>
+            <button type="submit" class="btn">Aplicar</button>
+        </form>
+        {% else %}
+        <div class="navegador-periodo">
+            <a class="pagina-boton" href="{{ enlace(ref=c.periodo.anterior.isoformat(), tramo=None) }}" aria-label="Periodo anterior">&#8249;</a>
+            <strong class="etiqueta-periodo">{{ c.periodo.etiqueta }}</strong>
+            <a class="pagina-boton" href="{{ enlace(ref=c.periodo.siguiente.isoformat(), tramo=None) }}" aria-label="Periodo siguiente">&#8250;</a>
+            <a class="limpiar" href="{{ enlace(ref=None, tramo=None) }}">Hoy</a>
+        </div>
+        {% endif %}
+        {% if c.periodo.error %}<span class="aviso-campo">{{ c.periodo.error }}</span>{% endif %}
+    </div>
+    {% if fichas %}
+    <div class="fichas fichas-historial">
+        {% for fi in fichas %}<a class="ficha-activa" href="{{ fi.quitar }}" title="Quitar este filtro">{{ fi.texto }}{{ f.icono("cerrar", 13) }}</a>{% endfor %}
+        <a class="limpiar" href="{{ url_sin_filtros }}">Quitar filtros</a>
+    </div>
+    {% endif %}
+</div>
+
+{# ---------------- Totales ---------------- #}
+{% macro tarjeta(titulo, valor, nota="", url=None, activo=False) -%}
+{% if url %}<a class="indicador{{ ' activo' if activo }}" href="{{ url }}">{% else %}<div class="indicador fijo">{% endif %}
+    <span class="indicador-titulo">{{ titulo }}</span>
+    <span class="indicador-valor">{{ valor }}</span>
+    {% if nota %}<span class="indicador-nota">{{ nota }}</span>{% endif %}
+{% if url %}</a>{% else %}</div>{% endif %}
+{%- endmacro %}
+<h2 class="titulo-seccion">Expediciones · {{ fechas[c.fecha] | lower }}</h2>
+<div class="indicadores indicadores-6">
+    {{ tarjeta("Total", numero(tot.total), "Quitar estado" if c.filtros.estado else "", enlace(estado=None) if c.filtros.estado else None) }}
+    {% for clave, texto in (("en_transito", "En tránsito"), ("entregado", "Entregadas"), ("anulado", "Anuladas")) %}
+    {{ tarjeta(texto, numero(tot[clave]), (numero(100 * tot[clave] / tot.total, 1) ~ " %") if tot.total else "",
+               enlace(estado=None if c.filtros.estado == clave else clave), c.filtros.estado == clave) }}
+    {% endfor %}
+    {{ tarjeta("Firmadas (AdES)", numero(tot.firmadas), "", enlace(firmado=None if c.filtros.firmado == "si" else "si"), c.filtros.firmado == "si") }}
+    {{ tarjeta("Modificadas", numero(tot.modificadas), "Durante el servicio", enlace(modificada=None if c.filtros.modificada == "si" else "si"), c.filtros.modificada == "si") }}
+    {{ tarjeta("Con lecturas del QR", numero(tot.con_lecturas), numero(tot.lecturas) ~ " lecturas", enlace(lecturas=None if c.filtros.lecturas == "si" else "si"), c.filtros.lecturas == "si") }}
+    {{ tarjeta("Mercancía peligrosa", numero(tot.adr), "Con n.º ONU (ADR)", enlace(adr=None if c.filtros.adr == "si" else "si"), c.filtros.adr == "si") }}
+    {{ tarjeta("Peso total", numero(tot.peso_kg / 1000, 1) ~ " t", (numero(tot.sin_peso) ~ " sin peso (otra magnitud o PDF propio)") if tot.sin_peso else "") }}
+    {{ tarjeta("Bultos", numero(tot.bultos)) }}
+    {{ tarjeta("Emisión a entrega", horas(tot.horas_entrega), "Tiempo medio") }}
+    {{ tarjeta("Distintos", numero(tot.destinatarios) ~ " · " ~ numero(tot.vehiculos), "Destinatarios · vehículos") }}
+</div>
+
+{# ---------------- Evolución ---------------- #}
+<div class="card">
+    <div class="cabecera-tarjeta"><h2>Evolución por {{ unidad }}</h2>
+        <span class="text-light">Pulsa una barra para ver solo ese {{ unidad }}</span></div>
+    {% if max_evo %}
+    <div class="grafico" role="list">
+        {% for e in evo %}
+        {% set tramo = e.desde.isoformat() ~ ":" ~ e.hasta.isoformat() %}
+        <a class="columna-grafico{{ ' activa' if p.tramo == tramo }}" role="listitem" href="{{ enlace(tramo=None if p.tramo == tramo else tramo) }}"
+           data-tip="{{ e.etiqueta }}: {{ numero(e.n) }} {{ 'expedición' if e.n == 1 else 'expediciones' }} · {{ numero(e.peso_kg / 1000, 1) }} t">
+            <span class="valor-barra">{{ e.n if e.n else '' }}</span>
+            <span class="barra" style="height: {{ '%.1f' % (100 * e.n / max_evo) }}%"></span>
+            <span class="etiqueta-barra">{{ e.etiqueta if loop.index0 % ((evo | length) // 16 + 1) == 0 else '' }}</span>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    {{ f.sin_resultados("Sin expediciones en este periodo", "Prueba con otro periodo o con otra fecha («Fecha de»).", "") }}
+    {% endif %}
+</div>
+
+{# ---------------- Desgloses ---------------- #}
+{% macro filas_desglose(d, filas) -%}
+{% for fi in filas %}
+{% set elegida = c.filtros.get(d.clave) == fi.valor %}
+<tr class="{{ 'elegida' if elegida }}">
+    <td><a href="{{ enlace(**{d.clave: None if elegida else fi.valor}) }}" class="enlace-desglose">{{ fi.nombre }}</a>
+        {% if fi.nif %}<span class="nif">{{ fi.nif }}</span>{% endif %}</td>
+    <td class="num">{{ numero(fi.n) }}
+        <span class="barra-porcentaje"><span style="width: {{ '%.1f' % (100 * fi.porcentaje) }}%"></span></span></td>
+    <td class="num">{{ numero(fi.peso_kg / 1000, 1) }}</td>
+</tr>
+{% endfor %}
+{%- endmacro %}
+<h2 class="titulo-seccion">Desglose</h2>
+<p class="text-light nota-seccion">Pulsa cualquier fila para filtrar todo el historial por ella; vuelve a pulsarla para quitar el filtro.</p>
+<div class="desgloses">
+    {% for g in desgloses %}
+    <div class="card desglose">
+        <div class="cabecera-tarjeta"><h2>{{ g.dim.titulo }}</h2><span class="text-light">{{ numero(g.grupos) }}</span></div>
+        {% if g.filas %}
+        <table class="tabla-desglose">
+            <thead><tr><th>{{ g.dim.columna }}</th><th class="num">Expediciones</th><th class="num">Peso (t)</th></tr></thead>
+            <tbody>{{ filas_desglose(g.dim, g.filas[:8]) }}</tbody>
+        </table>
+        {% if g.filas | length > 8 %}
+        <details class="ver-todos">
+            <summary>Ver todos ({{ numero(g.grupos) }})</summary>
+            <table class="tabla-desglose"><tbody>{{ filas_desglose(g.dim, g.filas[8:]) }}</tbody></table>
+            {% if g.grupos > g.filas | length %}<p class="text-light">Se muestran {{ g.filas | length }}; el Excel los incluye todos.</p>{% endif %}
+        </details>
+        {% endif %}
+        {% else %}<p class="text-light">Sin datos en este periodo.</p>{% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+{# ---------------- Bandeja ---------------- #}
+<h2 class="titulo-seccion">Bandeja de revisión · fecha de recepción</h2>
+<div class="indicadores indicadores-6">
+    {{ tarjeta("Recibidos", numero(tot_b.total), "Quitar estado" if c.filtros.b_estado else "", enlace(b_estado=None, pestana="bandeja") if c.filtros.b_estado else None) }}
+    {% for clave in ("pendiente", "emitido", "descartado") %}
+    {{ tarjeta(estados_bandeja[clave] ~ "s", numero(tot_b[clave]), "",
+               enlace(b_estado=None if c.filtros.b_estado == clave else clave, pestana="bandeja"), c.filtros.b_estado == clave) }}
+    {% endfor %}
+    {{ tarjeta("Con datos que faltan", numero(tot_b.con_avisos)) }}
+    {{ tarjeta("Tiempo de revisión", horas(tot_b.horas_revision), "Medio, de recepción a resolución") }}
+</div>
+<div class="desgloses">
+    {% for titulo, clave, filas in (("Origen de los documentos", "b_origen", b_origen), ("Resueltos por", "b_resuelto", b_resuelto)) %}
+    <div class="card desglose">
+        <div class="cabecera-tarjeta"><h2>{{ titulo }}</h2></div>
+        {% if filas %}
+        <table class="tabla-desglose"><tbody>
+            {% for fi in filas %}
+            {% set elegida = c.filtros.get(clave) == fi.valor %}
+            <tr class="{{ 'elegida' if elegida }}"><td><a class="enlace-desglose" href="{{ enlace(**{clave: None if elegida else fi.valor, 'pestana': 'bandeja'}) }}">{{ fi.nombre }}</a></td>
+                <td class="num">{{ numero(fi.n) }}</td></tr>
+            {% endfor %}
+        </tbody></table>
+        {% else %}<p class="text-light">Sin documentos en este periodo.</p>{% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+{# ---------------- Registros ---------------- #}
+<h2 class="titulo-seccion" id="registros">Registros</h2>
+<div class="card resultados">
+    <nav class="pestanas pestanas-enlaces">
+        <a href="{{ enlace(pestana='expediciones') }}#registros" class="{{ 'activa' if pestana == 'expediciones' }}">Expediciones <span class="n">{{ numero(tot.total) }}</span></a>
+        <a href="{{ enlace(pestana='bandeja') }}#registros" class="{{ 'activa' if pestana == 'bandeja' }}">Bandeja <span class="n">{{ numero(tot_b.total) }}</span></a>
+    </nav>
+    {% if registros %}
+    <div class="tabla-scroll">
+    <table>
+        {% if pestana == "expediciones" %}
+        <thead><tr><th>Referencia</th><th>Transporte</th><th>Destinatario</th><th>Destino</th><th>Matrícula</th><th class="num">Peso (kg)</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+        {% for e in registros %}
+        {% set d = e.datos_deca or {} %}
+        <tr>
+            <td class="mono">{{ e.referencia_externa }}</td>
+            <td>{{ e.fecha_transporte | fecha }} <span class="text-light">{{ e.fecha_transporte | hora }}</span></td>
+            <td>{{ (d.destinatario or {}).nombre_razon_social or '—' }}</td>
+            <td class="text-light">{{ d.destino_direccion or '—' }}</td>
+            <td class="mono">{{ e.matricula_vehiculo }}</td>
+            <td class="num">{{ numero((d.mercancia or {}).peso_kg, 1) if (d.mercancia or {}).peso_kg is number else '—' }}</td>
+            <td><span class="badge {{ e.estado }}">{{ nombres_estado.get(e.estado, e.estado) }}</span></td>
+            <td class="acciones"><a class="btn secundario" href="/dashboard/expediciones/{{ e.id }}">Ver</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        {% else %}
+        <thead><tr><th>Recibido</th><th>Documento</th><th>Origen</th><th>Estado</th><th>Resuelto por</th><th></th></tr></thead>
+        <tbody>
+        {% for b in registros %}
+        <tr>
+            <td>{{ b.fecha_alta | fecha }} <span class="text-light">{{ b.fecha_alta | hora }}</span></td>
+            <td>{{ b.nombre_documento or b.referencia_fuente }}</td>
+            <td class="text-light">{{ f_origen(b.origen) }}</td>
+            <td>{{ estados_bandeja.get(b.estado, b.estado) }}</td>
+            <td class="text-light">{{ b.resuelto_por or '—' }}</td>
+            <td class="acciones">{% if b.estado == 'pendiente' %}<a class="btn" href="/dashboard/bandeja/{{ b.id }}">Revisar</a>{% elif b.expedicion_id %}<a class="btn secundario" href="/dashboard/expediciones/{{ b.expedicion_id }}">Ver expedición</a>{% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        {% endif %}
+    </table>
+    </div>
+    {% if pag.paginas > 1 %}
+    <nav class="paginador" aria-label="Páginas">
+        <span class="paginador-info">{{ pag.desde }}–{{ pag.hasta }} de {{ numero(tot.total if pestana == 'expediciones' else tot_b.total) }}</span>
+        <div class="paginador-botones">
+            {% if pag.pagina > 1 %}<a class="pagina-boton" href="{{ enlace(pagina=pag.pagina - 1) }}#registros">&#8249; Anterior</a>{% endif %}
+            {% for n in pag.ventana %}
+            {% if n is none %}<span class="pagina-salto">…</span>
+            {% else %}<a class="pagina-boton{{ ' actual' if n == pag.pagina }}" href="{{ enlace(pagina=n) }}#registros">{{ n }}</a>{% endif %}
+            {% endfor %}
+            {% if pag.pagina < pag.paginas %}<a class="pagina-boton" href="{{ enlace(pagina=pag.pagina + 1) }}#registros">Siguiente &#8250;</a>{% endif %}
+        </div>
+    </nav>
+    {% endif %}
+    {% else %}
+    {{ f.sin_resultados("No hay registros con esta consulta", "Cambia el periodo, la fecha o quita algún filtro.", "") }}
+    {% endif %}
+</div>
+{% endblock %}

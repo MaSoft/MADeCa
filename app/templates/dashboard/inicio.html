@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% import "dashboard/_filtros.html" as f with context %}
+{% block titulo %}Inicio — MADeCa{% endblock %}
+{% block contenido %}
+<div class="cabecera-pagina">
+    <h1>Resumen</h1>
+    {% if sesion.rol in ("admin", "operador") %}
+    <a href="/dashboard/expediciones/nueva" class="btn">+ Nueva expedición</a>
+    {% endif %}
+</div>
+
+<div class="indicadores">
+    {% for i in indicadores %}
+    <a class="indicador" href="{{ i.enlace }}">
+        <span class="indicador-titulo">{{ i.titulo }}</span>
+        <span class="indicador-valor">{{ i.valor }}</span>
+        <span class="indicador-nota">{{ i.nota }}</span>
+    </a>
+    {% endfor %}
+</div>
+
+<div class="card avisos-inicio">
+    <h2>Necesita atención</h2>
+    {% for a in avisos %}
+    <div class="aviso-inicio {{ a.nivel }}">
+        {{ f.icono("alerta", 18) }}
+        <span class="aviso-texto"><strong>{{ 'Urgente' if a.nivel == 'grave' else 'Aviso' }}:</strong> {{ a.texto }}</span>
+        {% if a.accion %}<a href="{{ a.enlace }}">{{ a.accion }}</a>{% endif %}
+    </div>
+    {% else %}
+    <div class="aviso-inicio correcto">{{ f.icono("correcto", 18) }}<span class="aviso-texto">Todo en orden: no hay certificados por caducar, borradores atascados ni fuentes con error.</span></div>
+    {% endfor %}
+    {% if sesion.rol == "admin" %}
+    <p class="nota-correo">{% if correo_activo %}Los administradores reciben estos avisos por correo una vez al día.{% else %}Avisos por correo desactivados: falta configurar el servidor de correo (SMTP_HOST) en la instalación.{% endif %}</p>
+    {% endif %}
+</div>
+
+<div class="dos-columnas">
+    <div class="card resultados">
+        <div class="resumen-resultados"><strong class="titulo-lista">Pendientes de revisar</strong><a class="limpiar" href="/dashboard/bandeja">Ver la bandeja</a></div>
+        {% if ultimos_pendientes %}
+        <table><tbody>
+            {% for b in ultimos_pendientes %}
+            <tr>
+                <td>{{ b.nombre_documento or b.referencia_fuente }}<div class="text-light">{{ b.fecha_alta | fecha }} · {{ b.fecha_alta | hora }}</div></td>
+                <td>{% set n = b.avisos | length %}{% if n %}<span class="badge aviso">Faltan {{ n }}</span>{% else %}<span class="badge completo">Completo</span>{% endif %}</td>
+                <td class="acciones"><a class="btn" href="/dashboard/bandeja/{{ b.id }}">Revisar</a></td>
+            </tr>
+            {% endfor %}
+        </tbody></table>
+        {% else %}
+        {{ f.sin_resultados("No hay nada pendiente", "Los documentos que lleguen aparecerán aquí.", "") }}
+        {% endif %}
+    </div>
+    <div class="card resultados">
+        <div class="resumen-resultados"><strong class="titulo-lista">Últimas expediciones</strong><a class="limpiar" href="/dashboard/expediciones">Ver todas</a></div>
+        {% if ultimas_expediciones %}
+        <table><tbody>
+            {% for e in ultimas_expediciones %}
+            <tr>
+                <td class="mono">{{ e.referencia_externa }}<div class="text-light">{{ e.fecha_transporte | fecha }} · {{ e.matricula_vehiculo }}</div></td>
+                <td><span class="badge {{ e.estado }}">{{ nombres_estado.get(e.estado, e.estado) }}</span></td>
+                <td class="acciones"><a class="btn secundario" href="/dashboard/expediciones/{{ e.id }}">Ver</a></td>
+            </tr>
+            {% endfor %}
+        </tbody></table>
+        {% else %}
+        {{ f.sin_resultados("Todavía no hay expediciones", "", "") }}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

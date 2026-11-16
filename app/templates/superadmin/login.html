@@ -1,0 +1,26 @@
+{% extends "superadmin/base.html" %}
+{% block titulo %}Acceso Operador — MADeCa{% endblock %}
+{% block topbar %}{% endblock %}
+{% block contenido %}
+<div class="login-wrap">
+    <div class="card login-card">
+        <h1>MADeCa</h1>
+        <p class="text-light" style="text-align:center; margin-top:-8px;">Panel de operador — gestión de empresas</p>
+        {% if error %}<div class="alerta error">{{ error }}</div>{% endif %}
+        <form method="post" action="/superadmin/login">
+            <div class="form-fila">
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" name="email" required autofocus>
+            </div>
+            <div class="form-fila">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn" style="width:100%;">Entrar</button>
+        </form>
+        <p class="text-light" style="text-align:center; margin-top:14px;">
+            <a href="/login" class="text-light">Soy una empresa cliente &rarr;</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

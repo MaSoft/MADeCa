@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}MADeCa · Operador{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ estatico('favicon.svg') }}">
+    <link rel="stylesheet" href="{{ estatico('css/dashboard.css') }}">
+    <script src="{{ estatico('htmx.min.js') }}"></script>
+</head>
+<body>
+{% block topbar %}
+<div class="topbar" style="background:#0d1117;">
+    <div class="marca">MADeCa &middot; Panel de Operador (Superadmin)</div>
+    <nav>
+        <a href="/superadmin/empresas">Empresas</a>
+        <form method="post" action="/superadmin/logout"><button type="submit" class="link">Cerrar sesión</button></form>
+    </nav>
+</div>
+{% endblock %}
+<main>
+    {% block contenido %}{% endblock %}
+</main>
+<footer class="pie">MADeCa - Desarrollado por <a href="https://masoft.es" target="_blank" rel="noopener">Masoft.es</a></footer>
+</body>
+</html>

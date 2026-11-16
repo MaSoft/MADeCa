@@ -1,0 +1,83 @@
+# MADeCa para instalar en clientes: imagen SIN código fuente.
+#
+# 1.ª etapa: compila el paquete `app` entero con Nuitka a un módulo nativo
+#    (app.*.so) y las migraciones a bytecode (.pyc). Ningún .py pasa a la
+#    imagen final.
+# 2.ª etapa: la misma base que Dockerfile (librerías de WeasyPrint y
+#    Tesseract) con el módulo compilado, las plantillas, los estáticos y las
+#    migraciones compiladas (Alembic las lee con «sourceless = true»).
+#
+#   docker build -f Dockerfile.paquete -t madeca:<versión> .
+#   bash paquete/construir_paquete.sh
+
+FROM python:3.12-slim AS compilar
+
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev patchelf \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt "nuitka>=2.6.9" "ordered-set>=4.1.0" "zstandard>=0.23.0"
+
+COPY app ./app
+COPY migrations ./migrations
+# Los finales de línea pueden venir como CRLF si se clona en Windows.
+RUN find app migrations \( -name "*.bak" -o -name "__pycache__" \) -prune -exec rm -rf {} + \
+    && find app migrations -type f \( -name "*.py" -o -name "*.html" -o -name "*.txt" -o -name "*.js" -o -name "*.css" -o -name "*.mako" \) -exec sed -i 's/\r$//' {} +
+
+RUN python -m nuitka --module app --include-package=app \
+        --output-dir=/build --remove-output --no-pyi-file --assume-yes-for-downloads \
+        --lto=no --jobs=4 \
+    && ls -l /build
+
+# Migraciones: .pyc junto a cada fichero (-b) y fuera los .py.
+RUN python -m compileall -q -b migrations \
+    && find migrations -name "*.py" -delete \
+    && find migrations -name "__pycache__" -prune -exec rm -rf {} +
+
+
+FROM python:3.12-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libcairo2 \
+    libgdk-pixbuf-2.0-0 \
+    libffi-dev \
+    shared-mime-info \
+    fonts-dejavu-core tesseract-ocr tesseract-ocr-spa \
+    && rm -rf /var/lib/apt/lists/*
+
+# Un hilo por OCR (con varios Tesseract a la vez, OpenMP dejaba el servidor
+# sin responder).
+ENV OMP_THREAD_LIMIT=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt && rm requirements.txt
+
+# Módulo compilado + lo que no es código (plantillas y estáticos).
+COPY --from=compilar /build/app*.so /app/
+COPY app/templates /app/app/templates
+COPY app/static /app/app/static
+COPY --from=compilar /src/migrations /app/migrations
+COPY alembic.ini /app/
+
+# Comprobación: ni un .py de MADeCa en la imagen, y arranca.
+RUN find /app/app /app/migrations -name "*.bak" -delete \
+    && sed -i 's/^script_location = migrations$/script_location = migrations\nsourceless = true/' /app/alembic.ini \
+    && grep -qx 'sourceless = true' /app/alembic.ini \
+    && test -z "$(find /app -name '*.py')" \
+    && python -c "from app.version import VERSION; from app import instalacion; print('MADeCa', VERSION)"
+
+RUN useradd -m -u 1000 madeca && \
+    mkdir -p /app/storage/pdfs /app/certs /app/hotfolder_watch && \
+    chown -R madeca:madeca /app
+USER madeca
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block titulo %}Resultado del lote — MADeCa{% endblock %}
+{% block contenido %}
+<p><a href="/dashboard/expediciones/nueva?modo=lote" class="text-light">&larr; Cargar otro lote</a></p>
+<h1>Resultado de la carga por lotes</h1>
+
+<div class="alerta {{ 'exito' if num_exito == num_total else 'error' }}">
+    {{ num_exito }} de {{ num_total }} expediciones creadas correctamente.
+</div>
+
+<div class="card">
+    <table>
+        <thead><tr><th>Fila</th><th>Fichero</th><th>Resultado</th><th></th></tr></thead>
+        <tbody>
+        {% for r in resultados %}
+            <tr>
+                <td>{{ r.fila }}</td>
+                <td class="mono">{{ r.archivo }}</td>
+                <td>
+                    {% if r.exito %}
+                    <span class="badge activa">creada</span> {{ r.referencia }}
+                    {% else %}
+                    <span class="badge inactiva" style="background:#fee2e2; color:#dc2626;">error</span> {{ r.mensaje }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if r.exito %}
+                    <a class="btn secundario" href="/dashboard/expediciones/{{ r.expedicion_id }}">Ver</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="/dashboard/expediciones" class="btn">Ir al listado de expediciones</a>
+{% endblock %}

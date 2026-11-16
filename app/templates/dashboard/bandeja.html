@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% import "dashboard/_filtros.html" as f with context %}
+{% block titulo %}Bandeja de revisión — MADeCa{% endblock %}
+{% block contenido %}
+<h1>Bandeja de revisión</h1>
+{% if aviso %}<div class="alerta exito">{{ aviso }}</div>{% endif %}
+
+<div class="alerta info">
+    Datos leídos de albaranes, cartas de porte o del ERP. Revisa cada borrador y confírmalo para emitir el DeCA:
+    nada se emite sin revisión.
+    OCR de escaneos: {% if ocr_tercero %}Azure (autorizado por tu empresa){% else %}en el servidor de MADeCa{% endif %}.
+</div>
+
+{% if sesion.rol in ("admin", "operador") %}
+<div class="card">
+    <h2>Subir documentos</h2>
+    <form method="post" action="/dashboard/bandeja/subir" enctype="multipart/form-data">
+        <div class="form-fila">
+            <label for="archivos">PDF o fotos de albaranes / cartas de porte (puedes elegir varios)</label>
+            <input type="file" id="archivos" name="archivos" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.bmp,.webp,.txt" multiple required>
+        </div>
+        <button type="submit" class="btn">Leer y añadir a la bandeja</button>
+    </form>
+</div>
+{% endif %}
+
+<form class="barra-filtros" data-filtros action="/dashboard/bandeja" method="get"
+      hx-get="/dashboard/bandeja" hx-target="#resultados" hx-select="#resultados" hx-swap="outerHTML"
+      hx-select-oob="#resumen-fecha,#n-pendiente,#n-emitido,#n-descartado"
+      hx-push-url="true" hx-indicator="#resultados" hx-sync="this:replace"
+      hx-trigger="input changed delay:350ms from:input[type=search], change">
+    <input type="hidden" name="orden" value="{{ filtros.orden }}">
+    <input type="hidden" name="pagina" value="{{ filtros.pagina }}">
+
+    <div class="pestanas" role="tablist" aria-label="Estado de los borradores">
+        {% for clave, texto in estados.items() %}
+        <label class="pestana">
+            <input type="radio" name="estado" value="{{ clave }}" {% if estado == clave %}checked{% endif %}>
+            <span>{{ texto }} <span class="n" id="n-{{ clave }}">{{ por_estado.get(clave, 0) }}</span></span>
+        </label>
+        {% endfor %}
+    </div>
+
+    <div class="fila-principal">
+        {{ f.buscador(filtros.buscar, "Buscar por documento, referencia, matrícula, cliente, NIF, origen o destino") }}
+        <label class="selector-filtro" title="Origen del borrador">
+            <select name="origen" aria-label="Origen">
+                <option value="">Todos los orígenes</option>
+                {% for valor, texto in origenes.items() %}
+                <option value="{{ valor }}" {% if filtros.origen == valor %}selected{% endif %}>{{ texto }}</option>
+                {% endfor %}
+            </select>
+            {{ f.icono("flecha", 14) }}
+        </label>
+        {{ f.desplegable_fecha(fechas_de, "solo-resueltos") }}
+    </div>
+
+    <div class="fila-estados">
+        <label class="interruptor">
+            <input type="checkbox" name="con_avisos" value="1" {% if filtros.con_avisos %}checked{% endif %}>
+            <span class="pista" aria-hidden="true"></span>Solo con datos que faltan
+        </label>
+        <label class="interruptor solo-emitidos">
+            <input type="checkbox" name="ocultar_entregados" value="1" {% if filtros.ocultar_entregados %}checked{% endif %}>
+            <span class="pista" aria-hidden="true"></span>Ocultar entregados
+        </label>
+    </div>
+</form>
+
+<div class="card resultados" id="resultados">
+    {{ f.resumen(total, pag, "borrador", "borradores", "/dashboard/bandeja?estado=" ~ estado) }}
+    {% set lote = estado == 'pendiente' and sesion.rol in ("admin", "operador") and borradores %}
+    {% if lote %}
+    <form id="form-lote" method="post" action="/dashboard/bandeja/lote" class="barra-lote" data-lote hidden>
+        <span class="seleccion"><strong data-n-seleccion>0</strong> <span data-texto-seleccion>seleccionados</span></span>
+        <div class="paso" data-paso="inicio">
+            <button type="button" class="btn" data-lote-pedir="emitir">Emitir los completos</button>
+            <button type="button" class="btn secundario" data-lote-pedir="descartar">&#10005; Descartar</button>
+            <button type="button" class="enlace-boton" data-lote-limpiar>Quitar selección</button>
+        </div>
+        <div class="paso" data-paso="emitir" hidden>
+            <label class="casilla-linea"><input type="checkbox" name="confirmo" value="1" data-lote-confirmo>
+                He comprobado sus datos con los documentos originales</label>
+            <span class="nota-lote">Solo se emiten los que tienen todos los datos obligatorios y válidos; el resto sigue pendiente.</span>
+            <button type="submit" class="btn" name="accion" value="emitir" data-lote-emitir disabled>Emitir</button>
+            <button type="button" class="btn secundario" data-lote-cancelar>Cancelar</button>
+        </div>
+        <div class="paso" data-paso="descartar" hidden>
+            <span class="nota-lote">Se descartarán y se borrarán sus documentos originales.</span>
+            <button type="submit" class="btn peligro" name="accion" value="descartar">Sí, descartar</button>
+            <button type="button" class="btn secundario" data-lote-cancelar>Cancelar</button>
+        </div>
+    </form>
+    {% endif %}
+    {% if borradores %}
+    <div class="tabla-scroll">
+    <table>
+        <thead><tr>
+            {% if lote %}<th class="col-seleccion"><input type="checkbox" data-lote-todos aria-label="Seleccionar todos" title="Seleccionar todos"></th>{% endif %}
+            {{ f.cabecera("Recibido", "recibido_desc", "recibido") }}
+            <th>Hora</th>
+            {{ f.cabecera("Documento", "documento", "documento_desc") }}
+            {{ f.cabecera("Origen", "origen", "origen_desc") }}
+            {{ f.cabecera("Datos", "avisos_desc", "avisos") }}
+            {% if estado != 'pendiente' %}<th>Resuelto</th>{% endif %}
+            {% if estado == 'emitido' %}<th>Expedición</th>{% endif %}
+            <th></th>
+        </tr></thead>
+        <tbody>
+        {% for b in borradores %}
+            <tr>
+                {% if lote %}<td class="col-seleccion"><input type="checkbox" name="ids" value="{{ b.id }}" form="form-lote" aria-label="Seleccionar {{ b.nombre_documento or b.referencia_fuente }}"></td>{% endif %}
+                <td>{{ b.fecha_alta | fecha }}</td>
+                <td>{{ b.fecha_alta | hora }}</td>
+                <td>{{ b.nombre_documento or b.referencia_fuente }}</td>
+                <td class="text-light">{{ origenes.get(b.origen, b.origen) }}</td>
+                <td>{% set n = b.avisos | length %}{% if n %}<span class="badge aviso">Faltan {{ n }}</span>{% else %}<span class="badge completo">Completo</span>{% endif %}</td>
+                {% if estado != 'pendiente' %}<td class="text-light">{{ b.fecha_resolucion | fecha }} {{ b.fecha_resolucion | hora }}{% if b.resuelto_por %}<br>{{ b.resuelto_por }}{% endif %}</td>{% endif %}
+                {% if estado == 'emitido' %}<td>{% set est = estados_exp.get(b.expedicion_id) %}{% if est %}<span class="badge {{ est }}">{{ nombres_estado.get(est, est) }}</span>{% else %}—{% endif %}</td>{% endif %}
+                <td class="acciones">
+                    {% if b.estado == 'pendiente' %}<a class="btn" href="/dashboard/bandeja/{{ b.id }}">Revisar</a>
+                    {% elif b.expedicion_id %}<a class="btn secundario" href="/dashboard/expediciones/{{ b.expedicion_id }}">Ver expedición</a>{% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {{ f.paginador(pag) }}
+    {% elif hay_filtros %}
+    {{ f.sin_resultados("No hay borradores con estos filtros", "Prueba con otro texto, otro origen u otras fechas.", "/dashboard/bandeja?estado=" ~ estado) }}
+    {% elif estado == 'pendiente' %}
+    {{ f.sin_resultados("No hay nada pendiente de revisar", "Los documentos que subas o lleguen de tus fuentes aparecerán aquí.", "") }}
+    {% else %}
+    {{ f.sin_resultados("No hay borradores " ~ estados[estado] | lower, "", "") }}
+    {% endif %}
+</div>
+{% endblock %}

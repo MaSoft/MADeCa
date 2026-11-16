@@ -1,0 +1,31 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+*.log
+storage/pdfs/*
+!storage/pdfs/.gitkeep
+certs/*
+!certs/.gitkeep
+hotfolder_watch/incoming/*
+hotfolder_watch/processed/*
+hotfolder_watch/errores/*
+!hotfolder_watch/incoming/.gitkeep
+!hotfolder_watch/processed/.gitkeep
+!hotfolder_watch/errores/.gitkeep
+.pytest_cache/
+.coverage
+htmlcov/
+*.bak
+
+# Conector local: configuración y estado del equipo del cliente
+conector_local/conector.ini
+conector_local/estado_conector.json
+conector_local/*.log
+
+# Paquete de instalación montado (se entrega aparte, no se versiona)
+install/
+
+# Retirado (no se versiona)
+ARCHIVADO/

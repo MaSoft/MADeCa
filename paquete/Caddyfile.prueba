@@ -1,0 +1,17 @@
+# SOLO PARA PROBAR EN UNA RED LOCAL (madeca.sh instalar --prueba-local).
+# Certificado de una autoridad interna de Caddy: el navegador lo avisa y el
+# móvil de un inspector NO lo aceptaría. No vale para emitir DeCA reales.
+
+{
+	local_certs
+	default_sni {$DOMINIO}
+}
+
+{$DOMINIO}, localhost {
+	tls internal
+	encode gzip
+	request_body {
+		max_size 25MB
+	}
+	reverse_proxy app:8000
+}

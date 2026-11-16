@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block titulo %}Integraciones ERP — MADeCa{% endblock %}
+{% block contenido %}
+<h1>Integraciones ERP</h1>
+
+{% if clave_generada %}
+<div class="alerta exito">
+    Guarda esta API key ahora: <strong>no volverá a mostrarse en claro</strong>.
+    <div class="clave-generada">{{ clave_generada }}</div>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Nueva API key</h2>
+    <form method="post" action="/dashboard/integraciones">
+        <div class="form-fila">
+            <label for="nombre">Nombre descriptivo</label>
+            <input type="text" id="nombre" name="nombre" placeholder="p. ej. a3ERP producción" required>
+        </div>
+        <div class="form-fila">
+            <label for="erp_origen">ERP de origen</label>
+            <select id="erp_origen" name="erp_origen">
+                <option value="generico">Genérico / integración a medida</option>
+                <option value="a3erp">a3ERP</option>
+                <option value="sigrid">Sigrid</option>
+                <option value="sap">SAP</option>
+                <option value="dynamics365">Microsoft Dynamics 365</option>
+                <option value="odoo">Odoo</option>
+                <option value="sage">Sage</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">Generar API key</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>API keys existentes</h2>
+    <table>
+        <thead><tr><th>Nombre</th><th>ERP</th><th>Prefijo</th><th>Estado</th><th>Último uso</th><th>Hora</th><th></th></tr></thead>
+        <tbody>
+        {% for k in keys %}
+            <tr>
+                <td>{{ k.nombre }}</td>
+                <td>{{ k.erp_origen }}</td>
+                <td class="mono">{{ k.prefijo }}…</td>
+                <td><span class="badge {{ 'activa' if k.activo else 'inactiva' }}">{{ 'activa' if k.activo else 'revocada' }}</span></td>
+                <td class="text-light">{{ k.fecha_ultimo_uso | fecha('nunca') }}</td>
+                <td class="text-light">{{ k.fecha_ultimo_uso | hora }}</td>
+                <td>
+                    {% if k.activo %}
+                    <form method="post" action="/dashboard/integraciones/{{ k.id }}/revocar">
+                        <button type="submit" class="btn peligro">Revocar</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7" class="text-light">Todavía no hay API keys creadas.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

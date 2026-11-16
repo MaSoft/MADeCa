@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MADeCa v0.4.4 — Manual de usuario</title>
+<style>
+:root {
+  --primary: #1a3a5c;
+  --primary-light: #2c5f8a;
+  --accent: #1d4ed8;
+  --bg: #f7f9fc;
+  --card-bg: #ffffff;
+  --text: #1a1a2e;
+  --text-light: #555;
+  --border: #dde3ea;
+  --code-bg: #0d1117;
+  --code-text: #e6edf3;
+  --success: #16a34a;
+  --warning: #ca8a04;
+  --danger: #dc2626;
+  --info: #2563eb;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+nav { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; background: var(--primary); overflow-y: auto; padding: 24px 0 40px; }
+nav .nav-title { color: #fff; font-size: 20px; font-weight: 600; padding: 0 24px; margin-bottom: 2px; }
+nav .nav-subtitle { color: rgba(255,255,255,0.6); font-size: 12px; padding: 0 24px; margin-bottom: 20px; }
+nav ul { list-style: none; margin: 0; padding: 0; }
+nav li.section-title { color: rgba(255,255,255,0.45); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; padding: 16px 24px 6px; }
+nav ul li a { display: block; padding: 7px 24px; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px; border-left: 3px solid transparent; }
+nav ul li a:hover { background: rgba(255,255,255,0.08); border-left-color: var(--accent); }
+nav ul li a.sub { padding-left: 40px; font-size: 13px; color: rgba(255,255,255,0.65); }
+main { margin-left: 280px; padding: 0 0 80px; }
+.page-header { background: linear-gradient(135deg, var(--primary) 0%, #0d2038 100%); color: #fff; padding: 56px 48px; }
+.page-header h1 { font-size: 36px; font-weight: 300; margin: 0 0 8px; }
+.page-header .version { display: inline-block; background: rgba(255,255,255,0.15); padding: 3px 12px; border-radius: 20px; font-size: 13px; margin-bottom: 12px; }
+.page-header .tagline { font-size: 16px; color: rgba(255,255,255,0.8); max-width: 680px; }
+section { padding: 40px 48px; border-bottom: 1px solid var(--border); }
+h2 { font-size: 24px; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-top: 0; }
+h3 { font-size: 18px; color: var(--primary-light); margin-top: 32px; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 16px 0; }
+.card-header { font-weight: 600; color: var(--primary); margin-bottom: 10px; }
+table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--primary); color: #fff; font-weight: 500; }
+tbody tr:nth-child(even) { background: #f2f5fa; }
+tbody tr:hover { background: #e9eef7; }
+.table-wrap { overflow-x: auto; }
+.param-name { font-family: "SFMono-Regular", Consolas, monospace; color: var(--accent); font-weight: 600; }
+code { font-family: "SFMono-Regular", Consolas, monospace; background: #eef2f7; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+.badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 12px; margin-left: 6px; }
+.badge-required { background: #fde2e2; color: var(--danger); }
+.badge-optional { background: #e2ecfd; color: var(--info); }
+.badge-default { background: #eaf7ed; color: var(--success); }
+pre { background: var(--code-bg); color: var(--code-text); padding: 16px 20px; border-radius: 8px; overflow-x: auto; font-family: "SFMono-Regular", Consolas, monospace; font-size: 13.5px; line-height: 1.6; }
+pre .cmd { color: #79c0ff; }
+pre .param { color: #ffa657; }
+pre .string { color: #a5d6ff; }
+pre .comment { color: #8b949e; font-style: italic; }
+.alert-info, .alert-warning, .alert-danger, .alert-success { border-radius: 8px; padding: 14px 18px; margin: 18px 0; font-size: 14.5px; border-left: 4px solid; }
+.alert-info { background: #eaf1fd; border-color: var(--info); color: #1e3a6d; }
+.alert-warning { background: #fdf3e0; border-color: var(--warning); color: #6b4c05; }
+.alert-danger { background: #fbe6e6; border-color: var(--danger); color: #7a1a1a; }
+.alert-success { background: #e8f7ec; border-color: var(--success); color: #14532d; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 18px 0; }
+.flow-step { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 14px; }
+.flow-step::after { content: '\25B6'; color: var(--accent); margin-left: 12px; font-size: 12px; }
+.flow-step:last-child::after { content: ''; margin: 0; }
+.dir-tree { font-family: "SFMono-Regular", Consolas, monospace; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-size: 13.5px; line-height: 1.7; white-space: pre; overflow-x: auto; }
+.dir-tree .folder { color: var(--primary); font-weight: 600; }
+.dir-tree .file { color: var(--text-light); }
+.dir-tree .highlight-file { color: var(--accent); font-weight: 600; }
+.module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; margin-top: 20px; }
+.module-card { background: var(--card-bg); border: 1px solid var(--border); border-top: 4px solid var(--accent); border-radius: 10px; padding: 18px 20px; }
+.feature-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 20px; }
+.feature-item { display: flex; gap: 12px; align-items: flex-start; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.feature-icon { font-size: 22px; line-height: 1; }
+.feature-text strong { display: block; margin-bottom: 3px; color: var(--primary); }
+.feature-text span { font-size: 13.5px; color: var(--text-light); }
+.card ul { margin: 0; padding-left: 20px; color: var(--text-light); line-height: 1.8; }
+footer { text-align: center; padding: 32px; color: var(--text-light); font-size: 13px; }
+@media (max-width: 900px) { nav { display: none; } main { margin-left: 0; } .page-header, section { padding-left: 24px; padding-right: 24px; } }
+@media (max-width: 640px) { .page-header { padding: 32px 16px; } .page-header h1 { font-size: 28px; } section { padding: 28px 16px; } th, td { padding: 8px 10px; } .table-wrap table { min-width: 560px; } }
+@media print { nav { display: none; } main { margin-left: 0; } section { padding: 20px 0; page-break-inside: avoid; } body { font-size: 10pt; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-title">MADeCa</div>
+  <div class="nav-subtitle">Manual de usuario &middot; v0.4.4</div>
+  <ul>
+    <li class="section-title">Presentación</li>
+    <li><a href="#intro">1. Introducción y propósito</a></li>
+    <li><a href="#caracteristicas">2. Características</a></li>
+    <li><a href="#normativa">3. Base legal y cómo se cumple</a></li>
+    <li><a href="#requisitos">4. Requisitos del sistema</a></li>
+    <li><a href="#instalacion">5. Instalación y puesta en marcha</a></li>
+    <li><a href="#paquete" class="sub">5.1 Paquete para clientes</a></li>
+    <li><a href="#roles">6. Roles y permisos</a></li>
+    <li class="section-title">Panel de empresa</li>
+    <li><a href="#acceso">7.1 Acceso y menú</a></li>
+    <li><a href="#expediciones" class="sub">7.2 Expediciones</a></li>
+    <li><a href="#nueva" class="sub">7.3 Nueva expedición</a></li>
+    <li><a href="#detalle" class="sub">7.4 Detalle de la expedición</a></li>
+    <li><a href="#bandeja" class="sub">7.5 Bandeja de revisión</a></li>
+    <li><a href="#fuentes" class="sub">7.6 Fuentes de datos</a></li>
+    <li><a href="#integraciones" class="sub">7.7 Integraciones ERP</a></li>
+    <li><a href="#certificados" class="sub">7.8 Certificados</a></li>
+    <li><a href="#usuarios" class="sub">7.9 Usuarios</a></li>
+    <li><a href="#historial" class="sub">7.10 Historial</a></li>
+    <li class="section-title">Otros accesos</li>
+    <li><a href="#operador">8. Panel de operador</a></li>
+    <li><a href="#publico">9. Visor público y otra parte</a></li>
+    <li><a href="#api">10. API REST</a></li>
+    <li><a href="#hotfolder">11. Hot-folder</a></li>
+    <li><a href="#conector">12. Conector local</a></li>
+    <li class="section-title">Referencia</li>
+    <li><a href="#parametros">13. Parámetros de configuración</a></li>
+    <li><a href="#ejemplos">14. Ejemplos de uso</a></li>
+    <li><a href="#plazos">15. Ciclo de vida y plazos</a></li>
+    <li><a href="#problemas">16. Resolución de problemas</a></li>
+    <li><a href="#legal">17. Aviso legal</a></li>
+  </ul>
+</nav>
+
+<main>
+<div class="page-header">
+  <span class="version">Versión 0.4.4</span>
+  <h1>MADeCa</h1>
+  <div class="tagline">Plataforma para emitir, custodiar y servir a la inspección el Documento Electrónico de Control Administrativo (DeCA) del transporte de mercancías por carretera, con obtención de datos desde documentos, nubes, NAS y ERP.</div>
+</div>
+
+<!-- 1 -->
+<section id="intro">
+  <h2>1. Introducción y propósito</h2>
+  <p>Desde el <strong>5 de octubre de 2026</strong> el documento de control administrativo del transporte público de mercancías por carretera es obligatoriamente digital (disposición transitoria octava de la Ley 9/2025, de Movilidad Sostenible). La Resolución de 5 de junio de 2026 de la Dirección General de Transporte por Carretera y Ferrocarril (BOE-A-2026-12784) fija cómo debe ser: un PDF nativo digital de hasta 5 MB, con un código QR que lleva a una URL https desde la que los agentes descargan el documento sin usuario ni contraseña, conservado al menos un año.</p>
+  <p>MADeCa resuelve todo ese ciclo para varias empresas a la vez (multiempresa): recibe los datos o el PDF de cada expedición, emite el DeCA, lo sirve en su URL pública, permite modificarlo durante el servicio, entrega la copia al conductor y a la otra parte, y lo conserva. Además obtiene los datos automáticamente de albaranes y cartas de porte (PDF, escaneo o foto), de carpetas en la nube o en un NAS y de los principales ERP, siempre con revisión humana antes de emitir.</p>
+  <div class="alert-info">MADeCa no sustituye la responsabilidad del cargador ni del transportista sobre los datos del documento (Art. 7 de la Orden FOM/2861/2012). Ver <a href="#legal">Aviso legal</a>.</div>
+</section>
+
+<!-- 2 -->
+<section id="caracteristicas">
+  <h2>2. Características principales</h2>
+  <div class="feature-list">
+    <div class="feature-item"><div class="feature-icon">&#128196;</div><div class="feature-text"><strong>Dos caminos de emisión</strong><span>PDF propio del ERP con QR estampado, o PDF redactado por MADeCa a partir de los datos.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128269;</div><div class="feature-text"><strong>Validación del Art. 6</strong><span>NIF/CIF con dígito de control, matrículas (actual, antigua, remolque, extranjeras en cabotaje), peso o magnitud.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128279;</div><div class="feature-text"><strong>QR y URL pública</strong><span>Descarga directa sin credenciales ni límites para la inspección; desactivable 7 días después del servicio.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#9999;&#65039;</div><div class="feature-text"><strong>Modificación en ruta</strong><span>Método 1 del Apartado Quinto: misma URL y QR, datos anteriores marcados como no válidos.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128666;</div><div class="feature-text"><strong>Copia al conductor y a la otra parte</strong><span>PDF y QR descargables; enlace privado de un año para cargador o transportista.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128221;</div><div class="feature-text"><strong>Bandeja de revisión</strong><span>Lo obtenido de documentos o ERP se revisa junto al original antes de emitir; cada dato que falta enlaza a su campo y se señala en el documento dónde se leyó cada uno.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128203;</div><div class="feature-text"><strong>Agenda de partes</strong><span>Al escribir un nombre o NIF se ofrecen cargadores, transportistas y destinatarios de DeCA anteriores.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128202;</div><div class="feature-text"><strong>Inicio y avisos</strong><span>Resumen del día y avisos de certificados por caducar, borradores atascados y fuentes con error; también por correo.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128339;</div><div class="feature-text"><strong>Historial</strong><span>Quién emitió, modificó o finalizó cada expedición y cuándo.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128229;</div><div class="feature-text"><strong>Exportar a Excel</strong><span>Libro .xlsx de las expediciones que se ven en la lista, con sus filtros y totales.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128200;</div><div class="feature-text"><strong>Historial y estadísticas</strong><span>Solo administradores: todo lo gestionado por día, semana, mes, trimestre, año o fechas a elegir, con desgloses que filtran al pulsarlos y Excel completo.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128065;</div><div class="feature-text"><strong>Lectura de documentos</strong><span>Texto del PDF u OCR (Tesseract en el servidor; Azure solo con autorización).</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#9729;&#65039;</div><div class="feature-text"><strong>Fuentes automáticas</strong><span>SharePoint/OneDrive, Google Drive, Dropbox, SFTP, carpeta del servidor, Business Central, Odoo, SAP Business One, Holded.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#127970;</div><div class="feature-text"><strong>Conector local</strong><span>Extrae en la red del cliente y solo envía datos: los documentos no salen de su red.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128273;</div><div class="feature-text"><strong>Firma AdES opcional</strong><span>Con el certificado .p12 de la empresa (guardado cifrado) cuando el DeCA tiene finalidad contractual.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128101;</div><div class="feature-text"><strong>Multiempresa y roles</strong><span>Cada empresa ve solo lo suyo; roles administrador, operador y lectura; panel de operador aparte.</span></div></div>
+    <div class="feature-item"><div class="feature-icon">&#128737;&#65039;</div><div class="feature-text"><strong>Seguridad</strong><span>Credenciales cifradas, protección SSRF, sesiones revocables, claves fuertes obligatorias, cabeceras de seguridad.</span></div></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="normativa">
+  <h2>3. Base legal y cómo se cumple</h2>
+  <p>Normas comprobadas en el BOE y en EUR-Lex el 09/10/2026.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Norma</th><th>Exigencia</th><th>Cómo lo cumple MADeCa</th></tr></thead>
+    <tbody>
+      <tr><td>Ley 9/2025, DT 8.ª</td><td>DeCA obligatoriamente digital desde el 05/10/2026.</td><td>Todo el sistema.</td></tr>
+      <tr><td>Orden FOM/2861/2012, art. 6</td><td>Datos esenciales a) a h).</td><td>Validados en el camino de generación y en la bandeja (domicilio del cargador obligatorio, autorización especial de circulación cuando proceda).</td></tr>
+      <tr><td>Orden FOM/2861/2012, art. 7 (Orden TRM/282/2026)</td><td>El cargador responde de a)–d) y h) propios; el transportista de e)–g) y h) propios.</td><td>Nada obtenido automáticamente se emite sin revisión humana (bandeja).</td></tr>
+      <tr><td>Orden FOM/2861/2012, art. 9</td><td>Conservación de al menos un año.</td><td><code>RETENTION_DAYS=365</code>; la purga es manual y no actúa antes.</td></tr>
+      <tr><td>Resolución BOE-A-2026-12784, Primero</td><td>Generar antes del servicio, registrar fecha y hora de creación y de cada modificación; URL única por fichero.</td><td>Fecha de emisión y modificaciones registradas; un UUID por expedición.</td></tr>
+      <tr><td>Segundo.1</td><td>PDF de hasta 5 MB; fechas de creación y modificación como metadatos.</td><td>Límite de 5 MB en cada paso; <code>/CreationDate</code> y <code>/ModDate</code> en el PDF.</td></tr>
+      <tr><td>Segundo.2</td><td>Nativo digital; no vale un escaneo.</td><td>El camino 1 rechaza PDF que parecen escaneos; los escaneos solo sirven para extraer datos y generar un DeCA nativo.</td></tr>
+      <tr><td>Segundo.3</td><td>QR con la URL en el PDF; puede ir también como fichero aparte.</td><td>QR estampado o impreso; descarga del QR en PNG.</td></tr>
+      <tr><td>Segundo.4</td><td>Ambas partes conservan un año; a la que no genera le basta con poder descargarlo.</td><td>Enlace privado para la otra parte durante el plazo de conservación.</td></tr>
+      <tr><td>Tercero.1–4</td><td>HTTPS (TLS 1.2+), sin credenciales, descarga directa, las medidas de seguridad no pueden impedirla.</td><td><code>/inspect/{id}</code> sin login ni límite de peticiones; fuera de desarrollo MADeCa no arranca si <code>APP_BASE_URL</code> no es https. La lectura de escaneos no puede bloquear el visor (límite de tiempo por página).</td></tr>
+      <tr><td>Tercero.5</td><td>La descarga puede desactivarse 7 días después del fin del servicio.</td><td><code>PUBLIC_URL_DEACTIVATION_DAYS=7</code> desde «entregado» o «anulado»; el documento se sigue conservando.</td></tr>
+      <tr><td>Cuarto</td><td>Firma solo si hay finalidad contractual; como mínimo AdES.</td><td>Firma PAdES-B con el certificado de la empresa; no firma con certificados caducados.</td></tr>
+      <tr><td>Quinto</td><td>Modificación durante el servicio (método 1 o 2) y entrega al conductor.</td><td>Método 1 implementado; aviso de entrega al conductor.</td></tr>
+      <tr><td>Séptimo</td><td>Copia para el conductor antes del servicio, electrónica o impresa, con QR.</td><td>Descarga del PDF vigente y del QR (panel y API).</td></tr>
+      <tr><td>Octavo</td><td>Se pueden usar otros documentos (carta de porte, ADR…) si contienen los datos del art. 6.</td><td>Camino 1 (PDF propio); MADeCa no valida su contenido.</td></tr>
+      <tr><td>Noveno</td><td>Con eFTI (Reglamento UE 2020/1056) no hace falta el DeCA en esta forma.</td><td>No implementado (eFTI se aplica en pleno a partir del 09/07/2027).</td></tr>
+      <tr><td>RGPD art. 5 y 28</td><td>Minimización, plazo de conservación, encargados y subencargados.</td><td>Documentos originales borrados al resolver el borrador; IP de consultas borradas con la expedición; Azure solo con autorización expresa registrada.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 4 -->
+<section id="requisitos">
+  <h2>4. Requisitos del sistema</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Componente</th><th>Requisito</th><th>Notas</th></tr></thead>
+    <tbody>
+      <tr><td>Servidor</td><td>Docker y Docker Compose</td><td>Recomendado. La imagen incluye Python 3.12, WeasyPrint (Pango/Cairo) y Tesseract con español.</td></tr>
+      <tr><td>Base de datos</td><td>PostgreSQL 16</td><td>Servicio <code>db</code> del compose. Mínimo PostgreSQL 13 (la migración usa <code>gen_random_uuid()</code>).</td></tr>
+      <tr><td>Caché</td><td>Redis 7</td><td>Límite de intentos de login compartido entre procesos.</td></tr>
+      <tr><td>Publicación</td><td>Dominio con HTTPS (TLS 1.2+) delante (nginx, traefik…)</td><td>Obligatorio en producción (Apartado Tercero.1).</td></tr>
+      <tr><td>Sin Docker</td><td>Python 3.12+, <code>pip install -r requirements.txt</code>, PostgreSQL y Redis accesibles</td><td>En Windows, el PDF generado (WeasyPrint) necesita GTK; el resto funciona.</td></tr>
+      <tr><td>Conector local</td><td>Windows con Python 3.12+; Tesseract si hay escaneos</td><td>Ver <a href="#conector">12</a>.</td></tr>
+      <tr><td>Navegador</td><td>Cualquiera actual</td><td>htmx y unos pocos scripts propios (filtros, formulario, bandeja), servidos desde MADeCa; sin JavaScript en línea.</td></tr>
+      <tr><td>Correo (opcional)</td><td>Servidor SMTP</td><td>Para los avisos diarios a los administradores (<code>SMTP_*</code>, ver <a href="#parametros">13</a>).</td></tr>
+      <tr><td>Excel</td><td><code>openpyxl</code> (incluido en <code>requirements.txt</code>)</td><td>Para exportar a .xlsx las Expediciones y el Historial.</td></tr>
+      <tr><td>Posiciones en PDF con texto (opcional)</td><td><code>pypdfium2</code> (incluido en <code>requirements.txt</code>)</td><td>Sin él, la revisión muestra esos PDF como siempre, sin señalar dónde se leyó cada dato.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 5 -->
+<section id="instalacion">
+  <h2>5. Instalación y puesta en marcha</h2>
+  <div class="flow">
+    <div class="flow-step">Configurar .env</div>
+    <div class="flow-step">docker compose up -d --build</div>
+    <div class="flow-step">alembic upgrade head</div>
+    <div class="flow-step">Crear operador</div>
+    <div class="flow-step">Alta de empresas</div>
+  </div>
+<pre><span class="cmd">Copy-Item</span> <span class="string">.env.example</span> <span class="string">.env</span>
+<span class="comment"># Edita .env: APP_ENV, APP_BASE_URL (https://...), APP_SECRET_KEY y JWT_SECRET_KEY (distintas, 32+ caracteres)</span>
+<span class="cmd">docker compose up</span> <span class="param">-d --build</span>
+<span class="cmd">docker compose exec</span> <span class="string">app</span> <span class="cmd">alembic upgrade head</span>
+<span class="cmd">docker compose exec</span> <span class="string">app</span> <span class="cmd">python</span> <span class="param">-m scripts.crear_superadmin --email</span> <span class="string">operador@tudominio.es</span> <span class="param">--password</span> <span class="string">"una-clave-fuerte"</span></pre>
+  <h3>Servicios del docker-compose</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Servicio</th><th>Función</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">db</span></td><td>PostgreSQL. Solo accesible desde la propia máquina (127.0.0.1:5432).</td></tr>
+      <tr><td><span class="param-name">redis</span></td><td>Redis. Solo accesible desde la propia máquina (127.0.0.1:6379).</td></tr>
+      <tr><td><span class="param-name">app</span></td><td>Aplicación web (paneles, API, visor público) en el puerto 8000.</td></tr>
+      <tr><td><span class="param-name">hotfolder-watcher</span></td><td>Vigila <code>hotfolder_watch/incoming</code> y emite los DeCA de lo que llegue.</td></tr>
+      <tr><td><span class="param-name">conectores</span></td><td>Lee periódicamente las fuentes de datos y deja lo nuevo en la bandeja.</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Scripts de administración</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Script</th><th>Parámetros</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">scripts.crear_superadmin</span></td><td><code>--email</code> <span class="badge badge-required">obligatorio</span> <code>--password</code> <span class="badge badge-required">obligatorio</span></td><td>Crea el operador de la plataforma (acceso a <code>/superadmin</code>).</td></tr>
+      <tr><td><span class="param-name">scripts.crear_tenant</span></td><td><code>--nombre</code> <code>--nif</code> <code>--email</code> <code>--password</code> <span class="badge badge-required">todos</span></td><td>Alta de una empresa y su primer administrador sin pasar por el panel.</td></tr>
+      <tr><td><span class="param-name">scripts.cargar_demo</span></td><td><code>--con-operador</code> <span class="badge badge-optional">opcional</span> <code>--nuevas-claves</code> <span class="badge badge-optional">opcional</span></td><td>Empresa de demostración con un usuario por rol y clave de API. Se niega con <code>APP_ENV=production</code>.</td></tr>
+      <tr><td><span class="param-name">scripts.purgar_expirados</span></td><td><code>--confirmar</code> <span class="badge badge-optional">opcional</span></td><td>Sin parámetro, lista lo que se podría purgar (más antiguo que <code>RETENTION_DAYS</code>). Con <code>--confirmar</code> lo borra: expedición, consultas, modificaciones, borradores emitidos y PDF.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="paquete">5.1 Paquete de instalación para clientes</h3>
+  <p>Para instalar MADeCa en el servidor de un cliente hay un paquete en blanco (sin empresas, usuarios ni DeCA) que se instala con una sola orden y lleva el código <strong>compilado</strong>: la aplicación con Nuitka y las migraciones en bytecode, sin ningún <code>.py</code>. Se instala en <strong>cualquier entorno</strong>: cualquier Linux x86_64 (servidor propio, máquina virtual o VPS), Windows 10/11/Server con WSL2 (<code>INSTALAR_EN_WINDOWS.bat</code>, sin Docker Desktop) y sin internet (trae Docker, iptables, PostgreSQL, Redis y Caddy). El acceso puede ser con dominio público y Let's Encrypt, con certificado propio, detrás de un proxy HTTPS de la empresa o de prueba en la red local. El detalle, con capturas, está en <code>paquete/GUIA_INSTALACION_MADeCa.html</code>, que va dentro del paquete.</p>
+  <div class="flow">
+    <div class="flow-step">docker build -f Dockerfile.paquete</div>
+    <div class="flow-step">paquete/construir_paquete.sh</div>
+    <div class="flow-step">INSTALL/</div>
+    <div class="flow-step">sudo ./madeca.sh instalar</div>
+  </div>
+<pre><span class="comment"># En el equipo de Masoft.es, desde la raíz del proyecto (con Docker e internet):</span>
+<span class="cmd">docker build</span> <span class="param">-f</span> <span class="string">Dockerfile.paquete</span> <span class="param">-t</span> <span class="string">madeca:0.4.4</span> .
+<span class="cmd">bash</span> <span class="string">paquete/construir_paquete.sh</span>          <span class="comment"># deja INSTALL/ (Linux, Windows y sin internet)</span>
+<span class="comment"># Linux (cualquier distribución x86_64, física, virtual o VPS):</span>
+<span class="cmd">tar</span> xzf madeca-0.4.4.tar.gz &amp;&amp; <span class="cmd">cd</span> madeca-0.4.4
+<span class="cmd">sudo ./madeca.sh instalar</span>                     <span class="comment"># pregunta el acceso: publico, propio, proxy o prueba</span>
+<span class="comment"># Windows 10 (2004+), 11 o Server 2022/2025: doble clic en INSTALL\INSTALAR_EN_WINDOWS.bat (WSL2)</span></pre>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Fichero</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Dockerfile.paquete</span></td><td>Imagen sin código fuente. Se comprueba al construirla: ni un <code>.py</code> en la imagen.</td></tr>
+      <tr><td><span class="param-name">app/instalacion.py</span></td><td>Órdenes de consola que usa <code>madeca.sh</code>: <code>alta</code>, <code>clave</code>, <code>superadmin</code> y <code>estado</code>. Las contraseñas se generan en el servidor y se muestran una vez (nunca por la línea de órdenes).</td></tr>
+      <tr><td><span class="param-name">paquete/madeca.sh</span></td><td>Instalar, actualizar, estado, alta, clave, superadmin, certificado, copia, restaurar, parar/arrancar/reiniciar, registros y desinstalar. Accesos <code>publico</code>, <code>propio</code>, <code>proxy</code> y <code>prueba</code>; <code>--sin-internet</code>; puertos a elegir.</td></tr>
+      <tr><td><span class="param-name">paquete/windows/madeca_windows.ps1</span>, <span class="param-name">paquete/INSTALAR_EN_WINDOWS.bat</span></td><td>Windows: activa WSL2, crea la Ubuntu «MADeCa» desde el paquete, lanza <code>madeca.sh</code>, reenvía los puertos a la red, abre el cortafuegos y deja la tarea de arranque con el equipo (sin iniciar sesión).</td></tr>
+      <tr><td><span class="param-name">paquete/herramientas/iptables.Dockerfile</span></td><td>Compila iptables estático (nf_tables) para los sistemas sin internet que no lo traen.</td></tr>
+      <tr><td><span class="param-name">paquete/docker-compose.yml</span>, <span class="param-name">Caddyfile</span>, <span class="param-name">Caddyfile.propio</span>, <span class="param-name">Caddyfile.prueba</span></td><td>Servicios en <code>/opt/madeca</code>; solo Caddy publica los puertos (80 y 443 o los elegidos), con HTTPS de Let's Encrypt, del certificado propio o interno (TLS 1.2 o superior, Apartado Tercero.1). Con el acceso «proxy» no hay Caddy y el HTTPS lo pone el proxy de la empresa.</td></tr>
+      <tr><td><span class="param-name">paquete/LICENCIA.txt</span></td><td>Licencia MIT: software libre y gratuito.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="alert-info">En el paquete no van los scripts de <code>scripts/</code> (demostración y purga de expedientes caducados): nada se borra solo, así que los DeCA se conservan más allá del año que exige el Apartado Segundo.4.</div>
+</section>
+
+<!-- 6 -->
+<section id="roles">
+  <h2>6. Roles y permisos</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Acción</th><th>Lectura</th><th>Operador</th><th>Administrador</th></tr></thead>
+    <tbody>
+      <tr><td>Ver expediciones, detalle, accesos, modificaciones</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+      <tr><td>Descargar PDF y QR para el conductor</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+      <tr><td>Crear expediciones (PDF propio, datos, lote)</td><td>&mdash;</td><td>&#10003;</td><td>&#10003;</td></tr>
+      <tr><td>Modificar durante el servicio y marcar como entregado</td><td>&mdash;</td><td>&#10003;</td><td>&#10003;</td></tr>
+      <tr><td>Ver la bandeja y revisar borradores</td><td>&#10003; (sin formulario)</td><td>&#10003;</td><td>&#10003;</td></tr>
+      <tr><td>Subir documentos a la bandeja, emitir y descartar</td><td>&mdash;</td><td>&#10003;</td><td>&#10003;</td></tr>
+      <tr><td>Ver integraciones y certificados</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+      <tr><td>Crear y revocar claves de API; subir y desactivar certificados</td><td>&mdash;</td><td>&mdash;</td><td>&#10003;</td></tr>
+      <tr><td>Fuentes de datos y autorización del OCR de Azure</td><td>&mdash;</td><td>&mdash;</td><td>&#10003;</td></tr>
+      <tr><td>Usuarios de la empresa</td><td>&mdash;</td><td>&mdash;</td><td>&#10003;</td></tr>
+    </tbody>
+  </table></div>
+  <p>El rol se consulta en cada petición: un cambio de rol se aplica en la siguiente página que abra el usuario. El <strong>operador de plataforma</strong> (superadmin) es un acceso distinto, con su propia sesión, que no ve el contenido de las expediciones (ver <a href="#operador">8</a>).</p>
+</section>
+
+<!-- 7.1 -->
+<section id="acceso">
+  <h2>7. Panel de empresa</h2>
+  <h3>7.1 Acceso y menú</h3>
+  <p>Dirección: <code>/login</code>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Correo electrónico</span> <span class="badge badge-required">obligatorio</span></td><td>Correo del usuario (sin distinguir mayúsculas). Si el mismo correo existe en dos empresas, se entra en la cuenta cuya contraseña coincida.</td></tr>
+      <tr><td><span class="param-name">Contraseña</span> <span class="badge badge-required">obligatorio</span></td><td>Al crear un usuario, al menos 12 caracteres (y como máximo 72 bytes). 10 intentos de acceso por minuto y dirección IP.</td></tr>
+      <tr><td>Botón <em>Entrar</em></td><td>Abre el <em>Inicio</em>. Mensajes: «Credenciales incorrectas» o «Esta empresa está desactivada…».</td></tr>
+      <tr><td>Enlace <em>Panel de operador</em></td><td>Lleva a <code>/superadmin/login</code>.</td></tr>
+    </tbody>
+  </table></div>
+  <p>La sesión dura <code>JWT_EXPIRE_MINUTES</code> (480 min por defecto). <strong>Menú superior</strong>:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Opción</th><th>Visible para</th><th>Lleva a</th></tr></thead>
+    <tbody>
+      <tr><td>Inicio</td><td>Todos</td><td>Resumen (abajo)</td></tr>
+      <tr><td>Expediciones</td><td>Todos</td><td><a href="#expediciones">7.2</a></td></tr>
+      <tr><td>Bandeja de revisión</td><td>Todos</td><td><a href="#bandeja">7.5</a></td></tr>
+      <tr><td>Integraciones ERP</td><td>Todos</td><td><a href="#integraciones">7.7</a></td></tr>
+      <tr><td>Fuentes de datos</td><td>Administrador</td><td><a href="#fuentes">7.6</a></td></tr>
+      <tr><td>Certificados</td><td>Todos</td><td><a href="#certificados">7.8</a></td></tr>
+      <tr><td>Historial</td><td>Administrador</td><td><a href="#historial">7.10</a></td></tr>
+      <tr><td>Usuarios</td><td>Administrador</td><td><a href="#usuarios">7.9</a></td></tr>
+      <tr><td>Cerrar sesión</td><td>Todos</td><td>Borra la cookie de sesión y vuelve a <code>/login</code>.</td></tr>
+    </tbody>
+  </table></div>
+  <p>La sección en la que estás aparece resaltada. Al pie de todas las páginas: «MADeCa - Desarrollado por Masoft.es».</p>
+  <div class="card"><div class="card-header">Inicio (resumen)</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td>Indicadores</td><td><em>Pendientes de revisar</em> (y cuántos con datos que faltan), <em>En tránsito</em> (y cuántos con transporte hoy), <em>Emitidos este mes</em> y <em>Entregados este mes</em>. Cada uno abre la lista ya filtrada.</td></tr>
+      <tr><td>Necesita atención</td><td>Certificado activo caducado (urgente) o que caduca en 30 días (aviso), borradores sin revisar desde hace más de 24 h (aviso) y fuentes de datos con error en su última lectura (urgente). Cada aviso lleva icono, texto y enlace. Sin avisos: «Todo en orden». El administrador ve si los avisos se envían también por correo.</td></tr>
+      <tr><td>Pendientes de revisar / Últimas expediciones</td><td>Los cinco más recientes de cada uno, con <em>Revisar</em> o <em>Ver</em>.</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Avisos por correo:</strong> con <code>SMTP_HOST</code> configurado, los administradores activos de cada empresa reciben una vez al día (desde <code>AVISOS_CORREO_HORA</code>, hora local) un correo con los mismos avisos, solo si hay alguno. No incluye datos de las partes de los DeCA.</p></div>
+</section>
+
+<!-- 7.2 -->
+<section id="expediciones">
+  <h3>7.2 Expediciones</h3>
+  <p>Lista todas las expediciones de la empresa en páginas de 100 (por defecto, las emitidas más recientes primero) e indica cuántas cumplen los filtros en total. Al pie, el paginador (<em>&#8249; Anterior</em>, números con «…» y <em>Siguiente &#8250;</em>) y «101–200 de 656»: conserva filtros y orden, y al cambiar un filtro u orden se vuelve a la página 1. Botón <em>+ Nueva expedición</em> (operador y administrador). Todo se aplica al momento, sin botón de buscar.</p>
+  <div class="flow">
+    <div class="flow-step">Buscar</div>
+    <div class="flow-step">Fecha</div>
+    <div class="flow-step">Más filtros</div>
+    <div class="flow-step">Mostrar estados</div>
+    <div class="flow-step">Fichas activas &#10005;</div>
+  </div>
+  <div class="card"><div class="card-header">Barra de filtros</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Comportamiento</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Buscar</span> <span class="badge badge-optional">opcional</span></td><td>Cuadro con lupa. Busca el texto (sin distinguir mayúsculas) en la referencia, la matrícula del vehículo o del remolque, el nombre o NIF del cargador, transportista o destinatario, el origen, el destino o la mercancía. Filtra mientras escribes. Los caracteres <code>%</code> y <code>_</code> se buscan tal cual. Máximo 100 caracteres.</td></tr>
+      <tr><td><span class="param-name">Fecha</span> <span class="badge badge-default">Cualquier fecha</span></td><td>Botón con calendario que muestra el filtro elegido («Este mes», «01/10/2026 – 11/10/2026»…) y se resalta en azul cuando hay uno. Abre un panel con: <em>Aplicar a la fecha de</em> Transporte / Emisión / Entrega (fin del servicio; las no entregadas no tienen); <em>Periodo</em>: Cualquier fecha, Hoy, Últimos 7 días, Últimos 30 días, Este mes, Mes anterior, Este año; <em>Entre fechas</em>: Desde / Hasta (basta una de las dos; «Hasta» incluye el día entero). Al escribir una fecha se desmarca el periodo, y al elegir un periodo se vacían las fechas. Los días se cuentan en la hora de la instalación (<code>ZONA_HORARIA</code>), la misma de la tabla. Si «Desde» es posterior a «Hasta» se avisa y no se filtra por fecha.</td></tr>
+      <tr><td><span class="param-name">Más filtros</span> <span class="badge badge-optional">opcional</span></td><td>Panel con <em>Matrícula</em> (vehículo o remolque), <em>Referencia externa</em>, <em>Firma electrónica</em> (Todas / Firmadas / Sin firmar) y <em>ERP de origen</em> (solo los que tienen expediciones). El botón indica cuántos hay activos.</td></tr>
+      <tr><td><span class="param-name">Mostrar</span> <span class="badge badge-default">los tres marcados</span></td><td>Casillas de color <em>En tránsito</em>, <em>Entregados</em> y <em>Anulados</em>, cada una con el número de expediciones de ese estado que cumplen los demás filtros. Desmarca <em>Entregados</em> para ocultar los entregados (igual con los otros dos). Si no queda ninguno marcado, la lista lo indica.</td></tr>
+      <tr><td>Fichas activas</td><td>Sobre la tabla, una ficha por filtro aplicado («frutas», «Transporte: Este mes», «Firmadas»…). Su &#10005; quita solo ese filtro. <em>Limpiar filtros</em> los quita todos.</td></tr>
+      <tr><td>Ordenar</td><td>Pulsa la cabecera <em>Referencia</em>, <em>Matrícula</em>, <em>Fecha transporte</em> o <em>Estado</em>: un clic ordena, otro invierte y un tercero vuelve al orden por defecto. La flecha azul indica la columna y el sentido.</td></tr>
+      <tr><td>Panel desplegable</td><td>Se cierra al pulsar fuera, con <kbd>Esc</kbd> o al abrir el otro.</td></tr>
+      <tr><td><em>Exportar a Excel</em></td><td>Administrador y operador. Descarga un libro .xlsx con la hoja <em>Resumen</em> (filtros aplicados y totales por estado) y la hoja <em>Expediciones</em> (tabla de Excel con cabecera fija, filtros en cada columna, fechas y números con formato y fila de totales que se recalcula al filtrar), con las expediciones que cumplen los filtros —todas las páginas—, en el mismo orden, hasta 100.000: referencia, ERP, estado, fechas de transporte, emisión y entrega, matrículas, cargador, transportista y destinatario con sus NIF, origen, destino, mercancía, peso u otra magnitud, bultos, firma, URL pública y escaneos. Contiene datos personales: trátalo como tal.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Los filtros quedan en la dirección de la página: al recargar, volver atrás o guardar en favoritos se mantienen, y se pueden compartir con un compañero de la empresa. Solo cambian lo que se ve: no modifican ni borran ningún DeCA. Los enlaces antiguos con <code>?estado=</code> u <code>?ocultar_entregados=1</code> siguen funcionando.</p></div>
+  <div class="card"><div class="card-header">Columnas</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Columna</th><th>Contenido</th></tr></thead>
+    <tbody>
+      <tr><td>Referencia</td><td>Referencia externa (nº de albarán del ERP).</td></tr>
+      <tr><td>ERP</td><td>Origen: generico, a3erp, sigrid, sap, dynamics365, odoo, sage.</td></tr>
+      <tr><td>Matrícula</td><td>Matrícula del vehículo (tractora).</td></tr>
+      <tr><td>Fecha transporte / Hora</td><td>Fecha (DD/MM/AAAA) y hora peninsular del transporte, en columnas separadas.</td></tr>
+      <tr><td>Estado</td><td>En tránsito, Entregado o Anulado.</td></tr>
+      <tr><td>URL pública</td><td><em>activa</em> o <em>inactiva</em> (anulada, desactivada o más de 7 días tras el fin del servicio).</td></tr>
+      <tr><td>Firmado</td><td>«AdES» si se firmó; «—» si no.</td></tr>
+      <tr><td>Escaneos</td><td>Número de consultas registradas (visor público y descargas de la otra parte).</td></tr>
+      <tr><td><em>Ver</em></td><td>Abre el detalle (<a href="#detalle">7.4</a>).</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<!-- 7.3 -->
+<section id="nueva">
+  <h3>7.3 Nueva expedición</h3>
+  <p>Tres pestañas: <em>Subir PDF propio</em>, <em>Generar documento con MADeCa</em> y <em>Carga por lotes</em>. Si hay un error, el formulario vuelve con lo escrito (salvo el fichero, que el navegador no permite recordar).</p>
+
+  <div class="card"><div class="card-header">Subir PDF propio (camino 1)</div>
+  <p>El PDF lo genera el ERP o el programa de la empresa; MADeCa le añade el QR en la primera página sin tocar el resto, conserva su fecha de creación y fija la de modificación.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Fichero PDF</span> <span class="badge badge-required">obligatorio</span></td><td>PDF nativo digital. Se rechaza si parece un escaneo (página sin texto que solo contiene una imagen) o si con el QR supera 5 MB.</td></tr>
+      <tr><td><span class="param-name">Referencia</span> <span class="badge badge-required">obligatorio</span></td><td>Nº de albarán/factura, hasta 200 caracteres. No se puede repetir en la empresa (mismo ERP).</td></tr>
+      <tr><td><span class="param-name">Matrícula del vehículo</span> <span class="badge badge-required">obligatorio</span></td><td>1234BCD, M1234AB o R1234BCD; con país distinto de ES, alfanumérica de 2 a 12.</td></tr>
+      <tr><td><span class="param-name">Matrícula del remolque</span> <span class="badge badge-optional">opcional</span></td><td>Obligatoria en la práctica en conjuntos articulados (Art. 6.g).</td></tr>
+      <tr><td><span class="param-name">País de las matrículas</span> <span class="badge badge-default">ES</span></td><td>Dos casillas (vehículo y remolque), código de dos letras. Distinto de ES solo en cabotaje.</td></tr>
+      <tr><td><span class="param-name">Fecha y hora del transporte</span> <span class="badge badge-required">obligatorio</span></td><td>Hora peninsular.</td></tr>
+      <tr><td><span class="param-name">Finalidad contractual</span> <span class="badge badge-optional">casilla</span></td><td>Si se marca, se firma con AdES; exige un certificado activo y vigente.</td></tr>
+      <tr><td>Botón <em>Crear expedición</em></td><td>Emite y abre el detalle.</td></tr>
+    </tbody>
+  </table></div></div>
+
+  <div class="card"><div class="card-header">Generar documento con MADeCa (camino 2)</div>
+  <p>MADeCa redacta el PDF con todos los datos del Art. 6. Es el mismo formulario que usa la bandeja de revisión.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Bloque</th><th>Campo</th><th>Reglas</th></tr></thead>
+    <tbody>
+      <tr><td></td><td><span class="param-name">Referencia externa</span> <span class="badge badge-required">obligatorio</span></td><td>Hasta 200 caracteres, única en la empresa.</td></tr>
+      <tr><td rowspan="3">Cargador contractual (6.a)</td><td><span class="param-name">Nombre / razón social</span> <span class="badge badge-required">obligatorio</span></td><td>Hasta 300 caracteres.</td></tr>
+      <tr><td><span class="param-name">NIF/CIF</span> <span class="badge badge-required">obligatorio</span></td><td>NIF, NIE o CIF con dígito de control correcto.</td></tr>
+      <tr><td><span class="param-name">Domicilio</span> <span class="badge badge-required">obligatorio</span></td><td>Hasta 500 caracteres.</td></tr>
+      <tr><td rowspan="2">Transportista efectivo (6.b)</td><td><span class="param-name">Nombre / razón social</span> <span class="badge badge-required">obligatorio</span></td><td></td></tr>
+      <tr><td><span class="param-name">NIF/CIF</span> <span class="badge badge-required">obligatorio</span></td><td>Con dígito de control.</td></tr>
+      <tr><td>Destinatario</td><td><span class="param-name">Nombre</span>, <span class="param-name">NIF/CIF</span>, <span class="param-name">Domicilio</span> <span class="badge badge-optional">opcional</span></td><td>No lo exige el Art. 6. Solo se imprime si se indican nombre y NIF.</td></tr>
+      <tr><td rowspan="2">Origen y destino (6.c)</td><td><span class="param-name">Lugar de origen</span> <span class="badge badge-required">obligatorio</span></td><td>Hasta 500 caracteres.</td></tr>
+      <tr><td><span class="param-name">Lugar de destino</span> <span class="badge badge-required">obligatorio</span></td><td>Hasta 500 caracteres.</td></tr>
+      <tr><td rowspan="6">Mercancía (6.d)</td><td><span class="param-name">Naturaleza</span> <span class="badge badge-required">obligatorio</span></td><td>Hasta 500 caracteres.</td></tr>
+      <tr><td><span class="param-name">Peso bruto (kg)</span></td><td>Mayor que 0; admite coma decimal. Obligatorio salvo que se indique la magnitud alternativa.</td></tr>
+      <tr><td><span class="param-name">Magnitud alternativa</span></td><td>Solo si el peso exacto no es determinable por la forma de carga.</td></tr>
+      <tr><td><span class="param-name">Bultos</span> <span class="badge badge-optional">opcional</span></td><td>Entero ≥ 0.</td></tr>
+      <tr><td><span class="param-name">ADR — nº ONU</span> <span class="badge badge-optional">opcional</span></td><td>Si se indica, también la denominación.</td></tr>
+      <tr><td><span class="param-name">ADR — denominación</span> <span class="badge badge-optional">opcional</span></td><td>Si se indica, también el nº ONU.</td></tr>
+      <tr><td rowspan="5">Vehículo y fecha (6.e–g)</td><td><span class="param-name">Matrícula del vehículo</span> <span class="badge badge-required">obligatorio</span></td><td>Como en el camino 1.</td></tr>
+      <tr><td><span class="param-name">Matrícula del remolque</span> <span class="badge badge-optional">opcional</span></td><td></td></tr>
+      <tr><td><span class="param-name">País de las matrículas</span> <span class="badge badge-default">ES</span></td><td>Cabotaje.</td></tr>
+      <tr><td><span class="param-name">Autorización especial de circulación</span> <span class="badge badge-optional">opcional</span></td><td>Solo si el vehículo circula amparado por una (6.e). Hasta 100 caracteres.</td></tr>
+      <tr><td><span class="param-name">Fecha y hora del transporte</span> <span class="badge badge-required">obligatorio</span></td><td>Hora peninsular.</td></tr>
+      <tr><td>6.h</td><td><span class="param-name">Observaciones</span> <span class="badge badge-optional">opcional</span></td><td>Hasta 2000 caracteres.</td></tr>
+      <tr><td></td><td><span class="param-name">Finalidad contractual</span> <span class="badge badge-optional">casilla</span></td><td>Firma AdES.</td></tr>
+    </tbody>
+  </table></div></div>
+
+  <div class="card"><div class="card-header">Carga por lotes</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Ficheros PDF</span> <span class="badge badge-required">obligatorio</span></td><td>Varios PDF propios a la vez (camino 1).</td></tr>
+      <tr><td><span class="param-name">Fichero de metadatos</span> <span class="badge badge-required">obligatorio</span></td><td>CSV (UTF-8) o JSON con una fila por PDF. Columnas: <code>archivo</code> (nombre exacto del PDF), <code>referencia_externa</code>, <code>matricula_vehiculo</code>, <code>matricula_remolque</code> (opcional), <code>fecha_transporte</code>, <code>finalidad_contractual</code> (opcional, true/false), <code>pais_matricula_vehiculo</code>/<code>pais_matricula_remolque</code> (opcionales).</td></tr>
+    </tbody>
+  </table></div>
+  <p>Resultado: «N de M expediciones creadas» y una tabla <em>Fila / Fichero / Resultado</em> con «creada» o «error» y el motivo; <em>Ver</em> abre cada una creada. Las filas con error no impiden las demás.</p></div>
+</section>
+
+<!-- 7.4 -->
+<section id="detalle">
+  <h3>7.4 Detalle de la expedición</h3>
+  <div class="card"><div class="card-header">Estado y disponibilidad</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td>Estado / URL pública / Firma</td><td>Estado de la expedición, si la URL del QR está activa y si va firmada con AdES.</td></tr>
+      <tr><td>URL pública</td><td>La que contiene el QR (<code>/inspect/{id}</code>).</td></tr>
+      <tr><td><em>Ver PDF público</em></td><td>Abre el PDF como lo verá el agente (registra un acceso).</td></tr>
+      <tr><td><em>Descargar PDF para el conductor</em></td><td>PDF vigente, con sus modificaciones (Apartado Séptimo).</td></tr>
+      <tr><td><em>Descargar QR</em></td><td>PNG con el QR (fichero independiente permitido por el Segundo.3).</td></tr>
+      <tr><td><em>Marcar como entregado</em></td><td>Solo en tránsito (operador y administrador). Fija la fecha de fin del servicio: la URL podrá desactivarse 7 días después.</td></tr>
+      <tr><td>Enlace para la otra parte</td><td>Enlace privado <code>/descarga/{token}</code> para el cargador o transportista que no emite; válido durante el plazo de conservación. No publicarlo.</td></tr>
+      <tr><td>Texto de servicio finalizado</td><td>Fecha y hora del fin del servicio y recordatorio del plazo de 7 días.</td></tr>
+    </tbody>
+  </table></div></div>
+  <div class="card"><div class="card-header">Metadatos</div>
+  <p>Referencia externa, ERP de origen, Matrícula (vehículo / remolque), Fecha transporte, Hora transporte y Tamaño del PDF. En el camino 1 el contenido completo está en el propio PDF.</p></div>
+  <div class="card"><div class="card-header">Modificaciones durante el servicio (Apartado Quinto, método 1)</div>
+  <p>Historial: <em>N.º, Fecha, Hora, Motivo, Cambios</em> (dato: <s>anterior</s> &rarr; nuevo) y <em>Origen</em> (panel con el correo de quien lo hizo, o api). Formulario visible solo con la expedición en tránsito y para operador o administrador:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Motivo de la modificación</span> <span class="badge badge-required">obligatorio</span></td><td>De 3 a 1000 caracteres. Se imprime en el PDF.</td></tr>
+      <tr><td><span class="param-name">Dato 1</span> <span class="badge badge-required">obligatorio</span>, <span class="param-name">Dato 2</span> y <span class="param-name">Dato 3</span> <span class="badge badge-optional">opcionales</span></td><td>Desplegable: <em>Matrícula del vehículo</em>, <em>Matrícula del remolque</em>, <em>Fecha del transporte</em> (se actualizan también en MADeCa y se validan) u <em>Otro dato</em> (escribe su nombre en «Nombre del dato si es Otro»). Cada uno con <em>Valor anterior</em> y <em>Valor nuevo</em> (hasta 500 caracteres). La fecha nueva en formato AAAA-MM-DDTHH:MM.</td></tr>
+      <tr><td><em>Añadir modificación al DeCA</em></td><td>Añade al final del PDF la página «MODIFICACIÓN N.º X» con fecha, hora, motivo y los valores anteriores marcados «NO VÁLIDO». Misma URL y QR. Guarda la versión anterior. Si estaba firmado, se vuelve a firmar. Aviso: entregar el PDF modificado al conductor.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="alert-warning">Si con la página añadida el PDF superase 5 MB, la modificación se rechaza: emite entonces un DeCA nuevo (método 2 del Apartado Quinto) conservando el original.</div></div>
+  <div class="card"><div class="card-header">Actividad</div>
+  <p>Línea de tiempo con cada paso: <em>DeCA emitido</em>, <em>Modificado durante el servicio</em>, <em>Marcado como entregado</em> o <em>Anulado</em>, con fecha, hora, quién (correo del usuario, «API», «Carpeta compartida») y el detalle (p. ej. «Bandeja de revisión: albaran.pdf» o el motivo de la modificación). En expediciones anteriores a la v0.3.0 se reconstruye con lo que constaba; si no se sabe quién fue, lo indica.</p></div>
+  <div class="card"><div class="card-header">Registro de accesos (auditoría)</div>
+  <p>Columnas <em>Fecha, Hora</em> (con segundos), <em>IP, Resultado</em> (<code>concedido</code>, <code>denegado_desactivado</code>, <code>contraparte</code>) y <em>User-Agent</em>. Se borra junto con la expedición en la purga.</p></div>
+</section>
+
+<!-- 7.5 -->
+<section id="bandeja">
+  <h3>7.5 Bandeja de revisión</h3>
+  <div class="flow">
+    <div class="flow-step">Documento o ERP</div>
+    <div class="flow-step">Lectura de datos</div>
+    <div class="flow-step">Borrador pendiente</div>
+    <div class="flow-step">Revisión humana</div>
+    <div class="flow-step">Emitir DeCA (camino 2)</div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td>Aviso superior</td><td>Recuerda que nada se emite sin revisión e indica el OCR en uso: «en el servidor de MADeCa» o «Azure (autorizado por tu empresa)».</td></tr>
+      <tr><td><span class="param-name">Subir documentos</span></td><td>Operador y administrador. PDF, PNG, JPG, TIF, BMP, WEBP o TXT, varios a la vez, hasta <code>DOCUMENTO_ORIGEN_MAX_BYTES</code> (20 MB) cada uno. Botón <em>Leer y añadir a la bandeja</em>. Los no admitidos se indican en el aviso.</td></tr>
+      <tr><td>Pestañas</td><td><em>Pendientes</em>, <em>Emitidos</em>, <em>Descartados</em>, cada una con el número de borradores que cumplen los filtros. Al cambiar de pestaña los filtros se mantienen. Páginas de 100 con paginador, como en Expediciones.</td></tr>
+      <tr><td>Columnas</td><td><em>Fecha, Hora</em> de llegada; <em>Documento</em> (nombre o referencia de origen); <em>Origen</em> (Subido en el panel, API (documento), API (conector_local), Fuente: &lt;nombre de la fuente&gt;); <em>Datos</em> («Completo» en verde o «Faltan N» en ámbar); en Emitidos y Descartados, <em>Resuelto</em> (fecha, hora y usuario); en Emitidos, <em>Expedición</em> (su estado actual); <em>Revisar</em> (pendientes) o <em>Ver expedición</em> (emitidos).</td></tr>
+    </tbody>
+  </table></div>
+  <div class="card"><div class="card-header">Filtros de la bandeja (se aplican al momento)</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Comportamiento</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Buscar</span> <span class="badge badge-optional">opcional</span></td><td>Busca en el nombre del documento, su referencia de origen, el usuario que lo resolvió y los datos leídos (referencia, matrículas, cargador, transportista, destinatario y sus NIF, origen, destino, mercancía).</td></tr>
+      <tr><td><span class="param-name">Origen</span> <span class="badge badge-default">Todos los orígenes</span></td><td>Desplegable con los orígenes que tienen borradores, con el nombre de la fuente de datos.</td></tr>
+      <tr><td><span class="param-name">Fecha</span> <span class="badge badge-default">Cualquier fecha</span></td><td>Mismo panel que en <a href="#expediciones">Expediciones</a>. En Emitidos y Descartados se elige además si se aplica a la <em>Recepción</em> o a la <em>Resolución</em>.</td></tr>
+      <tr><td><span class="param-name">Solo con datos que faltan</span> <span class="badge badge-default">apagado</span></td><td>Interruptor: muestra solo los borradores con algún aviso.</td></tr>
+      <tr><td><span class="param-name">Ocultar entregados</span> <span class="badge badge-default">apagado</span></td><td>Interruptor que aparece solo en Emitidos: quita los borradores cuya expedición ya está entregada.</td></tr>
+      <tr><td>Ordenar</td><td>Cabeceras <em>Recibido</em> (por defecto, más recientes primero), <em>Documento</em>, <em>Origen</em> y <em>Datos</em> (primero los que tienen más avisos).</td></tr>
+      <tr><td>Fichas activas</td><td>Como en Expediciones: &#10005; quita ese filtro; <em>Limpiar filtros</em> los quita todos.</td></tr>
+    </tbody>
+  </table></div></div>
+  <div class="card"><div class="card-header">Varios pendientes a la vez</div>
+  <p>En Pendientes (operador y administrador), marca las casillas de las filas o la de la cabecera (todas). Aparece una barra con el número de seleccionados:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Acción</th><th>Comportamiento</th></tr></thead>
+    <tbody>
+      <tr><td><em>Emitir los completos</em></td><td>Pide marcar «He comprobado sus datos con los documentos originales» (el cargador responde de su exactitud, Art. 7.2). Solo emite los que tienen todos los datos obligatorios y válidos; el resto sigue pendiente y el aviso lo indica. Hasta 50 por vez.</td></tr>
+      <tr><td><em>&#10005; Descartar</em></td><td>Pide confirmar; los descarta y borra sus documentos originales.</td></tr>
+      <tr><td><em>Cancelar</em> / <em>Quitar selección</em></td><td>Vuelve atrás sin hacer nada.</td></tr>
+    </tbody>
+  </table></div></div>
+  <div class="card"><div class="card-header">Pantalla de revisión</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td>Cabecera</td><td>Vuelta a la bandeja y cuántos pendientes quedan.</td></tr>
+      <tr><td>Aviso de posible duplicado</td><td>Si ya hay una expedición con la misma referencia, con su fecha, estado y enlace.</td></tr>
+      <tr><td>Aviso de responsabilidad</td><td>Recuerda qué datos responde cada parte (Art. 7).</td></tr>
+      <tr><td>Panel de comprobación</td><td>«Faltan N de 11 datos obligatorios» (Art. 6: nombre, NIF y domicilio del cargador; nombre y NIF del transportista; origen; destino; naturaleza y peso —u otra magnitud, Art. 6.d—; fecha; matrícula). Cada dato que falta es un <strong>enlace</strong>: lleva al campo, lo enfoca y lo resalta, e indica el artículo y quién responde. Al rellenarlo se tacha con &#10003; y el panel se pone verde cuando están todos. Debajo, <em>Datos que no son válidos</em> (tras intentar emitir). La autorización especial (6.e) y el remolque (6.g) no son siempre exigibles y no se marcan.</td></tr>
+      <tr><td>Campos en rojo</td><td>Obligatorio vacío o dato no válido, con el motivo debajo; vuelve a su color al corregirlo. Los datos leídos no se marcan.</td></tr>
+      <tr><td>Comprobación al escribir</td><td>Al salir de un campo se comprueba con las mismas reglas que al emitir: NIF/CIF con dígito de control (también NIF-IVA de la UE en cabotaje), matrícula según el país, peso, bultos y fecha. La referencia avisa si ya existe.</td></tr>
+      <tr><td>Agenda de partes</td><td>Al escribir 2 letras del nombre o del NIF de una parte se proponen las de DeCA anteriores de la empresa (una por NIF, las más usadas primero). Con el ratón o con &#8593; &#8595; e Intro rellena nombre, NIF y domicilio.</td></tr>
+      <tr><td>Documento original</td><td>A la izquierda, fijo a la vista al bajar por el formulario (solo mientras está pendiente), con el método de lectura y <em>Abrir a tamaño real</em>. Cuando se conocen las posiciones (escaneos y fotos leídos por OCR; PDF con texto si está <code>pypdfium2</code>), se muestra por páginas y <strong>al entrar en un campo su dato se recuadra en el documento</strong> y el visor se desplaza hasta él; al pulsar un recuadro se va a su campo. <em>Ver dónde se leyó cada dato</em> muestra todos los recuadros. Se localiza aunque esté escrito distinto (1.250,5 kg, R-5678-BBC, 10/10/2026).</td></tr>
+      <tr><td>Formulario de datos</td><td>El de <a href="#nueva">7.3</a>, precargado, por secciones (cargador, transportista, destinatario, origen y destino, mercancía, vehículo y fecha, otros). Corrige lo necesario.</td></tr>
+      <tr><td><em>Emitir el DeCA</em></td><td>Si falta algo o hay un dato no válido no envía: lleva al primero. Valida (Art. 6) y emite por el camino 2. El borrador pasa a «emitido», queda enlazado a la expedición y el documento original se borra.</td></tr>
+      <tr><td><em>Emitir el DeCA y revisar el siguiente</em></td><td>Igual, y abre el siguiente pendiente con el aviso de lo emitido (o vuelve a la bandeja si no quedan).</td></tr>
+      <tr><td><em>&#10005; Descartar este borrador</em> / <em>Descartar y revisar el siguiente</em></td><td>Lo pasa a «descartado» y borra el original.</td></tr>
+    </tbody>
+  </table></div></div>
+  <div class="card"><div class="card-header">Cómo se leen los documentos</div>
+  <p>Se buscan las etiquetas habituales de albaranes, cartas de porte y CMR (cargador, remitente, sender; transportista, carrier; destinatario, consignee; lugar de carga/entrega; mercancía; peso bruto; bultos; fecha de carga; matrícula; remolque; nº de albarán; autorización especial…). Los NIF/CIF solo se aceptan con su dígito de control; las matrículas con su formato; el peso admite «1.250,5 kg» o toneladas. Lo que no aparece queda vacío con su aviso: <strong>no se inventa nada</strong>.</p></div>
+</section>
+
+<!-- 7.6 -->
+<section id="fuentes">
+  <h3>7.6 Fuentes de datos</h3>
+  <p>Solo administrador. MADeCa lee cada fuente activa cada <em>N</em> minutos (servicio <code>conectores</code>) y deja lo nuevo en la bandeja. Las credenciales se guardan cifradas y nunca se vuelven a mostrar; al editar, deja vacío un secreto para conservarlo.</p>
+  <div class="card"><div class="card-header">Lista «Tus fuentes»</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Columna / botón</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td>Nombre</td><td>Enlace a la edición.</td></tr>
+      <tr><td>Tipo</td><td>Tipo de fuente.</td></tr>
+      <tr><td>Estado</td><td>Activa o Pausada, y cada cuántos minutos se lee.</td></tr>
+      <tr><td>Última lectura / Hora</td><td>Fecha y hora de la última pasada.</td></tr>
+      <tr><td>Resultado</td><td>«N nuevo(s) en la bandeja (M leído(s))» o el error en rojo.</td></tr>
+      <tr><td><em>Probar</em></td><td>Comprueba credenciales y acceso sin traer nada.</td></tr>
+      <tr><td><em>Leer ahora</em></td><td>Ejecuta una pasada inmediata.</td></tr>
+      <tr><td><em>Pausar</em> / <em>Activar</em></td><td>Detiene o reanuda la lectura periódica.</td></tr>
+      <tr><td><em>&#10005;</em></td><td>Elimina la fuente. Sus borradores siguen en la bandeja.</td></tr>
+    </tbody>
+  </table></div></div>
+  <div class="card"><div class="card-header">Campos comunes al crear o editar</div>
+  <p><span class="param-name">Nombre de esta fuente</span> <span class="badge badge-required">obligatorio</span> (hasta 150) y <span class="param-name">Leer cada (minutos)</span> <span class="badge badge-default">15</span> (de 5 a 1440).</p></div>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Campos</th><th>Funcionamiento</th></tr></thead>
+    <tbody>
+      <tr><td><strong>SharePoint / OneDrive</strong></td><td>Id del inquilino de Microsoft; Id de la aplicación registrada en Entra ID; Secreto de la aplicación <em>(secreto)</em>; Id de la unidad (biblioteca); Carpeta dentro de la unidad (p. ej. <code>Albaranes/Pendientes</code>).</td><td>Microsoft Graph con permiso de aplicación <code>Files.Read.All</code> (el mínimo documentado). Lee los cambios de la unidad y toma los ficheros cuyo padre es esa carpeta (no entra en subcarpetas).</td></tr>
+      <tr><td><strong>Google Drive</strong></td><td>JSON de la cuenta de servicio <em>(secreto)</em>; Id de la carpeta (final de su URL).</td><td>Comparte la carpeta con el correo de la cuenta de servicio. Ignora documentos nativos de Google.</td></tr>
+      <tr><td><strong>Dropbox</strong></td><td>App key; App secret <em>(secreto)</em>; Refresh token <em>(secreto)</em>; Carpeta (p. ej. <code>/Albaranes</code>).</td><td>App con permiso <code>files.content.read</code>.</td></tr>
+      <tr><td><strong>SFTP (NAS / servidor)</strong></td><td>Servidor; Puerto (22); Usuario; Contraseña <em>(secreto, opcional)</em>; Clave privada OpenSSH <em>(secreto, opcional)</em>; Huella SHA256 del servidor <span class="badge badge-required">obligatorio</span>; Carpeta.</td><td>Sin la huella correcta no conecta (evita suplantaciones). El NAS debe ser accesible desde internet; si no, usa el conector local.</td></tr>
+      <tr><td><strong>Carpeta del servidor</strong></td><td>Subcarpeta <em>(opcional)</em>.</td><td>Solo instalaciones propias con <code>FUENTES_CARPETA_BASE</code>. Cada empresa solo ve <code>&lt;base&gt;/&lt;id_empresa&gt;</code>.</td></tr>
+      <tr><td><strong>Business Central</strong></td><td>Id del inquilino; Id de la aplicación; Secreto <em>(secreto)</em>; Entorno (<code>production</code>); Id de la empresa (GUID); Transportista habitual (nombre y NIF, opcionales).</td><td>API v2.0: albaranes de venta registrados. Cargador y origen = empresa de BC; destino y destinatario = envío y cliente. No trae peso, matrícula ni hora: se avisa.</td></tr>
+      <tr><td><strong>Odoo 19+ (API JSON-2)</strong></td><td>Dirección de Odoo (https); Base de datos <em>(opcional)</em>; Clave de API <em>(secreto)</em>; Transportista habitual.</td><td>Entregas de salida preparadas o hechas. Fecha en UTC: revisar la hora.</td></tr>
+      <tr><td><strong>SAP Business One</strong></td><td>Dirección del Service Layer (https); CompanyDB; Usuario; Contraseña <em>(secreto)</em>; Correspondencia de campos (JSON); Cargador (nombre, NIF, domicilio) y Origen habitual; Transportista habitual.</td><td>Entregas (DeliveryNotes), todas las páginas del Service Layer. <strong>La correspondencia de serie está por verificar</strong> con la instalación real (<code>/b1s/v1/$metadata</code>).</td></tr>
+      <tr><td><strong>Holded</strong></td><td>Clave de API <em>(secreto)</em>; Correspondencia de campos (JSON); Cargador y Origen habitual; Transportista habitual.</td><td>Albaranes (waybill) de la API v1; relee los 2 días anteriores por si se crea un albarán con fecha pasada. <strong>Correspondencia por verificar</strong> con la cuenta real.</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Correspondencia de campos (SAP y Holded):</strong> JSON <code>{"campo_madeca": "campo_del_erp"}</code>; los campos del ERP admiten rutas con puntos (<code>Lineas.0.Peso</code>). Campos de MADeCa: <code>referencia_externa</code>, <code>cargador.nombre_razon_social</code>, <code>cargador.nif_cif</code>, <code>cargador.domicilio</code>, <code>transportista.nombre_razon_social</code>, <code>transportista.nif_cif</code>, <code>destinatario.nombre_razon_social</code>, <code>destinatario.nif_cif</code>, <code>destinatario.domicilio</code>, <code>origen_direccion</code>, <code>destino_direccion</code>, <code>mercancia.naturaleza</code>, <code>mercancia.peso_kg</code>, <code>mercancia.bultos</code>, <code>fecha_transporte</code>, <code>matricula_vehiculo</code>, <code>matricula_remolque</code>, <code>observaciones</code>.</p>
+  <p><strong>Lectura sin pérdidas:</strong> cada pasada lee hasta 50 documentos o albaranes y la siguiente sigue donde se quedó, aunque muchos compartan la misma hora (copias masivas al NAS, validaciones en lote). Lo ya leído no se duplica en la bandeja.</p>
+  <p><strong>NIF de los ERP:</strong> si el ERP guarda el NIF-IVA (<code>ESB00345678</code>), MADeCa usa el NIF (<code>B00345678</code>). Los NIF extranjeros se dejan tal cual y se revisan en la bandeja.</p>
+  <div class="alert-warning"><strong>Protección SSRF:</strong> las direcciones de Odoo, SAP y SFTP no pueden apuntar a redes privadas, a la propia máquina ni a direcciones de metadatos de la nube. Error: «apunta a una red privada… Usa el conector local». En instalaciones propias se puede permitir con <code>FUENTES_PERMITIR_RED_PRIVADA=true</code>.</div>
+  <div class="card"><div class="card-header">OCR de documentos escaneados</div>
+  <p>Por defecto el OCR se hace en el servidor de MADeCa (Tesseract). Si el operador ha configurado Azure AI Document Intelligence, el administrador puede autorizarlo marcando <em>«Autorizo a Microsoft (Azure, región UE) como subencargado del tratamiento…»</em> y pulsando <em>Autorizar OCR con Azure</em>. Queda registrado quién y cuándo; <em>Retirar la autorización</em> vuelve al OCR del servidor. Sin Azure configurado se indica «Esta instalación no tiene Azure configurado».</p></div>
+</section>
+
+<!-- 7.7 -->
+<section id="integraciones">
+  <h3>7.7 Integraciones ERP (claves de API)</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Nombre descriptivo</span> <span class="badge badge-required">obligatorio</span></td><td>P. ej. «a3ERP producción». Hasta 150 caracteres.</td></tr>
+      <tr><td><span class="param-name">ERP de origen</span></td><td>Genérico / integración a medida, a3ERP, Sigrid, SAP, Microsoft Dynamics 365, Odoo, Sage. Informativo.</td></tr>
+      <tr><td><em>Generar API key</em></td><td>Solo administrador. La clave completa (<code>mad_live_…</code>) se muestra <strong>una sola vez</strong> en la propia página; en la base de datos solo se guarda su huella.</td></tr>
+      <tr><td>Tabla</td><td><em>Nombre, ERP, Prefijo</em> (inicio de la clave), <em>Estado</em> (activa/revocada), <em>Último uso</em> y <em>Hora</em>.</td></tr>
+      <tr><td><em>Revocar</em></td><td>Solo administrador. Deja de funcionar al instante.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 7.8 -->
+<section id="certificados">
+  <h3>7.8 Certificados de firma</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Nombre descriptivo</span> <span class="badge badge-required">obligatorio</span></td><td>P. ej. «Sello de empresa 2026».</td></tr>
+      <tr><td><span class="param-name">Fichero .p12/.pfx</span> <span class="badge badge-required">obligatorio</span></td><td>Certificado con su clave privada.</td></tr>
+      <tr><td><span class="param-name">Contraseña del certificado</span> <span class="badge badge-required">obligatorio</span></td><td>Se comprueba al subirlo; se guarda cifrada.</td></tr>
+      <tr><td><em>Subir y validar</em></td><td>Solo administrador. Error si la contraseña o el fichero no son válidos. El fichero se guarda cifrado en disco.</td></tr>
+      <tr><td>Tabla</td><td><em>Nombre, Titular</em> (sujeto del certificado), <em>Caduca, Estado</em> (activo o desactivado, y «caducado» si ya pasó la fecha).</td></tr>
+      <tr><td><span class="param-name">Buscar</span> <span class="badge badge-optional">opcional</span></td><td>Contiene el texto en el nombre o en el titular.</td></tr>
+      <tr><td><span class="param-name">Caducidad</span> <span class="badge badge-default">Todos</span></td><td>Vigentes (incluye los que no indican fecha) / Caducan en 30 días / Caducados.</td></tr>
+      <tr><td><span class="param-name">Ocultar desactivados</span> <span class="badge badge-default">desmarcada</span></td><td>Muestra solo los activos. <em>Quitar filtros</em> vuelve a verlos todos.</td></tr>
+      <tr><td><em>Desactivar</em></td><td>Deja de usarse para firmar.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Para firmar se usa el certificado activo y vigente que caduque más tarde. Si no hay ninguno, un DeCA con finalidad contractual se rechaza con un mensaje claro. Sin finalidad contractual no se firma (la norma no lo exige).</p>
+</section>
+
+<!-- 7.9 -->
+<section id="usuarios">
+  <h3>7.9 Usuarios</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Correo electrónico</span> <span class="badge badge-required">obligatorio</span></td><td>Único dentro de la empresa.</td></tr>
+      <tr><td><span class="param-name">Contraseña inicial</span> <span class="badge badge-required">obligatorio</span></td><td>Hasta 72 bytes.</td></tr>
+      <tr><td><span class="param-name">Rol</span> <span class="badge badge-default">Operador</span></td><td>Operador, Administrador o Lectura (ver <a href="#roles">6</a>).</td></tr>
+      <tr><td><em>Crear usuario</em></td><td>Alta inmediata.</td></tr>
+      <tr><td>Tabla</td><td><em>Correo, Rol</em> (desplegable + <em>Cambiar</em>; tu propio rol no se puede cambiar), <em>Estado, Alta</em>.</td></tr>
+      <tr><td><span class="param-name">Buscar</span> <span class="badge badge-optional">opcional</span></td><td>Contiene el texto en el correo.</td></tr>
+      <tr><td><span class="param-name">Rol</span> (filtro) <span class="badge badge-default">Todos</span></td><td>Solo los usuarios de ese rol.</td></tr>
+      <tr><td><span class="param-name">Ocultar desactivados</span> <span class="badge badge-default">desmarcada</span></td><td>Muestra solo los activos. <em>Quitar filtros</em> vuelve a verlos todos.</td></tr>
+      <tr><td><em>Desactivar</em> / <em>Activar</em></td><td>Un usuario desactivado no puede entrar y su sesión abierta deja de valer. No puedes desactivarte a ti mismo.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 7.10 -->
+<section id="historial">
+  <h3>7.10 Historial (solo administradores)</h3>
+  <p>Estadísticas de todo lo gestionado —expediciones y bandeja de revisión, en todos sus estados— en el periodo elegido. Se trabaja con lo que MADeCa guarda: no hay conductor (el Art. 6 no lo pide) y en las expediciones del camino 1 (PDF propio del ERP) solo constan sus metadatos, así que salen como «Sin dato» en partes, direcciones y mercancía.</p>
+  <div class="flow">
+    <div class="flow-step">Periodo</div>
+    <div class="flow-step">Fecha que cuenta</div>
+    <div class="flow-step">Totales y evolución</div>
+    <div class="flow-step">Desglose (pulsar = filtrar)</div>
+    <div class="flow-step">Registros / Excel</div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Elemento</th><th>Comportamiento</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Periodo</span> <span class="badge badge-default">Mensual</span></td><td><em>Diario, Semanal</em> (lunes a domingo), <em>Mensual, Trimestral, Anual</em> o <em>A elegir</em> (Desde / Hasta, ambos incluidos). Flechas &#8249; &#8250; para el periodo anterior o siguiente y <em>Hoy</em> para volver al actual. Días en la hora de la instalación (<code>ZONA_HORARIA</code>).</td></tr>
+      <tr><td><span class="param-name">Fecha de</span> <span class="badge badge-default">Transporte</span></td><td>Qué fecha de cada expedición decide si entra en el periodo: <em>Transporte</em>, <em>Emisión</em> o <em>Entrega</em> (solo las finalizadas). La bandeja cuenta siempre por fecha de recepción.</td></tr>
+      <tr><td>Totales de expediciones</td><td>Total, en tránsito, entregadas y anuladas (con su %), firmadas (AdES), modificadas durante el servicio, con lecturas del QR (y nº de lecturas), mercancía peligrosa (con nº ONU), peso total en toneladas (y cuántas no tienen peso: otra magnitud o PDF propio), bultos, tiempo medio de emisión a entrega y destinatarios y vehículos distintos. Las tarjetas de estado, firma, modificadas, lecturas y ADR <strong>filtran al pulsarlas</strong> (otra vez para quitarlo).</td></tr>
+      <tr><td>Evolución</td><td>Barras por día (periodos de hasta 31 días), por semana (hasta 92) o por mes. Al pasar por encima, número y toneladas; al pulsar una barra se filtra ese tramo.</td></tr>
+      <tr><td>Desglose</td><td>Destinatarios, cargadores y transportistas (con NIF), vehículos y remolques (matrícula), provincias de destino y de origen (por el código postal de la dirección), destinos y orígenes (dirección completa), mercancías, ERP o canal de origen y quién emitió (usuario, API, carpeta compartida; «No consta» en las anteriores al registro de actividad). Cada uno con nº de grupos, expediciones con su barra de porcentaje y toneladas; los 8 primeros a la vista y <em>Ver todos</em> para el resto. <strong>Pulsar una fila filtra todo el historial</strong> por ella (queda resaltada); pulsarla otra vez quita el filtro. Los filtros se combinan.</td></tr>
+      <tr><td>Bandeja de revisión</td><td>Recibidos, pendientes, emitidos, descartados (pulsables), con datos que faltan y tiempo medio de revisión; desglose por origen de los documentos (con el nombre de la fuente) y por quién los resolvió.</td></tr>
+      <tr><td>Fichas activas</td><td>Cada filtro aplicado (también el tramo) con su &#10005;; <em>Quitar filtros</em> deja solo el periodo.</td></tr>
+      <tr><td>Registros</td><td>Pestañas <em>Expediciones</em> y <em>Bandeja</em> con los registros que cumplen todo lo anterior, en páginas de 50, con enlace a cada uno.</td></tr>
+      <tr><td><em>Exportar a Excel</em></td><td>Libro .xlsx con todo lo de la consulta: <em>Resumen</em> (periodo, fecha que cuenta, filtros y todos los totales), <em>Evolución</em>, una hoja por cada desglose (todas las filas, con NIF, %, peso y bultos), <em>Expediciones</em> (todas las columnas de la exportación de Expediciones más «Emitida por») y <em>Bandeja</em>, cada una como tabla de Excel con filtros, formatos y totales. Hasta 100.000 filas por hoja.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="alert-info">Los filtros y el periodo quedan en la dirección de la página: se pueden guardar en favoritos o compartir con otro administrador de la empresa.</div>
+</section>
+
+<!-- 8 -->
+<section id="operador">
+  <h2>8. Panel de operador</h2>
+  <p>Dirección <code>/superadmin/login</code>. Sesión y cookie distintas de las de empresa. Enlace «Soy una empresa cliente» para volver a <code>/login</code>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Pantalla</th><th>Elementos</th></tr></thead>
+    <tbody>
+      <tr><td>Empresas &rarr; Dar de alta</td><td><span class="param-name">Nombre / razón social</span>, <span class="param-name">NIF/CIF</span> (con dígito de control, único), <span class="param-name">Correo del administrador inicial</span>, <span class="param-name">Contraseña inicial</span>; botón <em>Crear empresa</em>.</td></tr>
+      <tr><td>Empresas existentes</td><td><em>Nombre, NIF/CIF, Usuarios, Expediciones, Estado, Alta</em>; botones <em>Usuarios</em>, <em>Desactivar</em> (bloquea al instante login y claves de API, también el hot-folder y las fuentes) / <em>Activar</em>.</td></tr>
+      <tr><td>Usuarios de una empresa</td><td>Alta con <span class="param-name">Correo</span> y <span class="param-name">Rol</span>: la contraseña se genera sola y se muestra una vez. Tabla con <em>Rol</em> (desplegable + <em>Cambiar</em>), <em>Estado, Alta</em>; botones <em>Resetear contraseña</em> (nueva contraseña mostrada una vez y cierre de las sesiones abiertas de ese usuario), <em>Desactivar</em> / <em>Activar</em>.</td></tr>
+      <tr><td>Cerrar sesión</td><td>En la barra superior.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 9 -->
+<section id="publico">
+  <h2>9. Visor público y descarga de la otra parte</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Dirección</th><th>Quién</th><th>Comportamiento</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET /inspect/{id}</code></td><td>Agentes de inspección (QR)</td><td>PDF directo, sin login, sin límite de peticiones. 404 si no existe; 410 si la URL está desactivada (anulada o más de 7 días tras el fin del servicio), indicando que el documento sigue conservado. Cada consulta queda registrada.</td></tr>
+      <tr><td><code>GET /descarga/{token}</code></td><td>La otra parte (cargador o transportista)</td><td>Descarga el PDF durante <code>RETENTION_DAYS</code> desde la emisión; 404 si el token no existe; 410 fuera de plazo. Se registra como «contraparte».</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 10 -->
+<section id="api">
+  <h2>10. API REST</h2>
+  <p>Autenticación con la cabecera <code>X-API-Key: mad_live_…</code>. La empresa se deduce de la clave, nunca de la petición. Documentación interactiva en <code>/docs</code>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Método y ruta</th><th>Parámetros</th><th>Respuesta</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">POST /api/v1/expediciones</span><br>camino 1 (multipart)</td><td><code>archivo</code> PDF <span class="badge badge-required">obligatorio</span>; <code>referencia_externa</code> <span class="badge badge-required">obligatorio</span>; <code>matricula_vehiculo</code> <span class="badge badge-required">obligatorio</span>; <code>fecha_transporte</code> ISO 8601 <span class="badge badge-required">obligatorio</span>; <code>matricula_remolque</code>, <code>pais_matricula_vehiculo</code>/<code>pais_matricula_remolque</code> <span class="badge badge-default">ES</span>, <code>finalidad_contractual</code> <span class="badge badge-default">false</span>, <code>erp_origen</code> <span class="badge badge-default">generico</span>.</td><td>201 con la expedición. Si la referencia ya existe, devuelve la existente (idempotente). 422 PDF inválido, escaneo o &gt; 5 MB; 409 sin certificado.</td></tr>
+      <tr><td><span class="param-name">POST /api/v1/expediciones/datos</span><br>camino 2 (JSON)</td><td>Cuerpo con los campos de <a href="#nueva">7.3</a> (ver ejemplo en <a href="#ejemplos">14</a>); query <code>erp_origen</code> <span class="badge badge-default">generico</span>.</td><td>201; 422 datos inválidos (lista de errores); 503 si el motor de PDF no está disponible.</td></tr>
+      <tr><td><span class="param-name">POST /api/v1/expediciones/{id}/modificaciones</span></td><td><code>{"motivo": "...", "cambios": [{"campo", "anterior", "nuevo"}]}</code>, de 1 a 20 cambios. <code>campo</code> = <code>matricula_vehiculo</code>, <code>matricula_remolque</code>, <code>fecha_transporte</code> o cualquier otro nombre.</td><td>200 con la expedición; 409 si no está en tránsito o falta certificado; 422 si supera 5 MB.</td></tr>
+      <tr><td><span class="param-name">PATCH /api/v1/expediciones/{id}/finalizar</span></td><td>query <code>estado_final</code> = <code>entregado</code> <span class="badge badge-default">por defecto</span> o <code>anulado</code>.</td><td>200; 409 si ya estaba finalizada o el estado no es válido.</td></tr>
+      <tr><td><span class="param-name">GET /api/v1/expediciones/{id}/pdf</span></td><td>&mdash;</td><td>PDF vigente (copia para el conductor).</td></tr>
+      <tr><td><span class="param-name">GET /api/v1/expediciones/{id}/qr.png</span></td><td>&mdash;</td><td>QR en PNG.</td></tr>
+      <tr><td><span class="param-name">POST /api/v1/borradores</span></td><td><code>referencia_fuente</code> <span class="badge badge-required">obligatorio</span>; <code>origen</code> <span class="badge badge-default">conector_local</span>; <code>nombre_documento</code>; <code>datos</code> (forma del camino 2, máx. 64 KB); <code>confianza</code>; <code>avisos</code> (máx. 50).</td><td>201 <code>{"id", "estado", "creado"}</code>; <code>creado=false</code> si ya existía (misma referencia).</td></tr>
+      <tr><td><span class="param-name">POST /api/v1/borradores/documento</span></td><td><code>archivo</code> (multipart) <span class="badge badge-required">obligatorio</span>; <code>referencia_fuente</code> <span class="badge badge-optional">opcional</span>.</td><td>201; MADeCa extrae los datos y crea el borrador.</td></tr>
+      <tr><td><span class="param-name">GET /salud</span></td><td>&mdash;</td><td><code>{"estado": "ok"}</code>.</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Salida de una expedición:</strong> <code>id</code>, <code>tenant_id</code>, <code>referencia_externa</code>, <code>erp_origen</code>, <code>estado</code>, <code>fecha_transporte</code>, <code>fecha_emision</code>, <code>matricula_vehiculo</code>, <code>matricula_remolque</code>, <code>url_publica</code>, <code>firmado</code>, <code>numero_escaneos</code>, <code>url_contraparte</code>. Errores de autenticación: 401 clave inválida o revocada; 403 empresa desactivada.</p>
+</section>
+
+<!-- 11 -->
+<section id="hotfolder">
+  <h2>11. Hot-folder</h2>
+  <p>Para ERP sin API que exportan ficheros. Servicio <code>hotfolder-watcher</code>.</p>
+  <div class="dir-tree"><span class="folder">hotfolder_watch\</span>
+&#9500;&#9472;&#9472; <span class="folder">incoming\&lt;id_empresa&gt;\&lt;erp_origen&gt;\</span>
+&#9474;   &#9500;&#9472;&#9472; <span class="folder">pdf\</span>     <span class="file">ALB-001.pdf + ALB-001.json (o .csv): PDF propio + metadatos (camino 1)</span>
+&#9474;   &#9492;&#9472;&#9472; <span class="folder">datos\</span>   <span class="file">pedido.json / .csv con datos completos, una fila por envío (camino 2)</span>
+&#9500;&#9472;&#9472; <span class="folder">processed\</span>     <span class="file">lo procesado, con la misma estructura</span>
+&#9492;&#9472;&#9472; <span class="folder">errores\</span>       <span class="file">lo que falló + fichero .errores.txt con el motivo</span></div>
+  <p>En un CSV cada columna es un dato y los datos agrupados se escriben con punto: <code>referencia_externa</code>, <code>cargador.nombre_razon_social</code>, <code>cargador.nif_cif</code>, <code>cargador.domicilio</code>, <code>transportista.nombre_razon_social</code>, <code>transportista.nif_cif</code>, <code>origen_direccion</code>, <code>destino_direccion</code>, <code>mercancia.naturaleza</code>, <code>mercancia.peso_kg</code>, <code>fecha_transporte</code>, <code>matricula_vehiculo</code>… (los mismos nombres que el JSON). Las celdas vacías cuentan como dato no indicado. En <code>pdf\</code> el fichero de metadatos solo lleva <code>referencia_externa</code>, <code>matricula_vehiculo</code>, <code>matricula_remolque</code> y <code>fecha_transporte</code>.</p>
+  <p>En <code>pdf\</code> el PDF y su fichero de metadatos pueden llegar en cualquier orden; se procesan cuando ambos están completos. Al arrancar se procesa lo que hubiera pendiente. Una empresa inexistente o desactivada se rechaza a <code>errores\</code>. Para a3ERP y Sigrid hay correspondencias de campos orientativas que deben verificarse con la exportación real del cliente.</p>
+</section>
+
+<!-- 12 -->
+<section id="conector">
+  <h2>12. Conector local</h2>
+  <p>Carpeta <code>conector_local\</code>. Se instala en un equipo de la red del cliente, lee sus carpetas (NAS, unidades de red), extrae los datos allí y solo envía datos a <code>POST /api/v1/borradores</code>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Sección / clave de <code>conector.ini</code></th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">[madeca] url</span> <span class="badge badge-required">obligatorio</span></td><td>Dirección https de MADeCa (http solo hacia <code>localhost</code> para pruebas).</td></tr>
+      <tr><td><span class="param-name">MADECA_API_KEY</span> (variable de entorno) <span class="badge badge-required">obligatorio</span></td><td>Clave de API. Solo como último recurso en <code>[madeca] api_key</code>.</td></tr>
+      <tr><td><span class="param-name">[carpetas] rutas</span> <span class="badge badge-required">obligatorio</span></td><td>Carpetas separadas por punto y coma (admite <code>\\NAS\...</code>).</td></tr>
+      <tr><td><span class="param-name">[carpetas] mover_procesados_a</span> <span class="badge badge-optional">opcional</span></td><td>Mueve cada documento enviado a esa carpeta.</td></tr>
+      <tr><td><span class="param-name">[carpetas] intervalo_segundos</span> <span class="badge badge-default">120</span></td><td>Mínimo 30.</td></tr>
+      <tr><td><span class="param-name">[ocr] tesseract_ruta</span> <span class="badge badge-optional">opcional</span></td><td>Ruta de <code>tesseract.exe</code>. Sin Tesseract, los escaneos llegan sin datos y con aviso.</td></tr>
+      <tr><td><span class="param-name">[estado] fichero</span> / <span class="param-name">registro</span></td><td>Ficheros ya enviados (para no repetir) y registro de actividad.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Ejecución: <code>python conector.py --config conector.ini</code> (continuo) o <code>--una-vez</code> (para el Programador de tareas). Si MADeCa rechaza la clave, la pasada se detiene sin mover ni perder nada.</p>
+</section>
+
+<!-- 13 -->
+<section id="parametros">
+  <h2>13. Parámetros de configuración (.env)</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Parámetro</th><th>Por defecto</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">APP_ENV</span></td><td>development</td><td>Fuera de <code>development</code>: cookies solo https y claves robustas obligatorias.</td></tr>
+      <tr><td><span class="param-name">APP_SECRET_KEY</span> <span class="badge badge-required">obligatorio</span></td><td>&mdash;</td><td>Cifra contraseñas de certificados, certificados y credenciales de fuentes. 32+ caracteres aleatorios. Si cambia, lo cifrado no se puede recuperar.</td></tr>
+      <tr><td><span class="param-name">JWT_SECRET_KEY</span> <span class="badge badge-required">obligatorio</span></td><td>&mdash;</td><td>Firma las sesiones. Distinta de la anterior.</td></tr>
+      <tr><td><span class="param-name">JWT_EXPIRE_MINUTES</span></td><td>480</td><td>Duración de la sesión.</td></tr>
+      <tr><td><span class="param-name">APP_BASE_URL</span> <span class="badge badge-required">obligatorio</span></td><td>&mdash;</td><td>Base de las URL del QR. Debe ser https (salvo <code>http://localhost</code> en pruebas).</td></tr>
+      <tr><td><span class="param-name">DATABASE_URL</span> / <span class="param-name">REDIS_URL</span></td><td>&mdash; / redis://localhost:6379/0</td><td>Conexiones (el compose las fija).</td></tr>
+      <tr><td><span class="param-name">STORAGE_BACKEND</span></td><td>local</td><td><code>local</code> o <code>s3</code> (con <code>S3_ENDPOINT_URL</code>, <code>S3_BUCKET</code>, <code>S3_ACCESS_KEY</code>, <code>S3_SECRET_KEY</code>).</td></tr>
+      <tr><td><span class="param-name">STORAGE_LOCAL_PATH</span> / <span class="param-name">CERTS_LOCAL_PATH</span></td><td>./storage/pdfs / ./certs</td><td>Carpetas de PDF y certificados.</td></tr>
+      <tr><td><span class="param-name">RETENTION_DAYS</span></td><td>365</td><td>Conservación mínima (no bajar de 365) y validez del enlace de la otra parte.</td></tr>
+      <tr><td><span class="param-name">PUBLIC_URL_DEACTIVATION_DAYS</span></td><td>7</td><td>Días tras el fin del servicio en que se desactiva la URL pública.</td></tr>
+      <tr><td><span class="param-name">HOTFOLDER_INCOMING_PATH</span> / <span class="param-name">_PROCESSED_PATH</span> / <span class="param-name">_ERROR_PATH</span></td><td>./hotfolder_watch/…</td><td>Carpetas del hot-folder.</td></tr>
+      <tr><td><span class="param-name">TESSERACT_RUTA</span></td><td>vacío</td><td>Ruta de Tesseract si no está en el PATH.</td></tr>
+      <tr><td><span class="param-name">OCR_LIMITE_SEGUNDOS</span></td><td>60</td><td>Tiempo máximo de lectura por página. Si se supera, el documento llega a la bandeja con el aviso de revisarlo a mano.</td></tr>
+      <tr><td><span class="param-name">OCR_SIMULTANEOS</span></td><td>2</td><td>Lecturas a la vez por servicio; el resto espera su turno.</td></tr>
+      <tr><td><span class="param-name">ZONA_HORARIA</span></td><td>Europe/Madrid</td><td>Hora de las fechas que llegan sin zona y del panel. <code>Atlantic/Canary</code> para Canarias (una hora menos). Cada DeCA guarda e imprime la zona de su transporte.</td></tr>
+      <tr><td><span class="param-name">FORWARDED_ALLOW_IPS</span></td><td>127.0.0.1</td><td>IP del proxy HTTPS (o <code>*</code> si solo el proxy llega a MADeCa), para conocer la IP real de cada usuario: límite de intentos de acceso y registro de lecturas del QR.</td></tr>
+      <tr><td><span class="param-name">AZURE_DI_ENDPOINT</span> / <span class="param-name">AZURE_DI_CLAVE</span></td><td>vacío</td><td>Azure AI Document Intelligence (región UE). Solo para empresas que lo autoricen.</td></tr>
+      <tr><td><span class="param-name">DOCUMENTO_ORIGEN_MAX_BYTES</span></td><td>20971520</td><td>Tamaño máximo de un documento de origen (20 MB).</td></tr>
+      <tr><td><span class="param-name">FUENTES_PERMITIR_RED_PRIVADA</span></td><td>false</td><td>Solo instalaciones propias: permite fuentes en redes privadas.</td></tr>
+      <tr><td><span class="param-name">FUENTES_CARPETA_BASE</span></td><td>vacío</td><td>Solo instalaciones propias: activa la fuente «Carpeta del servidor».</td></tr>
+      <tr><td><span class="param-name">CONECTORES_CICLO_SEGUNDOS</span></td><td>60</td><td>Cada cuánto el servicio de conectores comprueba qué fuentes toca leer (mínimo 15).</td></tr>
+      <tr><td><span class="param-name">SMTP_HOST</span> <span class="badge badge-optional">opcional</span></td><td>vacío</td><td>Servidor de correo para los avisos diarios. Vacío = avisos por correo desactivados.</td></tr>
+      <tr><td><span class="param-name">SMTP_PUERTO</span></td><td>587</td><td>587 con STARTTLS, 465 con SSL.</td></tr>
+      <tr><td><span class="param-name">SMTP_USUARIO</span> / <span class="param-name">SMTP_CLAVE</span></td><td>vacío</td><td>Credenciales del buzón que envía. Solo en el <code>.env</code>.</td></tr>
+      <tr><td><span class="param-name">SMTP_REMITENTE</span></td><td>SMTP_USUARIO</td><td>Dirección «De» de los avisos.</td></tr>
+      <tr><td><span class="param-name">SMTP_SEGURIDAD</span></td><td>starttls</td><td><code>starttls</code>, <code>ssl</code> o <code>ninguna</code> (solo en red interna).</td></tr>
+      <tr><td><span class="param-name">AVISOS_CORREO_HORA</span></td><td>8</td><td>Hora local (0-23) a partir de la que se envía el resumen del día. Uno al día por empresa (marca en Redis).</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 14 -->
+<section id="ejemplos">
+  <h2>14. Ejemplos de uso</h2>
+  <h3>Camino 1: PDF del ERP (PowerShell 7)</h3>
+<pre><span class="cmd">Invoke-RestMethod</span> <span class="string">"https://deca.tudominio.es/api/v1/expediciones"</span> <span class="param">-Method</span> Post <span class="param">-Headers</span> @{ <span class="string">"X-API-Key"</span> = <span class="cmd">$env:MADECA_API_KEY</span> } <span class="param">-Form</span> @{
+    referencia_externa = <span class="string">"ALB-2026-001"</span>
+    matricula_vehiculo = <span class="string">"1234BCD"</span>
+    fecha_transporte   = <span class="string">"2026-10-10T08:00:00"</span>
+    archivo            = <span class="cmd">Get-Item</span> <span class="string">.\albaran.pdf</span>
+}</pre>
+  <h3>Camino 2: datos completos (curl)</h3>
+<pre><span class="cmd">curl</span> <span class="param">-X POST</span> <span class="string">"https://deca.tudominio.es/api/v1/expediciones/datos"</span> \
+  <span class="param">-H</span> <span class="string">"X-API-Key: mad_live_..."</span> <span class="param">-H</span> <span class="string">"Content-Type: application/json"</span> \
+  <span class="param">-d</span> <span class="string">'{"referencia_externa": "ALB-2026-002",
+       "cargador": {"nombre_razon_social": "Distribuciones Demo SL", "nif_cif": "B00345678", "domicilio": "Calle Industria 14, Madrid"},
+       "transportista": {"nombre_razon_social": "Transportes Demo SL", "nif_cif": "B00654327"},
+       "origen_direccion": "Getafe (Madrid)", "destino_direccion": "Sevilla",
+       "mercancia": {"naturaleza": "Palés de material eléctrico", "peso_kg": 850.5},
+       "fecha_transporte": "2026-10-10T08:00:00", "matricula_vehiculo": "1234BCD", "matricula_remolque": "R5678BBC"}'</span></pre>
+  <h3>Modificación durante el servicio</h3>
+<pre><span class="cmd">curl</span> <span class="param">-X POST</span> <span class="string">"https://deca.tudominio.es/api/v1/expediciones/{id}/modificaciones"</span> <span class="param">-H</span> <span class="string">"X-API-Key: mad_live_..."</span> \
+  <span class="param">-H</span> <span class="string">"Content-Type: application/json"</span> \
+  <span class="param">-d</span> <span class="string">'{"motivo": "Cambio de vehículo por avería", "cambios": [{"campo": "matricula_vehiculo", "anterior": "1234BCD", "nuevo": "5678CDF"}]}'</span>
+<span class="comment"># Después: GET /api/v1/expediciones/{id}/pdf y entregar ese PDF al conductor</span></pre>
+  <h3>Borrador desde un sistema propio (como el conector local)</h3>
+<pre><span class="cmd">curl</span> <span class="param">-X POST</span> <span class="string">"https://deca.tudominio.es/api/v1/borradores"</span> <span class="param">-H</span> <span class="string">"X-API-Key: mad_live_..."</span> \
+  <span class="param">-H</span> <span class="string">"Content-Type: application/json"</span> \
+  <span class="param">-d</span> <span class="string">'{"referencia_fuente": "TMS-778", "origen": "mi_tms", "datos": {"referencia_externa": "778", "matricula_vehiculo": "1234BCD"}}'</span></pre>
+  <h3>Purga tras el plazo de conservación</h3>
+<pre><span class="cmd">docker compose exec</span> <span class="string">app</span> <span class="cmd">python</span> <span class="param">-m scripts.purgar_expirados</span>             <span class="comment"># solo lista</span>
+<span class="cmd">docker compose exec</span> <span class="string">app</span> <span class="cmd">python</span> <span class="param">-m scripts.purgar_expirados --confirmar</span> <span class="comment"># borra</span></pre>
+</section>
+
+<!-- 15 -->
+<section id="plazos">
+  <h2>15. Ciclo de vida y plazos</h2>
+  <div class="flow">
+    <div class="flow-step">Emisión (antes del servicio)</div>
+    <div class="flow-step">Copia al conductor</div>
+    <div class="flow-step">En tránsito: modificaciones</div>
+    <div class="flow-step">Entregado / anulado</div>
+    <div class="flow-step">+7 días: URL pública desactivable</div>
+    <div class="flow-step">+1 año: purga posible</div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Estado</th><th>URL pública</th><th>Modificable</th><th>Enlace otra parte</th></tr></thead>
+    <tbody>
+      <tr><td>en_transito</td><td>Activa</td><td>Sí</td><td>Activo</td></tr>
+      <tr><td>entregado</td><td>Activa hasta 7 días después</td><td>No</td><td>Activo hasta 1 año desde la emisión</td></tr>
+      <tr><td>anulado</td><td>Inactiva al momento</td><td>No</td><td>Activo hasta 1 año desde la emisión</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 16 -->
+<section id="problemas">
+  <h2>16. Resolución de problemas</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Problema</th><th>Causa</th><th>Solución</th></tr></thead>
+    <tbody>
+      <tr><td>«El PDF parece resultado de escanear…»</td><td>Página sin texto con solo una imagen.</td><td>Genera el PDF directamente desde el ERP, o sube el escaneo a la bandeja para que se emita un DeCA nativo.</td></tr>
+      <tr><td>«Ya existe una expedición para referencia_externa…»</td><td>Referencia repetida.</td><td>Usa otra referencia o, si hay que cambiar datos, una modificación.</td></tr>
+      <tr><td>«…no tiene ningún certificado de firma activo y vigente»</td><td>Finalidad contractual sin certificado válido.</td><td>Sube un certificado vigente en Certificados o desmarca la finalidad contractual.</td></tr>
+      <tr><td>«Falta el domicilio del cargador contractual (Art. 6.a)»</td><td>Dato esencial vacío.</td><td>Complétalo.</td></tr>
+      <tr><td>«Formato de matrícula no reconocido»</td><td>Matrícula extranjera con país ES, o error de escritura.</td><td>Indica el país (cabotaje) o corrígela.</td></tr>
+      <tr><td>MADeCa no arranca: «APP_BASE_URL debe empezar por https://»</td><td>Modo producción con una dirección sin HTTPS (Apartado Tercero.1).</td><td>Pon MADeCa detrás de un proxy HTTPS y usa su dirección <code>https://</code> en <code>APP_BASE_URL</code>.</td></tr>
+      <tr><td>En la bandeja: «la lectura automática superó 60 s por página»</td><td>Foto o escaneo difícil de leer; se corta para que MADeCa siga respondiendo.</td><td>Completa los datos a mano mirando el documento, o súbelo con mejor calidad. El límite se ajusta con <code>OCR_LIMITE_SEGUNDOS</code>.</td></tr>
+      <tr><td>La hora del DeCA no coincide con la del albarán</td><td>Zona horaria distinta (Canarias tiene una hora menos).</td><td>Elige la zona en el formulario o fija <code>ZONA_HORARIA</code> en la instalación; el ERP puede enviar la hora con su desfase o el campo <code>zona_horaria</code>.</td></tr>
+      <tr><td>«Solo se puede modificar un DeCA durante el servicio»</td><td>Expedición entregada o anulada.</td><td>Ya no admite cambios; si procede, emite un DeCA nuevo.</td></tr>
+      <tr><td>La URL del QR responde «ya no está disponible»</td><td>Anulada o pasados 7 días desde el fin del servicio.</td><td>Normal. El documento se conserva; la otra parte usa su enlace.</td></tr>
+      <tr><td>Borrador vacío con «No se pudo leer el documento»</td><td>Imagen ilegible, formato no soportado o sin OCR disponible.</td><td>Rellena los datos a mano mirando el original, o revisa Tesseract/Azure.</td></tr>
+      <tr><td>Fuente en rojo: «Entra ID rechazó las credenciales»</td><td>Id o secreto incorrectos o caducados.</td><td>Revisa el registro de la aplicación en Entra ID y el permiso <code>Files.Read.All</code> o el de Business Central.</td></tr>
+      <tr><td>Fuente en rojo: «apunta a una red privada»</td><td>Protección SSRF.</td><td>Usa el conector local o, en instalación propia, <code>FUENTES_PERMITIR_RED_PRIVADA=true</code>.</td></tr>
+      <tr><td>SFTP: «La huella del servidor no coincide»</td><td>Huella mal copiada o servidor distinto.</td><td>Copia la huella SHA256 exacta del servidor (<code>ssh-keygen -lf</code>).</td></tr>
+      <tr><td>La API responde 401 / 403</td><td>Clave inválida o revocada / empresa desactivada.</td><td>Genera otra clave / contacta con el operador.</td></tr>
+      <tr><td>La aplicación no arranca: «APP_SECRET_KEY debe ser…»</td><td>Claves de ejemplo o cortas fuera de desarrollo.</td><td>Pon claves aleatorias propias de 32+ caracteres y distintas.</td></tr>
+      <tr><td>Hot-folder: ficheros en <code>errores\</code></td><td>Ver el <code>.errores.txt</code> de al lado.</td><td>Corrige y vuelve a dejarlos en <code>incoming\</code>.</td></tr>
+      <tr><td>No llegan los avisos por correo</td><td>Sin <code>SMTP_HOST</code>, sin avisos ese día, sin administradores activos, antes de <code>AVISOS_CORREO_HORA</code> o Redis caído.</td><td>Revisa el inicio (dice si están activados) y el registro del servicio <code>conectores</code>; si falla el envío se reintenta en la siguiente pasada.</td></tr>
+      <tr><td>La revisión no recuadra los datos en el documento</td><td>PDF con texto sin <code>pypdfium2</code>, documento leído antes de la v0.3.0 o dato que no aparece escrito tal cual.</td><td>Instala las dependencias de <code>requirements.txt</code>; los documentos nuevos ya guardan las posiciones.</td></tr>
+      <tr><td>«Marca la confirmación de que has comprobado los datos»</td><td>Emisión de varios sin la casilla de confirmación.</td><td>Márcala tras comprobar los documentos.</td></tr>
+      <tr><td>Las horas no cuadran</td><td>Se muestran en hora peninsular.</td><td>Las fechas sin zona que envíe un sistema se interpretan como hora peninsular en el PDF generado.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 17 -->
+<section id="legal">
+  <h2>17. Aviso legal</h2>
+  <div class="alert-warning">MADeCa es una herramienta de apoyo. La exactitud de los datos de cada DeCA es responsabilidad del cargador contractual y del transportista efectivo según el art. 7 de la Orden FOM/2861/2012. Revisa siempre los datos obtenidos automáticamente antes de emitir.</div>
+  <div class="card">
+    <div class="card-header">Limitaciones y uso previsto</div>
+    <ul>
+      <li>La lectura automática de documentos (texto y OCR) puede equivocarse o no encontrar datos; por eso pasa siempre por revisión humana.</li>
+      <li>En el camino 1 MADeCa no comprueba que el PDF del ERP contenga todos los datos del art. 6; solo que no sea un escaneo.</li>
+      <li>La detección de escaneos es una heurística: no cubre todos los casos posibles.</li>
+      <li>Las correspondencias de campos de SAP Business One, Holded, a3ERP y Sigrid deben verificarse con la instalación real del cliente antes de usarlas.</li>
+      <li>El uso de Azure AI Document Intelligence implica un subencargado del tratamiento (art. 28.2 RGPD) y requiere la autorización de la empresa y el contrato correspondiente.</li>
+      <li>La interoperabilidad eFTI (Reglamento UE 2020/1056) no está implementada en esta versión.</li>
+      <li>Las referencias normativas se comprobaron el 09/10/2026; pueden cambiar.</li>
+      <li>Software proporcionado «tal cual», sin garantías.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>MADeCa &middot; Versión 0.4.4 &middot; Actualizado el 16/11/2026<br>Aplicación desarrollada por Masoft.es</footer>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Fuera del contexto de construcción: secretos, certificados de firma, PDF de
+# clientes y entornos locales. La imagen solo lleva lo que copia el Dockerfile.
+.env
+.env.*
+!.env.example
+certs/
+storage/
+hotfolder_watch/
+.venv/
+.git/
+.pytest_cache/
+**/__pycache__/
+demo/
+conector_local/
+tests/
+*.html

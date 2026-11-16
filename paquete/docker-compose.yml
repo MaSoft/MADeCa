@@ -1,0 +1,127 @@
+# MADeCa — servicios. Lo instala y gestiona madeca.sh: no hace falta
+# lanzarlo a mano.
+#
+#   https://DOMINIO  -> MADeCa (certificado de Let's Encrypt, propio o de prueba)
+#
+# Solo Caddy publica puertos (80 y 443, o los de PUERTO_HTTP/PUERTO_HTTPS).
+# Con el acceso «proxy» no hay Caddy (COMPOSE_PROFILES vacío) y
+# docker-compose.override.yml publica la aplicación para el proxy de la
+# empresa. La base de datos, Redis y los procesos internos quedan en la red
+# interna de Docker.
+
+name: madeca
+
+x-madeca: &madeca
+  image: madeca:${MADECA_VERSION:?Falta MADECA_VERSION en .env}
+  restart: unless-stopped
+  env_file: .env
+  environment: &entorno
+    APP_ENV: production
+    DATABASE_URL: "postgresql+psycopg://madeca:${POSTGRES_PASSWORD:?Falta .env}@db:5432/madeca"
+    REDIS_URL: redis://redis:6379/0
+    FUENTES_CARPETA_BASE: /nas
+  volumes: &volumenes
+    - madeca_storage:/app/storage
+    - madeca_certs:/app/certs
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    mem_limit: 512m
+    environment:
+      POSTGRES_USER: madeca
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta .env}
+      POSTGRES_DB: madeca
+    volumes:
+      - madeca_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U madeca"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    mem_limit: 128m
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    <<: *madeca
+    mem_limit: 1g
+    environment:
+      <<: *entorno
+      # La IP real de cada usuario llega del proxy (límite de intentos de
+      # acceso y registro de lecturas del QR).
+      FORWARDED_ALLOW_IPS: "*"
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/salud', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  caddy:
+    image: caddy:2.8.4-alpine
+    profiles: ["proxy"]
+    restart: unless-stopped
+    mem_limit: 128m
+    environment:
+      DOMINIO: ${DOMINIO:?Falta DOMINIO en .env}
+      CORREO_ACME: ${CORREO_ACME:-}
+    depends_on:
+      app: {condition: service_healthy}
+    ports:
+      - "${PUERTO_HTTP:-80}:80"
+      - "${PUERTO_HTTPS:-443}:443"
+    volumes:
+      - ./${CADDYFILE:-Caddyfile}:/etc/caddy/Caddyfile:ro
+      - ./certificado:/certificado:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  # Carpeta compartida: los ficheros que deje el ERP en
+  # intercambio/hotfolder/incoming/<id de la empresa>/<erp>/<modo>/
+  hotfolder-watcher:
+    <<: *madeca
+    command: ["python", "-c", "from app.adapters.hotfolder_watcher import main; main()"]
+    mem_limit: 384m
+    depends_on:
+      db: {condition: service_healthy}
+    volumes:
+      - ./intercambio/hotfolder:/app/hotfolder_watch
+      - madeca_storage:/app/storage
+      - madeca_certs:/app/certs
+
+  # Fuentes de datos automáticas (nube, SFTP, ERP, carpeta del servidor).
+  conectores:
+    <<: *madeca
+    command: ["python", "-c", "from app.conectores.worker import main; main()"]
+    mem_limit: 1g
+    depends_on:
+      db: {condition: service_healthy}
+    volumes:
+      - ./intercambio/nas:/nas:ro
+      - madeca_storage:/app/storage
+
+  # Tareas puntuales de madeca.sh (migraciones, alta, contraseñas).
+  herramientas:
+    <<: *madeca
+    restart: "no"
+    profiles: ["herramientas"]
+    depends_on:
+      db: {condition: service_healthy}
+
+volumes:
+  caddy_data:
+  caddy_config:
+  madeca_pgdata:
+  madeca_storage:
+  madeca_certs:

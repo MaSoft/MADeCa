@@ -1,0 +1,66 @@
+{% extends "superadmin/base.html" %}
+{% block titulo %}Empresas — MADeCa Operador{% endblock %}
+{% block contenido %}
+<h1>Empresas clientes</h1>
+
+{% if error %}<div class="alerta error">{{ error }}</div>{% endif %}
+
+<div class="card">
+    <h2>Dar de alta una empresa nueva</h2>
+    <form method="post" action="/superadmin/empresas">
+        <div class="form-fila">
+            <label for="nombre">Nombre / razón social</label>
+            <input type="text" id="nombre" name="nombre" required>
+        </div>
+        <div class="form-fila">
+            <label for="nif">NIF/CIF</label>
+            <input type="text" id="nif" name="nif" required>
+        </div>
+        <div class="form-fila">
+            <label for="email_admin">Correo del administrador inicial</label>
+            <input type="email" id="email_admin" name="email_admin" required>
+        </div>
+        <div class="form-fila">
+            <label for="password_admin">Contraseña inicial</label>
+            <input type="password" id="password_admin" name="password_admin" required>
+        </div>
+        <button type="submit" class="btn">Crear empresa</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Empresas existentes</h2>
+    <table>
+        <thead>
+            <tr><th>Nombre</th><th>NIF/CIF</th><th>Usuarios</th><th>Expediciones</th><th>Estado</th><th>Alta</th><th></th></tr>
+        </thead>
+        <tbody>
+        {% for fila in filas %}
+            <tr>
+                <td>{{ fila.tenant.nombre }}</td>
+                <td class="mono">{{ fila.tenant.nif_cif }}</td>
+                <td>{{ fila.num_usuarios }}</td>
+                <td>{{ fila.num_expediciones }}</td>
+                <td><span class="badge {{ 'activa' if fila.tenant.activo else 'inactiva' }}">
+                    {{ 'activo' if fila.tenant.activo else 'desactivado' }}</span></td>
+                <td class="text-light">{{ fila.tenant.fecha_alta | fecha }}</td>
+                <td>
+                    <a class="btn secundario" href="/superadmin/empresas/{{ fila.tenant.id }}/usuarios">Usuarios</a>
+                    {% if fila.tenant.activo %}
+                    <form method="post" action="/superadmin/empresas/{{ fila.tenant.id }}/desactivar" style="display:inline;">
+                        <button type="submit" class="btn peligro">Desactivar</button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="/superadmin/empresas/{{ fila.tenant.id }}/activar" style="display:inline;">
+                        <button type="submit" class="btn secundario">Activar</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7" class="text-light">Todavía no hay empresas dadas de alta.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

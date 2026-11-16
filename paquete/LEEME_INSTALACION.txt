@@ -1,0 +1,58 @@
+MADeCa {VERSION} — Masoft.es (https://masoft.es)
+Instalación desde cero en cualquier entorno
+=============================================
+
+Software libre bajo licencia MIT (LICENCIA.txt).
+Guía completa con capturas: GUIA_INSTALACION_MADeCa.html
+
+QUÉ HAY EN ESTA CARPETA
+-----------------------
+  madeca-{VERSION}.tar.gz      Paquete para Linux: aplicación, PostgreSQL, Redis,
+                               Caddy y Docker incluidos (instala sin internet).
+  INSTALAR_EN_WINDOWS.bat      Instalación en Windows (WSL2, sin Docker Desktop).
+  windows\                     Lo que usa el .bat (incluye la Ubuntu para WSL2).
+
+ELIGE TU CASO
+-------------
+1. Servidor o VPS con Linux (Ubuntu, Debian, Rocky, Alma, RHEL, Fedora,
+   openSUSE... x86_64, 4 GB de memoria, 10 GB libres):
+       copia madeca-{VERSION}.tar.gz al servidor y:
+       tar xzf madeca-{VERSION}.tar.gz && cd madeca-{VERSION}
+       sudo ./madeca.sh instalar
+
+2. Servidor o PC con Windows 10 (2004+), 11 o Windows Server 2022/2025:
+       doble clic en INSTALAR_EN_WINDOWS.bat (pide permisos de administrador).
+       Si WSL2 no estaba activado, reinicia y vuelve a lanzarlo.
+       MADeCa arranca solo con el equipo, aunque nadie inicie sesión.
+
+3. Máquina virtual (Hyper-V, VMware, Proxmox, VirtualBox): instala dentro un
+   Linux y sigue el caso 1 (es lo más sencillo). Para Windows dentro de una
+   máquina virtual hace falta la virtualización anidada.
+
+4. Sin internet en el equipo: los casos 1 y 2 funcionan igual; en Linux
+   añade --sin-internet para que no intente descargar nada.
+
+CÓMO SE LLEGA A MADeCa (el instalador lo pregunta)
+--------------------------------------------------
+  publico  Dominio que llega desde internet hasta el equipo (VPS, o servidor
+           propio con el router reenviando 80 y 443): certificado automático.
+  propio   Certificado propio (comprado o de la empresa) para el dominio:
+           --cert certificado.pem --clave clave.pem
+  proxy    Ya hay un proxy HTTPS (nginx, IIS, Traefik...) delante: MADeCa
+           solo escucha en HTTP en el puerto que digas (--puerto-app 8080).
+           Si el proxy está en otro equipo: --ip-app 0.0.0.0 --ip-proxy IP-DEL-PROXY.
+  prueba   Solo para probar en la red local (certificado interno).
+  Si los puertos 80/443 están ocupados: --puerto-http N --puerto-https N.
+
+El QR de cada DeCA lo abre el móvil del inspector: la dirección de MADeCa
+tiene que llegar desde internet por HTTPS (Apartado Tercero de la
+Resolución BOE-A-2026-12784). En un servidor de la oficina se consigue con
+el acceso «publico» (router) o con «proxy»/«propio» detrás del proxy o
+cortafuegos de la empresa publicado a internet.
+
+DESPUÉS
+-------
+  Linux:   sudo /opt/madeca/madeca.sh estado | copia | actualizar | ...
+  Windows: INSTALAR_EN_WINDOWS.bat estado | copia | parar | arrancar | ...
+Los DeCA deben conservarse al menos un año (Apartado Segundo.4): haz copias
+y guárdalas fuera del equipo.

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MADeCa v0.4.4 — Ficha t&#233;cnica</title>
+<style>
+:root {
+  --primary:       #1a3a5c;
+  --primary-light: #2c5f8a;
+  --accent:        #1d4ed8;
+  --bg:            #f7f9fc;
+  --card-bg:       #ffffff;
+  --text:          #1a1a2e;
+  --text-light:    #555;
+  --border:        #dde3ea;
+  --code-bg:       #0d1117;
+  --code-text:     #e6edf3;
+  --success:       #16a34a;
+  --warning:       #ca8a04;
+  --danger:        #dc2626;
+  --info:          #2563eb;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Segoe UI', sans-serif; font-size: 10pt;
+  background: var(--bg); color: var(--text);
+  max-width: 960px; margin: 0 auto; padding: 0 24px 60px;
+}
+
+/* ── Cabecera ───────────────────────────────────────── */
+.page-header {
+  background: linear-gradient(135deg, #0d2137 0%, #1a3a5c 60%, #1e4d7a 100%);
+  padding: 40px 36px 32px; margin: 0 -24px 36px; border-radius: 0 0 10px 10px;
+}
+.header-row { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.page-header h1 { font-size: 32px; font-weight: 300; color: #fff; letter-spacing: -1px; }
+.page-header .meta { text-align: right; }
+.page-header .version {
+  display: inline-block; background: var(--accent); color: #fff;
+  font-size: 8pt; font-weight: 700; padding: 3px 10px; border-radius: 12px; margin-bottom: 4px;
+}
+.page-header .tagline { font-size: 10pt; color: #90b4d4; font-weight: 300; }
+.header-badge {
+  display: inline-block; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  color: #c8dff0; font-size: 8pt; padding: 3px 10px; border-radius: 12px; margin-top: 4px;
+}
+
+/* ── Secciones ──────────────────────────────────────── */
+h2 {
+  font-size: 13pt; color: var(--primary); font-weight: 700;
+  border-bottom: 2px solid var(--primary); padding-bottom: 6px; margin: 32px 0 16px;
+}
+h3 { font-size: 10.5pt; color: var(--primary-light); font-weight: 600; margin: 20px 0 10px; }
+p  { line-height: 1.7; color: var(--text-light); margin-bottom: 10px; font-size: 9.5pt; }
+
+/* ── Tarjetas de resumen ────────────────────────────── */
+.summary-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px; margin-bottom: 28px;
+}
+.summary-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-top: 3px solid var(--accent); border-radius: 8px; padding: 16px;
+}
+.summary-card .label { font-size: 7.5pt; color: var(--text-light); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+.summary-card .value { font-size: 13pt; font-weight: 700; color: var(--primary); }
+.summary-card .sub   { font-size: 8pt; color: var(--text-light); margin-top: 2px; }
+
+/* ── Tablas ─────────────────────────────────────────── */
+table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 9pt; }
+th { background: var(--primary); color: #fff; padding: 9px 12px; text-align: left; font-weight: 600; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-light); vertical-align: top; }
+tr:nth-child(even) td { background: var(--bg); }
+.param-name { font-family: 'Consolas', monospace; color: var(--accent); font-weight: 600; }
+
+/* ── Badges ─────────────────────────────────────────── */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 10px;
+  font-size: 7.5pt; font-weight: 700;
+}
+.badge-ok      { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
+.badge-warn    { background: #fffbeb; color: var(--warning); border: 1px solid #fde68a; }
+.badge-no      { background: #fef2f2; color: var(--danger);  border: 1px solid #fecaca; }
+.badge-neutral { background: #eff6ff; color: var(--info);    border: 1px solid #bfdbfe; }
+
+/* ── Alertas ────────────────────────────────────────── */
+.alert {
+  border-radius: 6px; padding: 12px 16px; margin-bottom: 16px;
+  font-size: 9pt; line-height: 1.6;
+}
+.alert strong { display: block; margin-bottom: 3px; }
+.alert-info    { background: #eff6ff; border-left: 4px solid var(--info);    color: #1e3a8a; }
+.alert-warning { background: #fffbeb; border-left: 4px solid var(--warning); color: #78350f; }
+.alert-danger  { background: #fef2f2; border-left: 4px solid var(--danger);  color: #7f1d1d; }
+.alert-success { background: #f0fdf4; border-left: 4px solid var(--success); color: #14532d; }
+
+/* ── C&#243;digo ─────────────────────────────────────────── */
+pre {
+  background: var(--code-bg); color: var(--code-text);
+  border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 8.5pt;
+  line-height: 1.6; margin-bottom: 16px;
+}
+pre .cmd    { color: #79c0ff; }
+pre .param  { color: #ffab70; }
+pre .string { color: #a5d6ff; }
+pre .comment{ color: #8b949e; font-style: italic; }
+
+/* ── Flujo ──────────────────────────────────────────── */
+.flow { display: flex; flex-wrap: wrap; gap: 0; margin-bottom: 20px; align-items: center; }
+.flow-step {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 14px; font-size: 8.5pt; color: var(--text);
+}
+.flow-step::after { content: '\25B6'; margin: 0 8px; color: var(--accent); font-size: 8.5pt; }
+.flow-step:last-child::after { content: ''; }
+
+/* ── &#193;rbol de directorios ─────────────────────────── */
+.dir-tree {
+  background: #f8fafc; border: 1px solid var(--border); border-radius: 6px;
+  padding: 14px 16px; font-family: 'Consolas', monospace; font-size: 8.5pt;
+  line-height: 1.8; margin-bottom: 20px;
+}
+.dir-tree .folder { color: var(--accent); font-weight: 700; }
+.dir-tree .file   { color: var(--text-light); }
+
+/* ── Pie ────────────────────────────────────────────── */
+footer {
+  text-align: center; padding: 20px 0 0; margin-top: 40px;
+  border-top: 1px solid var(--border); font-size: 8pt; color: var(--text-light);
+}
+
+/* ── Cards ──────────────────────────────────────────── */
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+.card-header { background: var(--bg); border-bottom: 1px solid var(--border); padding: 9px 16px; font-weight: 700; font-size: 9pt; color: var(--primary); }
+.card-body   { padding: 16px; }
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 640px) {
+  .header-row { flex-direction: column; align-items: flex-start; }
+  .page-header .meta { text-align: left; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+}
+@media print {
+  body { font-size: 9.5pt; padding: 0 12px; max-width: 100%; }
+  .page-header { background: #1a3a5c !important; -webkit-print-color-adjust: exact; }
+  pre { font-size: 8pt; }
+}
+</style>
+</head>
+<body>
+
+<!-- CABECERA -->
+<div class="page-header">
+  <div class="header-row">
+    <div>
+      <h1>MADeCa</h1>
+      <p class="tagline">Documento Electr&#243;nico de Control Administrativo (DeCA) &#8212; plataforma multiempresa</p>
+    </div>
+    <div class="meta">
+      <span class="version">v0.4.4</span><br>
+      <span class="header-badge">Python &#183; FastAPI &#183; PostgreSQL</span><br>
+      <span class="header-badge">Cumplimiento normativo &#183; Transporte</span>
+    </div>
+  </div>
+</div>
+
+<!-- TARJETAS DE RESUMEN -->
+<div class="summary-grid">
+  <div class="summary-card"><div class="label">Versi&#243;n</div><div class="value">0.4.4</div><div class="sub">Revisión completa (16/11): NIF, carpeta compartida en CSV, purga, subidas grandes</div></div>
+  <div class="summary-card"><div class="label">Autor</div><div class="value">Masoft.es</div><div class="sub">Repositorio Git</div></div>
+  <div class="summary-card"><div class="label">Python m&#237;n.</div><div class="value">3.12</div><div class="sub">Docker (imagen slim)</div></div>
+  <div class="summary-card"><div class="label">Interfaz</div><div class="value">Web</div><div class="sub">Jinja2 + htmx y tres scripts propios, sin JavaScript en línea</div></div>
+  <div class="summary-card"><div class="label">BD</div><div class="value">PostgreSQL</div><div class="sub">10 tablas &#183; Alembic</div></div>
+  <div class="summary-card"><div class="label">Tests</div><div class="value">120</div><div class="sub">+2 solo en Docker</div></div>
+</div>
+
+<!-- ── DESCRIPCIÓN ─────────────────────────────────── -->
+<h2>Descripci&#243;n</h2>
+<p>MADeCa emite, custodia y sirve a la inspecci&#243;n el DeCA exigido en el transporte p&#250;blico de mercanc&#237;as por carretera desde el 05/10/2026 (DT 8.&#170; Ley 9/2025; Resoluci&#243;n BOE-A-2026-12784; Orden FOM/2861/2012). Es un SaaS multiempresa: cada empresa (tenant) solo ve sus datos, con roles administrador, operador y lectura, y un panel de operador de plataforma aparte. Dos caminos de emisi&#243;n: estampar el QR en el PDF propio del ERP (rechazando escaneos) o redactar el PDF a partir de los datos del art. 6. Gestiona el ciclo completo: URL p&#250;blica sin credenciales ni l&#237;mites para los agentes, modificaci&#243;n en ruta (Apartado Quinto, m&#233;todo 1), copia al conductor, enlace de un a&#241;o para la otra parte, desactivaci&#243;n a los 7 d&#237;as y conservaci&#243;n de un a&#241;o. La v0.2.0 a&#241;ade la obtenci&#243;n de datos: extracci&#243;n por reglas y OCR de albaranes/cartas de porte, bandeja de revisi&#243;n humana obligatoria, fuentes autom&#225;ticas (SharePoint/OneDrive, Google Drive, Dropbox, SFTP, carpeta del servidor, Business Central, Odoo, SAP Business One, Holded) y un conector local que extrae en la red del cliente y solo env&#237;a datos.</p>
+
+<!-- ── STACK TÉCNICO ───────────────────────────────── -->
+<h2>Stack t&#233;cnico</h2>
+<table>
+  <tr><th>Capa</th><th>Tecnolog&#237;a</th><th>Prop&#243;sito</th></tr>
+  <tr><td>Web / API</td><td><span class="param-name">FastAPI + Uvicorn</span></td><td>Paneles, API REST, visor p&#250;blico; OpenAPI en <code>/docs</code></td></tr>
+  <tr><td>Plantillas</td><td><span class="param-name">Jinja2 + htmx</span></td><td>Panel sin JavaScript propio (CSP <code>script-src 'self'</code>); filtros de fecha/hora peninsular</td></tr>
+  <tr><td>Datos</td><td><span class="param-name">PostgreSQL 16 + SQLAlchemy 2 + Alembic</span></td><td>Multiempresa por <code>tenant_id</code>; JSONB para datos del DeCA, borradores y estado de fuentes</td></tr>
+  <tr><td>PDF</td><td><span class="param-name">pypdf, reportlab, WeasyPrint</span></td><td>Estampado de QR, p&#225;ginas de modificaci&#243;n, PDF generado, metadatos de fecha</td></tr>
+  <tr><td>QR</td><td><span class="param-name">qrcode</span></td><td>URL p&#250;blica <code>/inspect/{uuid}</code></td></tr>
+  <tr><td>Firma</td><td><span class="param-name">pyHanko + cryptography</span></td><td>PAdES-B (AdES) con el .p12 de la empresa, cifrado en reposo (Fernet)</td></tr>
+  <tr><td>Extracci&#243;n</td><td><span class="param-name">app/extraccion (reglas) + Tesseract / Azure DI</span></td><td>Datos del art. 6 desde PDF, escaneo o foto; sin IA generativa</td></tr>
+  <tr><td>Conectores</td><td><span class="param-name">httpx, paramiko, pyjwt</span></td><td>Graph, Google Drive, Dropbox, SFTP, Business Central, Odoo JSON-2, SAP Service Layer, Holded</td></tr>
+  <tr><td>Seguridad</td><td><span class="param-name">bcrypt, PyJWT, slowapi + Redis</span></td><td>Contrase&#241;as, sesiones revocables, l&#237;mite de intentos de login</td></tr>
+  <tr><td>Hot-folder</td><td><span class="param-name">watchdog (PollingObserver)</span></td><td>Ingesta por carpeta para ERP sin API</td></tr>
+  <tr><td>Almacenamiento</td><td><span class="param-name">Disco local o S3/MinIO (boto3)</span></td><td>PDF, versiones anteriores, documentos de origen pendientes</td></tr>
+</table>
+
+<!-- ── MÓDULOS PRINCIPALES ────────────────────────── -->
+<h2>M&#243;dulos principales</h2>
+<table>
+  <tr><th>Fichero</th><th>Responsabilidad</th></tr>
+  <tr><td><span class="param-name">app/main.py</span></td><td>Aplicaci&#243;n, routers, cabeceras de seguridad (setdefault para el iframe de la bandeja), l&#237;mite de tama&#241;o de petici&#243;n</td></tr>
+  <tr><td><span class="param-name">app/config.py</span></td><td>Par&#225;metros (.env); rechaza claves d&#233;biles fuera de desarrollo</td></tr>
+  <tr><td><span class="param-name">app/version.py</span></td><td>VERSION &#250;nica (API, manual, ficha)</td></tr>
+  <tr><td><span class="param-name">app/domain/</span></td><td>Modelos ORM, esquemas Pydantic (art. 6, matr&#237;culas con pa&#237;s, modificaciones) y validaci&#243;n NIF/CIF/matr&#237;culas</td></tr>
+  <tr><td><span class="param-name">app/services/expedicion_service.py</span></td><td>Emisi&#243;n (2 caminos), firma, modificaci&#243;n m&#233;todo 1, finalizaci&#243;n</td></tr>
+  <tr><td><span class="param-name">app/services/pdf_generator.py</span></td><td>Detecci&#243;n de escaneos, estampado de QR, p&#225;gina de modificaci&#243;n, fechas en metadatos, PDF generado</td></tr>
+  <tr><td><span class="param-name">app/services/borradores.py</span></td><td>Bandeja: creaci&#243;n idempotente, OCR seg&#250;n autorizaci&#243;n, emisi&#243;n y descarte (borra el original)</td></tr>
+  <tr><td><span class="param-name">app/services/fuentes.py</span></td><td>Configuraci&#243;n cifrada de fuentes y ejecuci&#243;n de cada pasada</td></tr>
+  <tr><td><span class="param-name">app/services/copia_conductor.py</span></td><td>Descarga del PDF vigente y del QR (Apartado S&#233;ptimo)</td></tr>
+  <tr><td><span class="param-name">app/extraccion/</span></td><td>Texto/OCR y lectura de campos; sin dependencias de BD (lo reutiliza el conector local)</td></tr>
+  <tr><td><span class="param-name">app/conectores/</span></td><td>Base (SSRF, Entra ID), conectores de documentos y de ERP, registro de tipos, proceso peri&#243;dico</td></tr>
+  <tr><td><span class="param-name">app/routers/</span></td><td>dashboard, bandeja, fuentes, formulario_deca, erp_ingestion (API), public_inspector, contraparte, auth_routes, superadmin</td></tr>
+  <tr><td><span class="param-name">app/adapters/</span></td><td>Hot-folder y correspondencias de campos (a3ERP, Sigrid orientativas)</td></tr>
+  <tr><td><span class="param-name">app/security/</span></td><td>Autenticaci&#243;n, dependencias por rol, cifrado Fernet, l&#237;mite de login</td></tr>
+  <tr><td><span class="param-name">app/plantillas.py</span></td><td>Motor de plantillas com&#250;n con filtros <code>fecha</code>/<code>hora</code></td></tr>
+  <tr><td><span class="param-name">conector_local/conector.py</span></td><td>Programa para la red del cliente: vigila carpetas, extrae y env&#237;a solo datos</td></tr>
+  <tr><td><span class="param-name">scripts/</span></td><td>crear_superadmin, crear_tenant, cargar_demo, purgar_expirados</td></tr>
+  <tr><td><span class="param-name">demo/</span></td><td>Generador y documentos de demostraci&#243;n, pruebas de la API en PowerShell</td></tr>
+</table>
+
+<!-- ── ESTRUCTURA DE FICHEROS ─────────────────────── -->
+<h2>Estructura de ficheros</h2>
+<div class="dir-tree">
+<span class="folder">MADECA\</span><br>
+&#9500;&#9472;&#9472; paquete/ &nbsp; madeca.sh, compose, Caddyfile, LICENCIA, gu&#237;a de instalaci&#243;n<br>
+&#9500;&#9472;&#9472; docker-compose.yml &nbsp; Dockerfile &nbsp; Dockerfile.paquete &nbsp; requirements.txt &nbsp; alembic.ini &nbsp; .env.example<br>
+&#9500;&#9472;&#9472; manual_MADeCa.html &nbsp; ficha_MADeCa.html &nbsp; guia_rapida_pruebas.html &nbsp; README.md<br>
+&#9500;&#9472;&#9472; <span class="folder">app\</span><br>
+&#9474;   &#9500;&#9472;&#9472; main.py &nbsp; config.py &nbsp; version.py &nbsp; database.py &nbsp; plantillas.py<br>
+&#9474;   &#9500;&#9472;&#9472; <span class="folder">domain\</span> &nbsp; models, schemas, validation<br>
+&#9474;   &#9500;&#9472;&#9472; <span class="folder">services\</span> &nbsp; expedicion_service, pdf_generator, signing, qr_service, storage, retention, certificado_service, borradores, fuentes, copia_conductor<br>
+&#9474;   &#9500;&#9472;&#9472; <span class="folder">extraccion\</span> &nbsp; texto, motores, campos<br>
+&#9474;   &#9500;&#9472;&#9472; <span class="folder">conectores\</span> &nbsp; base, documentos, erp, registro, worker<br>
+&#9474;   &#9500;&#9472;&#9472; <span class="folder">routers\</span> &nbsp; dashboard, bandeja, fuentes, formulario_deca, erp_ingestion, public_inspector, contraparte, auth_routes, superadmin<br>
+&#9474;   &#9500;&#9472;&#9472; <span class="folder">adapters\</span> &nbsp; hotfolder_watcher, mapping, base<br>
+&#9474;   &#9500;&#9472;&#9472; <span class="folder">security\</span> &nbsp; auth, dependencies, secrets, rate_limit<br>
+&#9474;   &#9492;&#9472;&#9472; <span class="folder">templates\</span> &nbsp; dashboard, superadmin, pdf<br>
+&#9500;&#9472;&#9472; <span class="folder">migrations\versions\</span> &nbsp; 7 migraciones (esquema inicial &#8230; fuentes_datos)<br>
+&#9500;&#9472;&#9472; <span class="folder">conector_local\</span> &nbsp; conector.py, conector.ini.ejemplo, requirements.txt, LEEME.md<br>
+&#9500;&#9472;&#9472; <span class="folder">demo\</span> &nbsp; generar_documentos.py, pruebas_api.ps1, documentos\<br>
+&#9500;&#9472;&#9472; <span class="folder">scripts\</span> &nbsp; crear_superadmin, crear_tenant, cargar_demo, purgar_expirados<br>
+&#9500;&#9472;&#9472; <span class="folder">tests\</span> &nbsp; 18 ficheros de pruebas<br>
+&#9492;&#9472;&#9472; <span class="folder">hotfolder_watch\</span> &nbsp; incoming, processed, errores
+</div>
+
+<!-- ── BASE DE DATOS ───────────────────────────────── -->
+<h2>Esquema de base de datos</h2>
+<table>
+  <tr><th>Tabla</th><th>Columnas clave</th><th>Prop&#243;sito</th></tr>
+  <tr><td><span class="param-name">superadmins</span></td><td>email &#250;nico, password_hash, activo</td><td>Operadores de plataforma, sin relaci&#243;n con empresas</td></tr>
+  <tr><td><span class="param-name">tenants</span></td><td>nombre, nif_cif &#250;nico, activo, ocr_tercero_autorizado(_en/_por)</td><td>Empresas clientes y autorizaci&#243;n del OCR de Azure</td></tr>
+  <tr><td><span class="param-name">usuarios</span></td><td>tenant_id, email (&#250;nico por empresa), rol, activo, sesiones_validas_desde</td><td>Usuarios del panel; corte de sesiones al restablecer contrase&#241;a</td></tr>
+  <tr><td><span class="param-name">erp_api_keys</span></td><td>tenant_id, prefijo, key_hash (SHA-256), activo, fecha_ultimo_uso</td><td>Claves de API (solo la huella)</td></tr>
+  <tr><td><span class="param-name">certificados</span></td><td>tenant_id, ruta_archivo (.p12.enc), password_cifrado, fecha_caducidad, activo</td><td>Certificados de firma</td></tr>
+  <tr><td><span class="param-name">expediciones</span></td><td>tenant_id, referencia_externa+erp_origen &#250;nicos, estado, datos_deca JSONB, fechas, matr&#237;culas, storage_path, firmado, token_contraparte &#250;nico</td><td>Cada DeCA; su id es el de la URL p&#250;blica</td></tr>
+  <tr><td><span class="param-name">modificaciones_deca</span></td><td>expedicion_id, numero, fecha, motivo, cambios JSONB, ruta_pdf_anterior, origen</td><td>Historial del Apartado Quinto</td></tr>
+  <tr><td><span class="param-name">borradores_deca</span></td><td>tenant_id, estado, origen+referencia_fuente &#250;nicos, datos/confianza/avisos JSONB, ruta_documento, expedicion_id</td><td>Bandeja de revisi&#243;n</td></tr>
+  <tr><td><span class="param-name">fuentes_datos</span></td><td>tenant_id, tipo, config_cifrada, estado_sync JSONB, activo, intervalo, &#250;ltimo resultado/error</td><td>Fuentes autom&#225;ticas</td></tr>
+  <tr><td><span class="param-name">accesos_log</span></td><td>expedicion_id, timestamp, ip, user_agent, resultado</td><td>Consultas del QR y de la otra parte</td></tr>
+</table>
+
+<!-- ── COMPORTAMIENTOS CLAVE ──────────────────────── -->
+<h2>Comportamientos clave</h2>
+
+<h3>Revisi&#243;n humana obligatoria</h3>
+<div class="flow">
+  <div class="flow-step">Documento / ERP / conector</div>
+  <div class="flow-step">Borrador (datos + confianza + avisos)</div>
+  <div class="flow-step">Revisi&#243;n junto al original</div>
+  <div class="flow-step">Emisi&#243;n por el camino 2</div>
+</div>
+<p>Ning&#250;n dato obtenido autom&#225;ticamente se emite sin confirmaci&#243;n: el cargador y el transportista responden de los datos (art. 7 FOM/2861/2012). La extracci&#243;n es por reglas deterministas, no por IA generativa: lo que no encuentra queda vac&#237;o con aviso, nunca se inventa. Los NIF solo se aceptan con su d&#237;gito de control.</p>
+
+<h3>Escaneos: nunca como DeCA</h3>
+<p>El camino 1 rechaza un PDF que parece un escaneo (Apartado Segundo.2). Un escaneo s&#237; puede entrar por la bandeja, pero solo para extraer los datos y generar un DeCA nativo digital.</p>
+
+<h3>Modificaci&#243;n m&#233;todo 1 con trazabilidad</h3>
+<p>La p&#225;gina de modificaci&#243;n se a&#241;ade al PDF vigente; antes se guarda la versi&#243;n anterior con sufijo <code>.vN</code>; si falla la base de datos se restaura el PDF. Si el DeCA estaba firmado se vuelve a firmar entero. Matr&#237;cula y fecha se actualizan tambi&#233;n en la expedici&#243;n.</p>
+
+<h3>Seguridad de las fuentes</h3>
+<p>Credenciales cifradas que nunca vuelven al navegador; URL de cada empresa validadas contra redes privadas, loopback y link-local (SSRF); sin seguir redirecciones salvo la descarga de Graph validada; huella obligatoria en SFTP; carpeta del servidor encerrada en la de cada empresa; errores internos sin detalles que puedan contener credenciales.</p>
+
+<h3>Visor p&#250;blico sin l&#237;mites</h3>
+<p><code>/inspect/{uuid}</code> no tiene l&#237;mite por IP: el Apartado Tercero.4 no permite que la seguridad impida la descarga y un l&#237;mite por IP bloquear&#237;a a agentes detr&#225;s de la misma IP. El UUIDv4 (122 bits) hace inviable la enumeraci&#243;n; la denegaci&#243;n de servicio se ataja en el proxy.</p>
+
+<div class="alert alert-warning">
+  <strong>&#9888; Correcciones relevantes de la v0.2.0</strong>
+  Se corrigieron, entre otros: fechas de creaci&#243;n del PDF perdidas al estampar el QR; fecha de emisi&#243;n impresa igual a la del transporte; domicilio del cargador opcional; matr&#237;culas de remolque rechazadas; firma con certificados caducados; login con error 500 si un correo existe en dos empresas; hot-folder que aceptaba empresas desactivadas y se deten&#237;a ante errores; hot-folder en Docker sin WeasyPrint ni vol&#250;menes compartidos; cambio de rol bloqueado por la CSP; autorizaci&#243;n de OCR inalcanzable por el orden de rutas; contrase&#241;as y claves en la URL; BD y Redis abiertos a la red.
+</div>
+
+<div class="alert alert-warning">
+  <strong>&#9888; Correcciones de la v0.2.1</strong>
+  Fuentes que perd&#237;an albaranes al pasar de 50 por pasada (SFTP y carpeta con ficheros del mismo segundo, Odoo, Business Central, SAP B1 que solo le&#237;a la primera p&#225;gina de 20, Holded); NIF-IVA (&laquo;ES&raquo; + NIF) de SAP, Holded y Business Central rechazado en la bandeja; peso con punto decimal en el DeCA; <code>.dockerignore</code> para que <code>.env</code>, certificados y PDF no se env&#237;en a Docker al construir.
+</div>
+
+<div class="alert alert-info">
+  <strong>&#8505; Novedades de la v0.4.4</strong>
+  Revisi&#243;n completa del c&#243;digo (16/11/2026). NIF: se comprueba la longitud (antes &laquo;0T&raquo; pasaba por v&#225;lido) y se admiten los NIF K, L y M por su forma (art. 19.2 del RD 1065/2007; antes se validaban con el algoritmo del CIF). Carpeta compartida: los CSV del modo &laquo;datos&raquo; ya se pueden usar (columnas &laquo;cargador.nif_cif&raquo;, &laquo;mercancia.peso_kg&raquo;...) y una celda vac&#237;a ya no se toma por un dato no v&#225;lido. Subidas de documentos de hasta DOCUMENTO_ORIGEN_MAX_BYTES por documento (antes se cortaban a 12 MB por env&#237;o). La purga (<code>scripts.purgar_expirados --confirmar</code>) fallaba siempre. El visor del QR ya no falla con un navegador de identificaci&#243;n muy larga. Un fallo inesperado del OCR deja el documento en la bandeja con su aviso, en vez de perderlo. Contrase&#241;as de al menos 12 caracteres al crear usuarios. Fechas de Odoo con su desfase UTC; horas del Excel en la zona de la instalaci&#243;n. Instalador: con el acceso &laquo;proxy&raquo; en otro equipo, <code>--ip-proxy</code> limita qui&#233;n puede indicar la IP real del usuario.
+</div>
+
+<div class="alert alert-info">
+  <strong>&#8505; Novedades de la v0.4.3</strong>
+  Instalador: en la instalaci&#243;n desatendida, una opci&#243;n que falta y tiene valor por defecto (p. ej. --ip-app, --zona) usa ese valor y lo dice, en vez de pararse; el acceso &laquo;proxy&raquo; ya no terminaba en silencio por la comprobaci&#243;n del puerto; salida sin las l&#237;neas de progreso de Compose. La aplicaci&#243;n no cambia.
+</div>
+
+<div class="alert alert-info">
+  <strong>&#8505; Novedades de la v0.4.2</strong>
+  Paquete de instalaci&#243;n para cualquier entorno (carpeta INSTALL): cualquier Linux x86_64 (Ubuntu, Debian, Rocky/Alma/RHEL, Fedora, openSUSE), Windows 10/11/Server con WSL2 sin Docker Desktop (INSTALAR_EN_WINDOWS.bat, arranque con el equipo, puertos a la red) y sin internet (Docker, iptables, PostgreSQL, Redis y Caddy dentro). Accesos publico (Let&#39;s Encrypt), propio (certificado de la empresa), proxy (detr&#225;s de nginx/IIS) y prueba; puertos a elegir; orden certificado. Probado en Ubuntu 22.04/24.04 (tambi&#233;n sin red), Debian 12, Rocky 9, openSUSE Leap 15.6 y Windows 11, y la actualizaci&#243;n desde la 0.4.1. La aplicaci&#243;n no cambia.
+</div>
+
+<div class="alert alert-info">
+  <strong>&#8505; Novedades de la v0.4.1</strong>
+  Paquete de instalaci&#243;n para clientes a partir de la versi&#243;n en producci&#243;n: imagen compilada con Nuitka y migraciones en bytecode, sin c&#243;digo fuente (Dockerfile.paquete); paquete/madeca.sh (instalar, actualizar, alta, clave, superadmin, copia, restaurar, desinstalar); HTTPS con Let&#39;s Encrypt; alta por consola con contrase&#241;a generada (app/instalacion.py); gu&#237;a de instalaci&#243;n con capturas; licencia seg&#250;n contrato. La aplicaci&#243;n no cambia.
+</div>
+
+<div class="alert alert-info">
+  <strong>&#8505; Novedades de la v0.4.0</strong>
+  Historial para administradores: estad&#237;sticas por d&#237;a, semana, mes, trimestre, a&#241;o o fechas a elegir, por fecha de transporte, emisi&#243;n o entrega; totales, evoluci&#243;n y desgloses (destinatario, cargador, transportista, veh&#237;culo, remolque, provincias y direcciones, mercanc&#237;a, canal, qui&#233;n emiti&#243;, bandeja) que filtran al pulsarlos; registros paginados y libro de Excel completo. Expediciones y Bandeja paginadas sin tope (antes, 200 como m&#225;ximo). Exportaci&#243;n de Expediciones a .xlsx (antes CSV). Quitado el marcado de datos &laquo;dudosos&raquo;. La tarjeta del detalle pasa a llamarse &laquo;Actividad&raquo;. Dependencia nueva: openpyxl.
+</div>
+
+<div class="alert alert-info">
+  <strong>&#8505; Novedades de la v0.3.0</strong>
+  Revisi&#243;n: cada dato obligatorio que falta (art. 6) enlaza a su campo, que queda en rojo hasta rellenarlo; datos no v&#225;lidos se&#241;alados en su campo; comprobaci&#243;n al escribir con las mismas reglas que al emitir; agenda de partes; aviso de posible duplicado; &laquo;emitir/descartar y revisar el siguiente&raquo;; recuadro en el documento original de d&#243;nde se ley&#243; cada dato. Bandeja: emitir (solo completos, con confirmaci&#243;n) o descartar varios a la vez. P&#225;gina de inicio con indicadores y avisos, tambi&#233;n por correo diario (SMTP). Historial de cada expedici&#243;n. Exportaci&#243;n para Excel. Pie &laquo;MADeCa - Desarrollado por Masoft.es&raquo;. Migraciones d3a8b5c2e710 y e6c4a9d2b157; dependencia nueva pypdfium2 (opcional).
+</div>
+
+<div class="alert alert-info">
+  <strong>&#8505; Correcci&#243;n de la v0.2.5</strong>
+  Las hojas de estilo y los scripts del panel llevan la huella de su contenido en la direcci&#243;n: tras actualizar, el navegador ya no mezcla la p&#225;gina nueva con estilos antiguos guardados (la pantalla se ve&#237;a descolocada hasta forzar la recarga).
+</div>
+
+<div class="alert alert-info">
+  <strong>&#8505; Novedades de la v0.2.4</strong>
+  Barra de filtros rediseñada en Expediciones y Bandeja: buscador con lupa, botón &laquo;Fecha&raquo; con periodos y rango, &laquo;M&#225;s filtros&raquo; con contador, casillas de estado con su n&#250;mero, fichas de filtros activos con &#10005;, orden pulsando la cabecera, pesta&#241;as que conservan los filtros e interruptores. Adaptada a m&#243;vil.
+</div>
+
+<div class="alert alert-info">
+  <strong>&#8505; Novedades de la v0.2.3</strong>
+  Filtros y b&#250;squeda en Expediciones (texto en referencia, matr&#237;culas, partes, NIF, origen, destino y mercanc&#237;a; firma; ERP; periodo o rango de fechas de transporte, emisi&#243;n o entrega; orden; casillas para ocultar entregados y anulados), en la Bandeja de revisi&#243;n (texto, origen con el nombre de la fuente, periodo de llegada o resoluci&#243;n, solo con datos que faltan, ocultar entregados en Emitidos, estado de la expedici&#243;n), en Certificados (texto, caducidad, ocultar desactivados) y en Usuarios (correo, rol, ocultar desactivados). Los filtros quedan en la direcci&#243;n de la p&#225;gina y solo cambian lo que se ve.
+</div>
+
+<div class="alert alert-warning">
+  <strong>&#9888; Correcciones de la v0.2.2</strong> (halladas con el entorno de pruebas en modo producci&#243;n)
+  Firma AdES imposible desde la bandeja, la API de PDF y el panel; la lectura de escaneos sin l&#237;mite de tiempo dejaba MADeCa entera sin responder (tambi&#233;n el visor del QR); datos no v&#225;lidos devueltos por la API como error 500 sin motivo; hora del transporte guardada una hora desplazada desde la bandeja e impresa siempre en hora peninsular (ahora con zona: peninsular o de Canarias); MADeCa arrancaba en producci&#243;n sin HTTPS; la carpeta compartida ignoraba ficheros renombrados; n&#250;mero de IVA comunitario del transportista en cabotaje rechazado; lectura de albaranes con bloques titulados (&laquo;Raz&#243;n social:&raquo;, &laquo;(ORIGEN)&raquo;, peso total, &laquo;No precisa&raquo;).
+</div>
+
+<!-- ── DEPENDENCIAS ────────────────────────────────── -->
+<h2>Dependencias</h2>
+<table>
+  <tr><th>Paquete</th><th>Versi&#243;n m&#237;n.</th><th>Uso</th></tr>
+  <tr><td><span class="param-name">fastapi / uvicorn</span></td><td>&gt;=0.115.0 / &gt;=0.32.0</td><td>Web y API</td></tr>
+  <tr><td><span class="param-name">sqlalchemy / alembic / psycopg</span></td><td>&gt;=2.0.35 / &gt;=1.13.3 / &gt;=3.2.3</td><td>Base de datos y migraciones</td></tr>
+  <tr><td><span class="param-name">pydantic / pydantic-settings</span></td><td>&gt;=2.9.0 / &gt;=2.5.2</td><td>Validaci&#243;n y configuraci&#243;n</td></tr>
+  <tr><td><span class="param-name">pypdf</span></td><td>&gt;=6.14.2</td><td>PDF (versi&#243;n con los fallos publicados de 2026 corregidos)</td></tr>
+  <tr><td><span class="param-name">reportlab / weasyprint / qrcode / pillow</span></td><td>&gt;=4.2.5 / &gt;=62.3 / &gt;=8.0 / &gt;=10.4.0</td><td>PDF y QR</td></tr>
+  <tr><td><span class="param-name">pyhanko / cryptography</span></td><td>&gt;=0.25.1 / &gt;=43.0.1</td><td>Firma y cifrado</td></tr>
+  <tr><td><span class="param-name">bcrypt / pyjwt / slowapi / redis</span></td><td>&gt;=4.1.0 / &gt;=2.9.0 / &gt;=0.1.9 / &gt;=5.1.1</td><td>Seguridad</td></tr>
+  <tr><td><span class="param-name">httpx / paramiko / pytesseract</span></td><td>&gt;=0.27.2 / &gt;=5.0.0 / &gt;=0.3.13</td><td>Conectores y OCR</td></tr>
+  <tr><td><span class="param-name">watchdog / boto3 / tzdata</span></td><td>&gt;=5.0.3 / &gt;=1.35.36 / &gt;=2024.1</td><td>Hot-folder, S3, zona horaria</td></tr>
+</table>
+<p>Sistema (en la imagen Docker): Pango/Cairo/GDK-Pixbuf para WeasyPrint y <code>tesseract-ocr</code> + <code>tesseract-ocr-spa</code>.</p>
+
+<!-- ── PENDIENTE ───────────────────────────────────── -->
+<h2>Mejoras pendientes</h2>
+<table>
+  <tr><th>&#193;rea</th><th>Descripci&#243;n</th><th>Prioridad</th></tr>
+    <tr><td>SAP B1 y Holded</td><td>Verificar la correspondencia de campos con instalaciones reales. Holded ya publica una API v2 (<code>/api/v2/waybills</code>): valorar el cambio cuando se pueda leer su referencia.</td><td><span class="badge badge-warn">Media</span></td></tr>
+  <tr><td>a3ERP, Sage 200, Sigrid</td><td>Sin API p&#250;blica: integraci&#243;n v&#237;a hot-folder, conector local o acuerdo con el fabricante.</td><td><span class="badge badge-warn">Media</span></td></tr>
+  <tr><td>M&#233;todo 2 del Apartado Quinto</td><td>Emitir un DeCA sustituto enlazado al original (hoy se hace como alta nueva).</td><td><span class="badge badge-neutral">Baja</span></td></tr>
+  <tr><td>eFTI</td><td>Reglamento (UE) 2020/1056, aplicable en pleno desde el 09/07/2027.</td><td><span class="badge badge-neutral">Baja</span></td></tr>
+</table>
+
+<!-- ── AVISO LEGAL ─────────────────────────────────── -->
+<h2>Aviso legal</h2>
+<div class="card">
+  <div class="card-header">Limitaciones y uso previsto</div>
+  <div class="card-body">
+    <ul style="padding-left:18px; line-height:2; color:var(--text-light); font-size:9pt;">
+      <li>Herramienta de apoyo: la exactitud de los datos del DeCA es responsabilidad del cargador y del transportista (art. 7 Orden FOM/2861/2012).</li>
+      <li>Referencias normativas comprobadas el 09/10/2026; pueden cambiar.</li>
+      <li>El OCR de Azure implica un subencargado del tratamiento y requiere autorizaci&#243;n y contrato.</li>
+      <li>Software proporcionado &laquo;tal cual&raquo;, sin garant&#237;as.</li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  MADeCa &mdash; Documento Electr&#243;nico de Control Administrativo &nbsp;|&nbsp; v0.4.4 &nbsp;|&nbsp; Masoft.es &nbsp;|&nbsp; 2026<br>
+  Aplicaci&#243;n desarrollada por Masoft.es
+</footer>
+
+</body>
+</html>

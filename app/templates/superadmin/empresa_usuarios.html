@@ -1,0 +1,76 @@
+{% extends "superadmin/base.html" %}
+{% block titulo %}Usuarios de {{ tenant.nombre }} — MADeCa Operador{% endblock %}
+{% block contenido %}
+<p><a href="/superadmin/empresas" class="text-light">&larr; Volver a empresas</a></p>
+<h1>Usuarios de {{ tenant.nombre }}</h1>
+
+{% if error %}<div class="alerta error">{{ error }}</div>{% endif %}
+
+{% if password_generada %}
+<div class="alerta exito">
+    Contraseña para <strong>{{ usuario_email }}</strong> — comunícala ahora, no volverá a mostrarse:
+    <div class="clave-generada">{{ password_generada }}</div>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Nuevo usuario</h2>
+    <form method="post" action="/superadmin/empresas/{{ tenant.id }}/usuarios">
+        <div class="form-fila">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-fila">
+            <label for="rol">Rol</label>
+            <select id="rol" name="rol">
+                <option value="operador">Operador (gestiona expediciones)</option>
+                <option value="admin">Administrador (acceso completo)</option>
+                <option value="lectura">Lectura (solo consulta)</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">Crear usuario</button>
+    </form>
+    <p class="text-light" style="margin-top:10px;">La contraseña inicial se genera automáticamente y se muestra una única vez.</p>
+</div>
+
+<div class="card">
+    <table>
+        <thead><tr><th>Correo</th><th>Rol</th><th>Estado</th><th>Alta</th><th></th></tr></thead>
+        <tbody>
+        {% for u in usuarios %}
+            <tr>
+                <td>{{ u.email }}</td>
+                <td>
+                    <form method="post" action="/superadmin/empresas/{{ tenant.id }}/usuarios/{{ u.id }}/rol" style="display:flex; gap:6px;">
+                        <select name="rol">
+                            {% for r in roles_validos %}
+                            <option value="{{ r }}" {% if r == u.rol %}selected{% endif %}>{{ r }}</option>
+                            {% endfor %}
+                        </select>
+                            <button type="submit" class="btn secundario">Cambiar</button>
+                    </form>
+                </td>
+                <td><span class="badge {{ 'activa' if u.activo else 'inactiva' }}">{{ 'activo' if u.activo else 'desactivado' }}</span></td>
+                <td class="text-light">{{ u.fecha_alta | fecha }}</td>
+                <td>
+                    <form method="post" action="/superadmin/empresas/{{ tenant.id }}/usuarios/{{ u.id }}/resetear-password" style="display:inline;">
+                        <button type="submit" class="btn secundario">Resetear contraseña</button>
+                    </form>
+                    {% if u.activo %}
+                    <form method="post" action="/superadmin/empresas/{{ tenant.id }}/usuarios/{{ u.id }}/desactivar" style="display:inline;">
+                        <button type="submit" class="btn peligro">Desactivar</button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="/superadmin/empresas/{{ tenant.id }}/usuarios/{{ u.id }}/activar" style="display:inline;">
+                        <button type="submit" class="btn secundario">Activar</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5" class="text-light">Esta empresa todavía no tiene usuarios.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

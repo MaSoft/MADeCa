@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block titulo %}Fuentes de datos — MADeCa{% endblock %}
+{% block contenido %}
+<h1>Fuentes de datos</h1>
+{% if aviso %}<div class="alerta exito">{{ aviso }}</div>{% endif %}
+{% if error %}<div class="alerta error">{{ error }}</div>{% endif %}
+
+<div class="alerta info">
+    MADeCa lee cada cierto tiempo los albaranes nuevos de estas fuentes y los deja en la
+    <a href="/dashboard/bandeja">bandeja de revisión</a>. Nada se emite sin que alguien lo confirme.
+    Las credenciales se guardan cifradas y no se vuelven a mostrar.
+</div>
+
+<div class="card">
+    <h2>Tus fuentes</h2>
+    <table>
+        <thead><tr><th>Nombre</th><th>Tipo</th><th>Estado</th><th>Última lectura</th><th>Hora</th><th>Resultado</th><th></th></tr></thead>
+        <tbody>
+        {% for f in fuentes %}
+            <tr>
+                <td><a href="/dashboard/fuentes/{{ f.id }}">{{ f.nombre }}</a></td>
+                <td>{{ tipos[f.tipo].titulo if f.tipo in tipos else f.tipo }}</td>
+                <td>{{ 'Activa' if f.activo else 'Pausada' }} · cada {{ f.intervalo_minutos }} min</td>
+                <td>{{ f.ultima_ejecucion | fecha }}</td>
+                <td>{{ f.ultima_ejecucion | hora }}</td>
+                <td>{% if f.ultimo_error %}<span style="color:var(--danger);">{{ f.ultimo_error }}</span>{% else %}{{ f.ultimo_resultado or '' }}{% endif %}</td>
+                <td style="white-space:nowrap;">
+                    <form method="post" action="/dashboard/fuentes/{{ f.id }}/probar" style="display:inline;"><button class="btn secundario" type="submit">Probar</button></form>
+                    <form method="post" action="/dashboard/fuentes/{{ f.id }}/sincronizar" style="display:inline;"><button class="btn secundario" type="submit">Leer ahora</button></form>
+                    <form method="post" action="/dashboard/fuentes/{{ f.id }}/activar" style="display:inline;"><button class="btn secundario" type="submit">{{ 'Pausar' if f.activo else 'Activar' }}</button></form>
+                    <form method="post" action="/dashboard/fuentes/{{ f.id }}/eliminar" style="display:inline;"><button class="btn secundario" type="submit" title="Eliminar fuente">&#10005;</button></form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7" class="text-light">Todavía no hay fuentes. Añade una abajo.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Añadir una fuente</h2>
+    <div class="fuentes-tipos">
+        {% for tipo, clase in tipos.items() if tipo != 'carpeta' or carpeta_disponible %}
+        <a class="fuente-tipo" href="/dashboard/fuentes/nueva?tipo={{ tipo }}">
+            <strong>{{ clase.titulo }}</strong>
+            <span class="text-light">{{ clase.descripcion }}</span>
+        </a>
+        {% endfor %}
+    </div>
+    <p class="text-light">¿Tus documentos están en un NAS o carpeta de tu red sin acceso desde internet? Usa el
+        conector local: lee y extrae los datos en tu equipo y solo envía los datos a MADeCa.</p>
+</div>
+
+<div class="card">
+    <h2>OCR de documentos escaneados</h2>
+    {% if tenant.ocr_tercero_autorizado %}
+        <p>Autorizado el uso de Azure AI Document Intelligence por {{ tenant.ocr_tercero_autorizado_por }}
+            el {{ tenant.ocr_tercero_autorizado_en | fecha }} a las {{ tenant.ocr_tercero_autorizado_en | hora }}.</p>
+        <form method="post" action="/dashboard/fuentes/ocr-tercero">
+            <input type="hidden" name="autorizar" value="no">
+            <button class="btn secundario" type="submit">Retirar la autorización</button>
+        </form>
+    {% else %}
+        <p>Ahora el OCR se hace en el servidor de MADeCa. Azure suele leer mejor fotos y escaneos malos,
+            pero es un tercero que trataría tus documentos.</p>
+        {% if azure_disponible %}
+        <form method="post" action="/dashboard/fuentes/ocr-tercero">
+            <input type="hidden" name="autorizar" value="si">
+            <label><input type="checkbox" name="confirmo" value="si" style="width:auto;">
+                Autorizo a Microsoft (Azure, región UE) como subencargado del tratamiento para leer nuestros documentos
+                (art. 28.2 RGPD).</label>
+            <button class="btn" type="submit" style="margin-top:8px;">Autorizar OCR con Azure</button>
+        </form>
+        {% else %}
+        <p class="text-light">Esta instalación no tiene Azure configurado.</p>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

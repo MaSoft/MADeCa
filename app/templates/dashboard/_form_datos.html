@@ -1,0 +1,113 @@
+{# Formulario de datos del DeCA (Art. 6 FOM/2861/2012). Lo usan el alta
+   manual y la bandeja de revisión; ver app/routers/formulario_deca.py y
+   app/revision.py. Cada campo lleva su estado: falta (obligatorio vacío),
+   o error (no supera la comprobación);
+   static/formulario_deca.js lo actualiza mientras se escribe. #}
+{% set v = valores or {} %}
+{% set faltan_ = faltan or [] %}
+{% set errores_ = errores_campos or {} %}
+
+{% macro campo(nombre, etiqueta, tipo="text", ancho="c6", ayuda="", parte="", papel="", extra="") -%}
+{% set es_obligatorio = nombre in obligatorios %}
+<div class="campo {{ ancho }}{% if nombre in faltan_ %} falta{% endif %}{% if errores_.get(nombre) %} con-error{% endif %}" id="fila-{{ nombre }}" data-campo="{{ nombre }}"{% if es_obligatorio %} data-obligatorio{% endif %}
+     {%- if alternativas.get(nombre) %} data-alternativa="{{ alternativas[nombre] }}"{% endif %}>
+    <label for="campo-{{ nombre }}">{{ etiqueta }}{% if es_obligatorio %}<span class="asterisco" title="Obligatorio (Art. 6)">*</span>{% endif %}</label>
+    <div class="control">
+        <input type="{{ tipo }}" id="campo-{{ nombre }}" name="{{ nombre }}" value="{{ v[nombre] or '' }}" autocomplete="off"
+               {%- if tipos.get(nombre) %} data-validar="{{ tipos[nombre] }}"{% endif %}
+               {%- if parte %} data-parte="{{ parte }}" data-papel="{{ papel }}"{% endif %} {{ extra | safe }}>
+    </div>
+    <p class="nota-campo" id="nota-{{ nombre }}" aria-live="polite">
+        {%- if errores_.get(nombre) %}{{ errores_[nombre] }}
+        {%- elif nombre in faltan_ %}Obligatorio: no aparece en el documento.
+        {%- endif -%}
+    </p>
+    {% if ayuda %}<p class="ayuda-campo">{{ ayuda }}</p>{% endif %}
+</div>
+{%- endmacro %}
+
+<form method="post" action="{{ accion_datos }}" class="formulario-deca" data-formulario-deca novalidate>
+    <div class="rejilla">
+        {{ campo("referencia_externa", "Referencia externa", ayuda="N.º de albarán o pedido con el que se identifica el envío.") }}
+    </div>
+
+    <fieldset>
+        <legend>Cargador contractual <span class="art-legend">Art. 6.a</span></legend>
+        <div class="rejilla">
+            {{ campo("cargador_nombre", "Nombre o razón social", ancho="c4", parte="cargador", papel="nombre") }}
+            {{ campo("cargador_nif", "NIF/CIF", ancho="c2", parte="cargador", papel="nif") }}
+            {{ campo("cargador_domicilio", "Domicilio", parte="cargador", papel="domicilio") }}
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Transportista efectivo <span class="art-legend">Art. 6.b</span></legend>
+        <div class="rejilla">
+            {{ campo("transportista_nombre", "Nombre o razón social", ancho="c4", parte="transportista", papel="nombre") }}
+            {{ campo("transportista_nif", "NIF/CIF", ancho="c2", parte="transportista", papel="nif", ayuda="En cabotaje, su número de IVA de la UE (p. ej. PT…).") }}
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Destinatario <span class="opcional">opcional</span></legend>
+        <div class="rejilla">
+            {{ campo("destinatario_nombre", "Nombre o razón social", ancho="c4", parte="destinatario", papel="nombre") }}
+            {{ campo("destinatario_nif", "NIF/CIF", ancho="c2", parte="destinatario", papel="nif") }}
+            {{ campo("destinatario_domicilio", "Domicilio", parte="destinatario", papel="domicilio") }}
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Origen y destino <span class="art-legend">Art. 6.c</span></legend>
+        <div class="rejilla">
+            {{ campo("origen_direccion", "Lugar de origen", ancho="c3") }}
+            {{ campo("destino_direccion", "Lugar de destino", ancho="c3") }}
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Mercancía <span class="art-legend">Art. 6.d</span></legend>
+        <div class="rejilla">
+            {{ campo("mercancia_naturaleza", "Naturaleza") }}
+            {{ campo("mercancia_peso_kg", "Peso bruto (kg)", ancho="c2", extra='inputmode="decimal"') }}
+            {{ campo("mercancia_magnitud_alternativa", "Otra magnitud", ancho="c4", ayuda="Solo si el peso exacto es difícil de determinar (p. ej. «3 palets», «20 m³»).") }}
+            {{ campo("mercancia_bultos", "Bultos", ancho="c2", extra='inputmode="numeric"') }}
+            {{ campo("mercancia_adr_numero_onu", "ADR · n.º ONU", ancho="c2", ayuda="Solo mercancía peligrosa.") }}
+            {{ campo("mercancia_adr_denominacion", "ADR · denominación", ancho="c2") }}
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Vehículo y fecha <span class="art-legend">Art. 6.e, f, g</span></legend>
+        <div class="rejilla">
+            {{ campo("matricula_vehiculo", "Matrícula del vehículo", ancho="c4", extra='placeholder="1234BBC"') }}
+            {{ campo("pais_matricula_vehiculo", "País", ancho="c2", extra='maxlength="2"', ayuda="ES salvo cabotaje.") }}
+            {{ campo("matricula_remolque", "Matrícula del remolque", ancho="c4", ayuda="Obligatoria en conjuntos articulados.") }}
+            {{ campo("pais_matricula_remolque", "País", ancho="c2", extra='maxlength="2"') }}
+            {{ campo("autorizacion_especial_circulacion", "Autorización especial de circulación", ayuda="Solo si el vehículo circula amparado por una.") }}
+            {{ campo("fecha_transporte", "Fecha y hora del transporte", tipo="datetime-local", ancho="c4") }}
+            <div class="campo c2">
+                <label for="zona_horaria">Hora de</label>
+                <div class="control">{% include 'dashboard/_zona_horaria.html' %}</div>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Otros datos</legend>
+        <div class="rejilla">
+            {{ campo("observaciones", "Observaciones", ayuda="Reservas u otras indicaciones de las partes (Art. 6.h).") }}
+            <div class="campo c6">
+                <label class="casilla-linea"><input type="checkbox" name="finalidad_contractual" value="true" {% if v.finalidad_contractual %}checked{% endif %}>
+                    Finalidad contractual (firmar con AdES)</label>
+            </div>
+        </div>
+    </fieldset>
+
+    <div class="acciones-formulario">
+        <button type="submit" class="btn">{{ texto_boton_datos }}</button>
+        {% if boton_siguiente %}
+        <button type="submit" class="btn secundario" name="despues" value="siguiente">{{ texto_boton_datos }} y revisar el siguiente</button>
+        {% endif %}
+    </div>
+</form>

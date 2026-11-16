@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>DeCA {{ expedicion_id }}</title>
+<style>
+    @page { size: A4; margin: 18mm 16mm; }
+    body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 10.5pt; color: #1a1a2e; }
+    .cabecera { display: flex; justify-content: space-between; align-items: flex-start;
+                border-bottom: 3px solid #1a3a5c; padding-bottom: 10px; margin-bottom: 16px; }
+    .cabecera h1 { font-size: 16pt; font-weight: 700; color: #1a3a5c; margin: 0 0 4px 0; }
+    .cabecera .subtitulo { font-size: 9pt; color: #555; }
+    .cabecera .ref { text-align: right; font-size: 9pt; color: #555; }
+    .cabecera .ref strong { display: block; font-size: 11pt; color: #1a3a5c; }
+    .sello { display: inline-block; margin-top: 6px; padding: 3px 10px; border-radius: 3px;
+              font-size: 8.5pt; font-weight: 700; }
+    .sello.firmado { background: #16a34a; color: #fff; }
+    .sello.no-firmado { background: #e5e7eb; color: #444; }
+    .bloque { margin-bottom: 14px; }
+    .bloque h2 { font-size: 10.5pt; color: #1a3a5c; border-bottom: 1px solid #dde3ea;
+                 padding-bottom: 3px; margin: 0 0 6px 0; }
+    table.datos { width: 100%; border-collapse: collapse; }
+    table.datos td { padding: 3px 4px; vertical-align: top; }
+    table.datos td.etiqueta { width: 32%; color: #555; font-size: 9pt; }
+    table.datos td.valor { font-weight: 600; }
+    .columnas { display: flex; gap: 16px; }
+    .columna { flex: 1; }
+    .pie-qr { margin-top: 22px; padding-top: 14px; border-top: 1px solid #dde3ea;
+              display: flex; align-items: center; gap: 16px; }
+    .pie-qr img { width: 90px; height: 90px; }
+    .pie-qr .info { font-size: 8.5pt; color: #555; }
+    .pie-qr .url { font-family: "DejaVu Sans Mono", monospace; font-size: 8pt; color: #1a3a5c;
+                    word-break: break-all; }
+    .observaciones { font-size: 9.5pt; white-space: pre-wrap; }
+    .adr { color: #ca8a04; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="cabecera">
+    <div>
+        <h1>Documento Electr&oacute;nico de Control Administrativo (DeCA)</h1>
+        <div class="subtitulo">Conforme a la Orden FOM/2861/2012 y la Resoluci&oacute;n de 5 de junio
+            de 2026 (BOE-A-2026-12784)</div>
+        <span class="sello {{ 'firmado' if firmado else 'no-firmado' }}">
+            {{ 'FIRMADO ELECTRÓNICAMENTE (AdES)' if firmado else 'SIN FIRMA ELECTRÓNICA' }}
+        </span>
+    </div>
+    <div class="ref">
+        Referencia externa: {{ deca.referencia_externa }}
+        <strong>{{ expedicion_id }}</strong>
+        Emitido: {{ fecha_emision }}
+    </div>
+</div>
+
+<div class="columnas">
+    <div class="columna bloque">
+        <h2>Cargador contractual</h2>
+        <table class="datos">
+            <tr><td class="etiqueta">Nombre / Raz&oacute;n social</td><td class="valor">{{ deca.cargador.nombre_razon_social }}</td></tr>
+            <tr><td class="etiqueta">NIF/CIF</td><td class="valor">{{ deca.cargador.nif_cif }}</td></tr>
+            <tr><td class="etiqueta">Domicilio</td><td class="valor">{{ deca.cargador.domicilio or '-' }}</td></tr>
+        </table>
+    </div>
+    <div class="columna bloque">
+        <h2>Transportista efectivo</h2>
+        <table class="datos">
+            <tr><td class="etiqueta">Nombre / Raz&oacute;n social</td><td class="valor">{{ deca.transportista.nombre_razon_social }}</td></tr>
+            <tr><td class="etiqueta">NIF/CIF</td><td class="valor">{{ deca.transportista.nif_cif }}</td></tr>
+        </table>
+    </div>
+</div>
+
+{% if deca.destinatario %}
+<div class="bloque">
+    <h2>Destinatario</h2>
+    <table class="datos">
+        <tr><td class="etiqueta">Nombre / Raz&oacute;n social</td><td class="valor">{{ deca.destinatario.nombre_razon_social }}</td></tr>
+        <tr><td class="etiqueta">NIF/CIF</td><td class="valor">{{ deca.destinatario.nif_cif }}</td></tr>
+        <tr><td class="etiqueta">Domicilio</td><td class="valor">{{ deca.destinatario.domicilio or '-' }}</td></tr>
+    </table>
+</div>
+{% endif %}
+
+<div class="columnas">
+    <div class="columna bloque">
+        <h2>Origen y destino</h2>
+        <table class="datos">
+            <tr><td class="etiqueta">Lugar de origen</td><td class="valor">{{ deca.origen_direccion }}</td></tr>
+            <tr><td class="etiqueta">Lugar de destino</td><td class="valor">{{ deca.destino_direccion }}</td></tr>
+            <tr><td class="etiqueta">Fecha del transporte</td><td class="valor">{{ fecha_transporte }}</td></tr>
+        </table>
+    </div>
+    <div class="columna bloque">
+        <h2>Veh&iacute;culo</h2>
+        <table class="datos">
+            <tr><td class="etiqueta">Matr&iacute;cula tractora</td><td class="valor">{{ deca.matricula_vehiculo }}{% if deca.pais_matricula_vehiculo != 'ES' %} ({{ deca.pais_matricula_vehiculo }}){% endif %}</td></tr>
+            <tr><td class="etiqueta">Matr&iacute;cula remolque</td><td class="valor">{% if deca.matricula_remolque %}{{ deca.matricula_remolque }}{% if deca.pais_matricula_remolque != 'ES' %} ({{ deca.pais_matricula_remolque }}){% endif %}{% else %}-{% endif %}</td></tr>
+            {% if deca.autorizacion_especial_circulacion %}
+            <tr><td class="etiqueta">Autorizaci&oacute;n especial de circulaci&oacute;n</td><td class="valor">{{ deca.autorizacion_especial_circulacion }}</td></tr>
+            {% endif %}
+        </table>
+    </div>
+</div>
+
+<div class="bloque">
+    <h2>Mercanc&iacute;a</h2>
+    <table class="datos">
+        <tr><td class="etiqueta">Naturaleza</td><td class="valor">{{ deca.mercancia.naturaleza }}</td></tr>
+        <tr><td class="etiqueta">Peso bruto</td><td class="valor">
+            {% if deca.mercancia.peso_kg %}{{ deca.mercancia.peso_kg | decimal }} kg{% else %}{{ deca.mercancia.magnitud_alternativa }}{% endif %}
+        </td></tr>
+        {% if deca.mercancia.bultos is not none %}
+        <tr><td class="etiqueta">Bultos</td><td class="valor">{{ deca.mercancia.bultos }}</td></tr>
+        {% endif %}
+        {% if deca.mercancia.adr_numero_onu %}
+        <tr><td class="etiqueta">Mercanc&iacute;a peligrosa (ADR)</td>
+            <td class="valor adr">ONU {{ deca.mercancia.adr_numero_onu }} &mdash; {{ deca.mercancia.adr_denominacion }}</td></tr>
+        {% endif %}
+    </table>
+</div>
+
+{% if deca.observaciones %}
+<div class="bloque">
+    <h2>Observaciones</h2>
+    <div class="observaciones">{{ deca.observaciones }}</div>
+</div>
+{% endif %}
+
+<div class="pie-qr">
+    <img src="{{ qr_data_uri }}" alt="Código QR de verificación">
+    <div class="info">
+        Verificaci&oacute;n del documento: escanee el c&oacute;digo QR o acceda directamente a la URL.
+        Acceso libre, sin usuario ni contrase&ntilde;a, conforme al Apartado Tercero de
+        BOE-A-2026-12784.
+        <div class="url">{{ url_publica }}</div>
+    </div>
+</div>
+
+</body>
+</html>

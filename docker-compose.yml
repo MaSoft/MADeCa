@@ -1,0 +1,94 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: madeca
+      POSTGRES_PASSWORD: madeca
+      POSTGRES_DB: madeca
+    volumes:
+      - madeca_pgdata:/var/lib/postgresql/data
+    ports:
+      # Solo en la propia máquina: con 0.0.0.0 la BD (usuario/clave por
+      # defecto) y Redis (sin contraseña) quedaban abiertos a la red.
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U madeca"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://madeca:madeca@db:5432/madeca
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - madeca_storage:/app/storage
+      - madeca_certs:/app/certs
+
+  # Misma imagen que la app: el modo "datos" necesita WeasyPrint (PDF
+  # generado) y los volúmenes de PDF y certificados son compartidos; si no,
+  # los PDF quedaban dentro de este contenedor y la URL del QR fallaba.
+  hotfolder-watcher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-m", "app.adapters.hotfolder_watcher"]
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://madeca:madeca@db:5432/madeca
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./hotfolder_watch:/app/hotfolder_watch
+      - madeca_storage:/app/storage
+      - madeca_certs:/app/certs
+
+  # Fuentes de datos automáticas (SharePoint, Drive, Dropbox, SFTP, ERP):
+  # deja los documentos y albaranes nuevos en la bandeja de revisión.
+  conectores:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://madeca:madeca@db:5432/madeca
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - madeca_storage:/app/storage
+    command: ["python", "-m", "app.conectores.worker"]
+
+volumes:
+  madeca_pgdata:
+  madeca_storage:
+  madeca_certs:

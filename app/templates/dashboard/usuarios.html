@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block titulo %}Usuarios — MADeCa{% endblock %}
+{% block contenido %}
+<h1>Usuarios de la empresa</h1>
+
+{% if error %}<div class="alerta error">{{ error }}</div>{% endif %}
+
+<div class="card">
+    <h2>Nuevo usuario</h2>
+    <form method="post" action="/dashboard/usuarios">
+        <div class="form-fila">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-fila">
+            <label for="password">Contraseña inicial</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-fila">
+            <label for="rol">Rol</label>
+            <select id="rol" name="rol">
+                <option value="operador">Operador (gestiona expediciones)</option>
+                <option value="admin">Administrador (acceso completo)</option>
+                <option value="lectura">Lectura (solo consulta)</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">Crear usuario</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Usuarios existentes</h2>
+    <form class="filtros" hx-get="/dashboard/usuarios" hx-target="#tabla-usuarios" hx-select="#tabla-usuarios"
+          hx-swap="outerHTML" hx-push-url="true" hx-trigger="keyup changed delay:400ms from:input[type=search], change">
+        <label class="campo ancho">Buscar
+            <input type="search" name="buscar" value="{{ filtros.buscar }}" maxlength="100" placeholder="Correo electrónico">
+        </label>
+        <label class="campo">Rol
+            <select name="rol">
+                <option value="">Todos</option>
+                {% for r in roles_validos %}<option value="{{ r }}" {% if filtros.rol == r %}selected{% endif %}>{{ r }}</option>{% endfor %}
+            </select>
+        </label>
+        <label class="casilla"><input type="checkbox" name="ocultar_desactivados" value="1" {% if filtros.ocultar_desactivados %}checked{% endif %}> Ocultar desactivados</label>
+        <a class="btn secundario limpiar" href="/dashboard/usuarios">Quitar filtros</a>
+    </form>
+    <div id="tabla-usuarios">
+    <table>
+        <thead><tr><th>Correo</th><th>Rol</th><th>Estado</th><th>Alta</th><th></th></tr></thead>
+        <tbody>
+        {% for u in usuarios %}
+            <tr>
+                <td>{{ u.email }}</td>
+                <td>
+                    {% if u.id != sesion.usuario_id %}
+                    <form method="post" action="/dashboard/usuarios/{{ u.id }}/rol">
+                        <select name="rol">
+                            {% for r in roles_validos %}
+                            <option value="{{ r }}" {% if r == u.rol %}selected{% endif %}>{{ r }}</option>
+                            {% endfor %}
+                        </select>
+                            <button type="submit" class="btn secundario">Cambiar</button>
+                    </form>
+                    {% else %}
+                    {{ u.rol }}
+                    {% endif %}
+                </td>
+                <td><span class="badge {{ 'activa' if u.activo else 'inactiva' }}">{{ 'activo' if u.activo else 'desactivado' }}</span></td>
+                <td class="text-light">{{ u.fecha_alta | fecha }}</td>
+                <td>
+                    {% if u.id == sesion.usuario_id %}
+                    <span class="text-light">(tu usuario)</span>
+                    {% elif u.activo %}
+                    <form method="post" action="/dashboard/usuarios/{{ u.id }}/desactivar" style="display:inline;">
+                        <button type="submit" class="btn peligro">Desactivar</button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="/dashboard/usuarios/{{ u.id }}/activar" style="display:inline;">
+                        <button type="submit" class="btn secundario">Activar</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5" class="text-light">{% if filtros.buscar or filtros.rol or filtros.ocultar_desactivados %}No hay usuarios que coincidan con el filtro.{% else %}Todavía no hay más usuarios.{% endif %}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block titulo %}Revisar borrador — MADeCa{% endblock %}
+{% block contenido %}
+<div class="migas">
+    <a href="/dashboard/bandeja">&larr; Bandeja de revisión</a>
+    {% if quedan %}<span class="text-light">· {{ quedan }} {{ 'pendiente más' if quedan == 1 else 'pendientes más' }}</span>{% endif %}
+</div>
+<h1>Revisar: {{ b.nombre_documento or b.referencia_fuente }}</h1>
+
+{% if aviso %}<div class="alerta exito">{{ aviso }}</div>{% endif %}
+{% if error %}
+<div class="alerta error">
+    {% if errores_campos or faltan %}No se ha emitido el DeCA: corrige los datos señalados en rojo.
+    {% else %}{{ error | replace("Value error, ", "") }}{% endif %}
+</div>
+{% endif %}
+{% if duplicado %}
+<div class="alerta advertencia">
+    Ya existe una expedición con la referencia <strong>{{ duplicado.referencia_externa }}</strong>, emitida el
+    {{ duplicado.fecha_emision | fecha }} ({{ nombres_estado.get(duplicado.estado, duplicado.estado) | lower }}).
+    Comprueba que no sea el mismo envío. <a href="/dashboard/expediciones/{{ duplicado.id }}" target="_blank" rel="noopener">Ver expedición</a>
+</div>
+{% endif %}
+{% for a in otros_avisos %}<div class="alerta error">{{ a }}</div>{% endfor %}
+
+<div class="alerta info">
+    Comprueba cada dato con el documento original antes de emitir: el cargador responde de los datos de las
+    partes, origen, destino y mercancía, y el transportista de la autorización, la fecha y la matrícula
+    (Art. 7 de la Orden FOM/2861/2012).
+</div>
+
+<div class="revision">
+    {% if b.ruta_documento %}
+    <div class="card revision-documento">
+        <div class="doc-cabecera">
+            <h2>Documento original</h2>
+            <a href="/dashboard/bandeja/{{ b.id }}/documento" target="_blank" rel="noopener" class="limpiar">Abrir a tamaño real</a>
+        </div>
+        {% if paginas_doc %}
+        {# Páginas como imagen con un recuadro por dato leído: al entrar en un
+           campo se señala aquí (static/formulario_deca.js). #}
+        <label class="interruptor ver-marcas"><input type="checkbox" data-ver-marcas>
+            <span class="pista" aria-hidden="true"></span>Ver dónde se leyó cada dato</label>
+        <div class="doc-paginas" data-doc-paginas>
+            {% for n in range(paginas_doc) %}
+            <div class="doc-pagina">
+                <img src="/dashboard/bandeja/{{ b.id }}/pagina/{{ n }}" alt="Página {{ n + 1 }} del documento original" loading="lazy">
+                {% for campo, cajas in marcas.items() %}{% for c in cajas if c.pagina == n %}
+                <button type="button" class="marca-dato" data-marca="{{ campo }}" title="{{ campos_deca[campo].texto }}"
+                        style="left:{{ '%.2f' % (c.x0 * 100 - 0.6) }}%;top:{{ '%.2f' % (c.y0 * 100 - 0.4) }}%;width:{{ '%.2f' % ((c.x1 - c.x0) * 100 + 1.2) }}%;height:{{ '%.2f' % ((c.y1 - c.y0) * 100 + 0.8) }}%">
+                    <span>{{ campos_deca[campo].texto }}</span>
+                </button>
+                {% endfor %}{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% elif (b.nombre_documento or '').lower().endswith('.pdf') %}
+        <iframe src="/dashboard/bandeja/{{ b.id }}/documento" title="Documento original" style="width:100%; height:70vh; border:1px solid var(--border, #ddd);"></iframe>
+        {% else %}
+        {# Foto o escaneo: ajustado al ancho; en un iframe salía a tamaño real y cortado. #}
+        <a href="/dashboard/bandeja/{{ b.id }}/documento" target="_blank" rel="noopener" title="Abrir a tamaño real">
+            <img src="/dashboard/bandeja/{{ b.id }}/documento" alt="Documento original" style="display:block; width:100%; height:auto; border:1px solid var(--border, #ddd);">
+        </a>
+        {% endif %}
+        <p class="text-light">Leído {% if b.motor_ocr %}con OCR ({{ b.motor_ocr }}){% else %}del texto del PDF{% endif %}.
+            Se borra al emitir o descartar.</p>
+    </div>
+    {% endif %}
+    <div class="card revision-datos">
+        <h2>Datos del DeCA</h2>
+        {% if b.estado == 'pendiente' and sesion.rol in ("admin", "operador") %}
+
+        {# Panel de comprobación: cada dato es un enlace a su campo.
+           static/formulario_deca.js lo mantiene al día mientras se escribe. #}
+        <div class="comprobacion{% if not faltan %} completa{% endif %}" data-comprobacion data-total="{{ obligatorios | length }}">
+            <div class="comprobacion-estado">
+                <span class="indicador" aria-hidden="true"></span>
+                <strong data-resumen>{% if faltan %}Faltan {{ faltan | length }} de {{ obligatorios | length }} datos obligatorios{% else %}Están todos los datos obligatorios{% endif %}</strong>
+            </div>
+            <ul class="lista-comprobacion">
+                {% for c in obligatorios %}
+                <li class="{{ 'falta' if c in faltan else 'oculto' }}" data-para="{{ c }}">
+                    <a href="#campo-{{ c }}" data-ir="{{ c }}">{{ campos_deca[c].texto }}</a>
+                    <span class="art">{{ texto_articulo(c) }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% if errores_campos %}
+            <div class="grupo-comprobacion error">
+                <strong>Datos que no son válidos</strong>
+                <ul>
+                    {% for c, mensaje in errores_campos.items() %}
+                    <li data-error-para="{{ c }}"><a href="#campo-{{ c }}" data-ir="{{ c }}">{{ campos_deca[c].texto }}</a><span>{{ mensaje }}</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        {% include "dashboard/_form_datos.html" %}
+        <form method="post" action="/dashboard/bandeja/{{ b.id }}/descartar" class="acciones-descartar">
+            <button type="submit" class="btn secundario">&#10005; Descartar este borrador</button>
+            {% if boton_siguiente %}<button type="submit" class="btn secundario" name="despues" value="siguiente">&#10005; Descartar y revisar el siguiente</button>{% endif %}
+        </form>
+        {% else %}
+            <p>Este borrador está {{ b.estado }}.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

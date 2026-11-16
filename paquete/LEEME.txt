@@ -1,0 +1,40 @@
+MADeCa — Masoft.es (https://masoft.es)
+======================================
+
+Emisión y gestión del Documento Electrónico de Control Administrativo
+(DeCA) del transporte de mercancías por carretera.
+
+Software libre bajo licencia MIT. Lee LICENCIA.txt.
+
+Necesitas
+---------
+- Un equipo Linux x86_64 de cualquier distribución (Ubuntu, Debian, Rocky,
+  Alma, RHEL, Fedora, openSUSE...), físico, virtual o VPS, con 4 GB de
+  memoria (2 GB como mínimo) y 10 GB libres. Docker se instala solo (del
+  repositorio oficial o, sin internet, desde docker/ de este paquete).
+  En Windows: INSTALAR_EN_WINDOWS.bat de la carpeta INSTALL (WSL2).
+- Una dirección (dominio) por la que llegar a MADeCa con HTTPS. El QR del
+  DeCA lo abre el móvil del inspector desde internet, por HTTPS y sin
+  contraseña (Apartado Tercero de la Resolución BOE-A-2026-12784).
+
+Instalación rápida
+------------------
+    tar xzf madeca-<versión>.tar.gz
+    cd madeca-<versión>
+    sudo ./madeca.sh instalar
+
+El script pregunta cómo se llega a MADeCa (publico: certificado automático;
+propio: tu certificado; proxy: detrás de tu nginx/IIS; prueba: red local),
+el dominio, la zona horaria y los datos de la empresa, y al terminar
+muestra el usuario y la contraseña del administrador. Sin internet:
+añade --sin-internet. Todas las opciones: ./madeca.sh
+Todo el detalle, paso a paso y con capturas: GUIA_INSTALACION_MADeCa.html.
+
+Después
+-------
+    sudo /opt/madeca/madeca.sh estado      ver cómo está
+    sudo /opt/madeca/madeca.sh copia       copia de seguridad
+    sudo /opt/madeca/madeca.sh             todas las órdenes
+
+Los DeCA deben conservarse al menos un año (Apartado Segundo.4 de la
+Resolución BOE-A-2026-12784): haz copias y guárdalas fuera del servidor.

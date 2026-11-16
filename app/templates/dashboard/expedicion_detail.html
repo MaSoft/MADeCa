@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block titulo %}Expedición {{ exp.referencia_externa }} — MADeCa{% endblock %}
+{% block contenido %}
+<p><a href="/dashboard/expediciones" class="text-light">&larr; Volver al listado</a></p>
+<h1>Expedición {{ exp.referencia_externa }}</h1>
+{% if error %}<div class="alerta error">{{ error }}</div>{% endif %}
+{% if aviso %}<div class="alerta exito">{{ aviso }}</div>{% endif %}
+
+<div class="card">
+    <h2>Estado y disponibilidad</h2>
+    <p>
+        Estado: <span class="badge {{ exp.estado }}">{{ nombres_estado.get(exp.estado, exp.estado) }}</span>
+        &nbsp; URL pública: <span class="badge {{ 'activa' if url_activa else 'inactiva' }}">{{ 'activa' if url_activa else 'inactiva' }}</span>
+        &nbsp; Firma: {% if exp.firmado %}<span class="badge firmado">AdES</span>{% else %}sin firmar (no exigida por la norma para este DeCA){% endif %}
+    </p>
+    <p class="mono" style="word-break:break-all;">{{ url_publica }}</p>
+    <p>
+        <a class="btn" href="{{ url_publica }}" target="_blank" rel="noopener">Ver PDF público</a>
+        <a class="btn secundario" href="/dashboard/expediciones/{{ exp.id }}/pdf">Descargar PDF para el conductor</a>
+        <a class="btn secundario" href="/dashboard/expediciones/{{ exp.id }}/qr.png">Descargar QR</a>
+        {% if exp.estado == 'en_transito' %}
+        <form method="post" action="/dashboard/expediciones/{{ exp.id }}/finalizar" style="display:inline;">
+            <button type="submit" class="btn secundario">Marcar como entregado</button>
+        </form>
+        {% endif %}
+    </p>
+    {% if url_contraparte %}
+    <p><strong>Enlace para la otra parte</strong> (cargador o transportista): envíaselo para que
+        pueda descargar el DeCA durante un año (Apartado Segundo.4). No lo publiques: es privado.</p>
+    <p class="mono" style="word-break:break-all;">{{ url_contraparte }}</p>
+    {% endif %}
+    {% if exp.fecha_finalizacion_servicio %}
+    <p class="text-light">Servicio finalizado el {{ exp.fecha_finalizacion_servicio | fecha }} a las {{ exp.fecha_finalizacion_servicio | hora }}.
+        La URL pública podrá desactivarse a partir de 7 días después de esa fecha
+        (Apartado Tercero.5, BOE-A-2026-12784).</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Metadatos de la expedición</h2>
+    <p class="text-light">
+        {% if exp.datos_deca and exp.datos_deca.get('cargador') %}
+        MADeCa redactó el PDF con los datos recibidos (cargador, transportista, mercancía, etc.),
+        tras comprobar su formato (NIF, matrícula, fechas). La exactitud de los datos es
+        responsabilidad de quien los aporta. Consulta el PDF público para ver el contenido completo.
+        {% else %}
+        El contenido del documento (cargador, transportista, mercancía, etc.) lo aporta
+        el PDF del ERP tal cual — MADeCa no lo redacta ni lo valida, solo indexa estos
+        metadatos operativos y estampa el QR. Consulta el PDF público para ver el
+        contenido completo.
+        {% endif %}
+    </p>
+    <table>
+        <tr><th>Referencia externa</th><td class="mono">{{ exp.referencia_externa }}</td></tr>
+        <tr><th>ERP de origen</th><td>{{ exp.erp_origen }}</td></tr>
+        <tr><th>Matrícula</th><td>{{ exp.matricula_vehiculo }}{% if exp.matricula_remolque %} / {{ exp.matricula_remolque }}{% endif %}</td></tr>
+        {% set zona_exp = (exp.datos_deca or {}).get('zona_horaria') %}
+        <tr><th>Fecha transporte</th><td>{{ exp.fecha_transporte | fecha(zona=zona_exp) }}</td></tr>
+        <tr><th>Hora transporte</th><td>{{ exp.fecha_transporte | hora(zona=zona_exp) }} ({{ zona_exp | nombre_zona }})</td></tr>
+        <tr><th>Tamaño del PDF</th><td>{{ (exp.tamano_bytes / 1024) | round(1) }} KB</td></tr>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Modificaciones durante el servicio</h2>
+    <p class="text-light">
+        Apartado Quinto (método 1): los datos nuevos y el motivo se añaden al mismo PDF y los
+        anteriores quedan marcados como no válidos. La URL y el QR no cambian. Después hay que
+        entregar el PDF modificado al conductor.
+    </p>
+    {% if modificaciones %}
+    <table>
+        <thead><tr><th>N.º</th><th>Fecha</th><th>Hora</th><th>Motivo</th><th>Cambios</th><th>Origen</th></tr></thead>
+        <tbody>
+        {% for m in modificaciones %}
+            <tr>
+                <td>{{ m.numero }}</td>
+                <td>{{ m.fecha | fecha }}</td>
+                <td>{{ m.fecha | hora }}</td>
+                <td>{{ m.motivo }}</td>
+                <td>{% for c in m.cambios %}{{ c.campo }}: <s>{{ c.anterior }}</s> &rarr; {{ c.nuevo }}{% if not loop.last %}<br>{% endif %}{% endfor %}</td>
+                <td class="text-light">{{ m.origen }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    {% if exp.estado == 'en_transito' and sesion.rol in ('admin', 'operador') %}
+    <form method="post" action="/dashboard/expediciones/{{ exp.id }}/modificar">
+        <div class="form-fila"><label>Motivo de la modificación</label><input type="text" name="motivo" required minlength="3" maxlength="1000"></div>
+        {% for i in (1, 2, 3) %}
+        <div class="form-fila">
+            <label>Dato {{ i }}{% if i > 1 %} (opcional){% endif %}</label>
+            <select name="campo_{{ i }}">
+                <option value="">—</option>
+                {% for clave, nombre in campos_indexados.items() %}<option value="{{ clave }}">{{ nombre }}</option>{% endfor %}
+                <option value="otro">Otro dato (escríbelo)</option>
+            </select>
+            <input type="text" name="campo_otro_{{ i }}" placeholder="Nombre del dato si es «Otro»" maxlength="100">
+            <input type="text" name="anterior_{{ i }}" placeholder="Valor anterior" maxlength="500">
+            <input type="text" name="nuevo_{{ i }}" placeholder="Valor nuevo" maxlength="500">
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn">Añadir modificación al DeCA</button>
+    </form>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Actividad</h2>
+    <ol class="historial">
+        {% for p in pasos %}
+        <li class="paso-historial {{ p.accion }}">
+            <span class="punto" aria-hidden="true"></span>
+            <div class="paso-cuerpo">
+                <div class="paso-linea"><strong>{{ p.texto }}</strong>
+                    <span class="paso-fecha">{{ p.fecha | fecha }} · {{ p.fecha | hora }}</span></div>
+                <div class="paso-quien">{{ p.quien }}</div>
+                {% if p.detalle %}<div class="paso-detalle">{{ p.detalle }}</div>{% endif %}
+            </div>
+        </li>
+        {% else %}
+        <li class="text-light">Sin historial.</li>
+        {% endfor %}
+    </ol>
+</div>
+
+<div class="card">
+    <h2>Registro de accesos (auditoría)</h2>
+    <table>
+        <thead><tr><th>Fecha</th><th>Hora</th><th>IP</th><th>Resultado</th><th>User-Agent</th></tr></thead>
+        <tbody>
+        {% for a in accesos %}
+            <tr>
+                <td>{{ a.timestamp | fecha }}</td>
+                <td>{{ a.timestamp | hora(True) }}</td>
+                <td class="mono">{{ a.ip }}</td>
+                <td>{{ a.resultado }}</td>
+                <td class="text-light">{{ a.user_agent or '-' }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5" class="text-light">Sin escaneos todavía.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

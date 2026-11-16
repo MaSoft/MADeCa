@@ -1,0 +1,18 @@
+# Proxy HTTPS de MADeCa con el certificado PROPIO de la empresa (comprado o
+# de su entidad de certificación): madeca.sh instalar --acceso propio.
+# Ficheros PEM en /opt/madeca/certificado (certificado con la cadena completa
+# y clave sin contraseña). Para cambiarlo: sudo ./madeca.sh certificado.
+# MADeCa exige HTTPS (Apartado Tercero.1 BOE-A-2026-12784).
+{
+	auto_https disable_certs
+}
+
+{$DOMINIO} {
+	tls /certificado/certificado.pem /certificado/clave.pem
+	encode gzip
+	request_body {
+		max_size 25MB
+	}
+	reverse_proxy app:8000
+	header Strict-Transport-Security "max-age=31536000"
+}

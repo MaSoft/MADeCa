@@ -1,0 +1,44 @@
+{% import "dashboard/_filtros.html" as f with context %}
+{{ f.resumen(total, pag, "expedición", "expediciones", "/dashboard/expediciones") }}
+{% if filas %}
+<div class="tabla-scroll">
+<table>
+    <thead>
+        <tr>
+            {{ f.cabecera("Referencia", "referencia", "referencia_desc") }}
+            <th>ERP</th>
+            {{ f.cabecera("Matrícula", "matricula", "matricula_desc") }}
+            {{ f.cabecera("Fecha transporte", "transporte_desc", "transporte_asc") }}
+            <th>Hora</th>
+            {{ f.cabecera("Estado", "estado", "estado_desc") }}
+            <th>URL pública</th>
+            <th>Firmado</th>
+            <th>Escaneos</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for fila in filas %}
+        <tr>
+            <td class="mono">{{ fila.exp.referencia_externa }}</td>
+            <td>{{ fila.exp.erp_origen }}</td>
+            <td class="mono">{{ fila.exp.matricula_vehiculo }}</td>
+            <td>{{ fila.exp.fecha_transporte | fecha }}</td>
+            <td>{{ fila.exp.fecha_transporte | hora }}</td>
+            <td><span class="badge {{ fila.exp.estado }}">{{ nombres_estado.get(fila.exp.estado, fila.exp.estado) }}</span></td>
+            <td><span class="badge {{ 'activa' if fila.url_activa else 'inactiva' }}">
+                {{ 'activa' if fila.url_activa else 'inactiva' }}</span></td>
+            <td>{% if fila.exp.firmado %}<span class="badge firmado">AdES</span>{% else %}—{% endif %}</td>
+            <td>{{ fila.num_escaneos }}</td>
+            <td><a class="btn secundario" href="/dashboard/expediciones/{{ fila.exp.id }}">Ver</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{{ f.paginador(pag) }}
+{% elif not visibles %}
+{{ f.sin_resultados("No hay ningún estado marcado", "Marca En tránsito, Entregados o Anulados para ver expediciones.", "/dashboard/expediciones") }}
+{% else %}
+{{ f.sin_resultados("No hay expediciones con estos filtros", "Prueba con otro texto u otras fechas.", "/dashboard/expediciones") }}
+{% endif %}

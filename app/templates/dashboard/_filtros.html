@@ -1,0 +1,120 @@
+{# Componentes de las barras de filtros (Expediciones y Bandeja).
+   Se importan con contexto: {% import "dashboard/_filtros.html" as f with context %}
+   El comportamiento (desplegables, fichas, cabeceras) está en static/filtros.js:
+   la CSP del panel no admite JavaScript en línea. #}
+
+{% macro icono(nombre, tam=16) -%}
+<svg class="icono" width="{{ tam }}" height="{{ tam }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{%- if nombre == "buscar" %}<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+{%- elif nombre == "calendario" %}<rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>
+{%- elif nombre == "ajustes" %}<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>
+{%- elif nombre == "flecha" %}<path d="m6 9 6 6 6-6"/>
+{%- elif nombre == "cerrar" %}<path d="M18 6 6 18M6 6l12 12"/>
+{%- elif nombre == "descargar" %}<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>
+{%- elif nombre == "alerta" %}<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h0"/>
+{%- elif nombre == "correcto" %}<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>
+{%- elif nombre == "vacio" %}<path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="m3 7.5 9 4.5 9-4.5M12 12v9"/>
+{%- endif %}
+</svg>
+{%- endmacro %}
+
+{% macro buscador(valor, texto_ayuda) -%}
+<label class="buscador">
+    {{ icono("buscar", 18) }}
+    <input type="search" name="buscar" value="{{ valor }}" maxlength="100" placeholder="{{ texto_ayuda }}" aria-label="Buscar" autocomplete="off">
+</label>
+{%- endmacro %}
+
+{# Botón «Fecha» con su panel: a qué fecha se aplica (si hay varias),
+   periodos rápidos y rango. `clase_fecha_de` permite ocultarlo por CSS. #}
+{% macro desplegable_fecha(fechas_de, clase_fecha_de="") -%}
+<details class="desplegable" data-desplegable>
+    <summary class="boton-filtro">
+        {{ icono("calendario") }}
+        <span id="resumen-fecha" class="etiqueta-filtro{% if resumen_fecha != 'Cualquier fecha' %} activo{% endif %}">{{ resumen_fecha }}</span>
+        {{ icono("flecha", 14) }}
+    </summary>
+    <div class="panel-desplegable">
+        {% if fechas_de %}
+        <div class="{{ clase_fecha_de }}">
+            <div class="panel-titulo">Aplicar a la fecha de</div>
+            <div class="segmentado">
+                {% for clave, texto in fechas_de.items() %}
+                <label><input type="radio" name="fecha_de" value="{{ clave }}" {% if filtros.fecha_de == clave %}checked{% endif %}><span>{{ texto }}</span></label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="panel-titulo">Periodo</div>
+        <div class="pastillas">
+            {% for clave, texto in periodos.items() if clave != "rango" %}
+            <label class="pastilla"><input type="radio" name="periodo" value="{{ clave }}" {% if filtros.periodo == clave %}checked{% endif %}><span>{{ texto }}</span></label>
+            {% endfor %}
+            <input type="radio" name="periodo" value="rango" hidden {% if filtros.periodo == "rango" %}checked{% endif %}>
+        </div>
+        <div class="panel-titulo">Entre fechas</div>
+        <div class="rango-fechas">
+            <label>Desde<input type="date" name="desde" value="{{ filtros.desde }}"></label>
+            <label>Hasta<input type="date" name="hasta" value="{{ filtros.hasta }}"></label>
+        </div>
+        <p class="panel-nota">Días en {{ zona_predeterminada() | nombre_zona }}. «Hasta» incluye el día entero.</p>
+    </div>
+</details>
+{%- endmacro %}
+
+{# Cabecera de columna que ordena al pulsarla. #}
+{% macro cabecera(texto, asc, desc) -%}
+{% set o = orden_columna(asc, desc) %}
+<th aria-sort="{{ {'asc': 'ascending', 'desc': 'descending'}.get(o.sentido, 'none') }}">
+    <button type="button" class="ordenar{% if o.activo %} activo {{ o.sentido }}{% endif %}" data-orden="{{ o.siguiente }}" title="Ordenar por {{ texto | lower }}">
+        {{ texto }}<span class="flecha" aria-hidden="true"></span>
+    </button>
+</th>
+{%- endmacro %}
+
+{# Total, fichas de los filtros activos y «Limpiar filtros». #}
+{% macro resumen(total, pag, singular, plural, url_limpiar) -%}
+<div class="resumen-resultados">
+    <div class="total">
+        <strong>{{ total }}</strong> {{ singular if total == 1 else plural }}
+        {% if pag and pag.paginas > 1 %}<span class="text-light">· {{ pag.desde }}–{{ pag.hasta }}</span>{% endif %}
+    </div>
+    <div class="fichas">
+        {% for f in fichas %}
+        <button type="button" class="ficha-activa" data-quitar="{{ f.campos }}" title="Quitar este filtro">{{ f.texto }}{{ icono("cerrar", 13) }}</button>
+        {% endfor %}
+        {% if hay_filtros %}<a class="limpiar" href="{{ url_limpiar }}">Limpiar filtros</a>{% endif %}
+        {% if url_exportar and puede_exportar and total %}
+        <a class="boton-exportar" href="{{ url_exportar }}" title="Descargar estas {{ total }} expediciones en Excel">{{ icono("descargar", 15) }}Exportar a Excel</a>
+        {% endif %}
+    </div>
+</div>
+{% if error_fechas %}<div class="alerta error">{{ error_fechas }} No se ha aplicado el filtro de fechas.</div>{% endif %}
+{%- endmacro %}
+
+{% macro sin_resultados(titulo, texto, url_limpiar) -%}
+<div class="sin-resultados">
+    {{ icono("vacio", 40) }}
+    <strong>{{ titulo }}</strong>
+    <span>{{ texto }}</span>
+    {% if hay_filtros %}<a class="btn secundario" href="{{ url_limpiar }}">Limpiar filtros</a>{% endif %}
+</div>
+{%- endmacro %}
+
+{# Paginador: botones que cambian la página del formulario de filtros
+   (static/filtros.js); conserva filtros y orden. #}
+{% macro paginador(pag) -%}
+{% if pag and pag.paginas > 1 %}
+<nav class="paginador" aria-label="Páginas">
+    <span class="paginador-info">{{ pag.desde }}–{{ pag.hasta }} de {{ total }}</span>
+    <div class="paginador-botones">
+        <button type="button" class="pagina-boton" data-pagina="{{ pag.pagina - 1 }}" {% if pag.pagina == 1 %}disabled{% endif %} aria-label="Página anterior">&#8249; Anterior</button>
+        {% for n in pag.ventana %}
+        {% if n is none %}<span class="pagina-salto">…</span>
+        {% else %}<button type="button" class="pagina-boton{% if n == pag.pagina %} actual{% endif %}" data-pagina="{{ n }}" {% if n == pag.pagina %}aria-current="page"{% endif %}>{{ n }}</button>{% endif %}
+        {% endfor %}
+        <button type="button" class="pagina-boton" data-pagina="{{ pag.pagina + 1 }}" {% if pag.pagina == pag.paginas %}disabled{% endif %} aria-label="Página siguiente">Siguiente &#8250;</button>
+    </div>
+</nav>
+{% endif %}
+{%- endmacro %}

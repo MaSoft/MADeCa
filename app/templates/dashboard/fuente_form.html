@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}{{ clase.titulo }} — MADeCa{% endblock %}
+{% block contenido %}
+<p><a href="/dashboard/fuentes" class="text-light">&larr; Volver a las fuentes</a></p>
+<h1>{{ clase.titulo }}</h1>
+<p class="text-light">{{ clase.descripcion }}</p>
+
+<div class="card">
+    <form method="post" action="{{ '/dashboard/fuentes/' ~ fuente.id if fuente else '/dashboard/fuentes/nueva' }}">
+        <input type="hidden" name="tipo" value="{{ clase.tipo }}">
+        <div class="form-fila"><label>Nombre de esta fuente</label><input type="text" name="nombre" value="{{ nombre }}" maxlength="150" required></div>
+        <div class="form-fila"><label>Leer cada (minutos)</label><input type="number" name="intervalo" min="5" max="1440" value="{{ intervalo }}" style="width:8em;"></div>
+        {% for c in clase.CAMPOS %}
+        <div class="form-fila">
+            <label>{{ c.etiqueta }}{% if not c.obligatorio %} (opcional){% endif %}</label>
+            {% if c.secreto %}
+                {% if c.nombre in ('credenciales_json', 'clave_privada') %}
+                <textarea name="{{ c.nombre }}" rows="4" autocomplete="off" placeholder="{{ 'Guardado: déjalo vacío para no cambiarlo' if valores.get(c.nombre ~ '__guardado') else '' }}"></textarea>
+                {% else %}
+                <input type="password" name="{{ c.nombre }}" autocomplete="new-password" placeholder="{{ 'Guardado: déjalo vacío para no cambiarlo' if valores.get(c.nombre ~ '__guardado') else '' }}">
+                {% endif %}
+            {% elif c.nombre == 'mapeo' %}
+                <textarea name="{{ c.nombre }}" rows="5" class="mono">{{ valores.get(c.nombre, '') }}</textarea>
+            {% else %}
+                <input type="text" name="{{ c.nombre }}" value="{{ valores.get(c.nombre, '') }}">
+            {% endif %}
+            {% if c.ayuda %}<p class="text-light" style="margin:4px 0 0 0;">{{ c.ayuda }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn">{{ 'Guardar cambios' if fuente else 'Crear fuente' }}</button>
+    </form>
+</div>
+{% endblock %}

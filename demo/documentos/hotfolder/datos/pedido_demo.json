@@ -1,0 +1,28 @@
+{
+  "referencia_externa": "ALB-DEMO-HF-002",
+  "cargador": {
+    "nombre_razon_social": "Distribuciones Demo SL",
+    "nif_cif": "B00345678",
+    "domicilio": "Calle Industria 14, 28001 Madrid"
+  },
+  "transportista": {
+    "nombre_razon_social": "Transportes Rápidos Demo SL",
+    "nif_cif": "B00654327"
+  },
+  "destinatario": {
+    "nombre_razon_social": "Cliente Final Demo SA",
+    "nif_cif": "A00468132",
+    "domicilio": "Polígono Sur, parcela 4, 41001 Sevilla"
+  },
+  "origen_direccion": "Nave 3, Polígono Norte, Getafe (Madrid)",
+  "destino_direccion": "Polígono Sur, parcela 4, 41001 Sevilla",
+  "mercancia": {
+    "naturaleza": "Palés de material eléctrico",
+    "peso_kg": 1250.5,
+    "bultos": 12
+  },
+  "fecha_transporte": "2026-11-17T08:00:00",
+  "matricula_vehiculo": "1234BCD",
+  "matricula_remolque": "R5678BBC",
+  "observaciones": "Expedición de demostración"
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}MADeCa{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ estatico('favicon.svg') }}">
+    <link rel="stylesheet" href="{{ estatico('css/dashboard.css') }}">
+    <script src="{{ estatico('htmx.min.js') }}"></script>
+    <script src="{{ estatico('filtros.js') }}" defer></script>
+    <script src="{{ estatico('formulario_deca.js') }}" defer></script>
+    <script src="{{ estatico('bandeja.js') }}" defer></script>
+</head>
+<body>
+{% if sesion %}
+<div class="topbar">
+    <div class="marca">MADeCa &middot; Documento Electrónico de Control Administrativo</div>
+    <nav>
+        {% set ruta = request.url.path if request else "" %}
+        <a href="/dashboard/inicio"{% if ruta.startswith("/dashboard/inicio") %} class="activo"{% endif %}>Inicio</a>
+        <a href="/dashboard/expediciones"{% if ruta.startswith("/dashboard/expediciones") %} class="activo"{% endif %}>Expediciones</a>
+        <a href="/dashboard/bandeja"{% if ruta.startswith("/dashboard/bandeja") %} class="activo"{% endif %}>Bandeja de revisión</a>
+        <a href="/dashboard/integraciones"{% if ruta.startswith("/dashboard/integraciones") %} class="activo"{% endif %}>Integraciones ERP</a>
+        {% if sesion.rol == "admin" %}<a href="/dashboard/historial"{% if ruta.startswith("/dashboard/historial") %} class="activo"{% endif %}>Historial</a>{% endif %}
+        {% if sesion.rol == "admin" %}<a href="/dashboard/fuentes"{% if ruta.startswith("/dashboard/fuentes") %} class="activo"{% endif %}>Fuentes de datos</a>{% endif %}
+        <a href="/dashboard/certificados"{% if ruta.startswith("/dashboard/certificados") %} class="activo"{% endif %}>Certificados</a>
+        {% if sesion.rol == "admin" %}<a href="/dashboard/usuarios"{% if ruta.startswith("/dashboard/usuarios") %} class="activo"{% endif %}>Usuarios</a>{% endif %}
+        <form method="post" action="/logout"><button type="submit" class="link">Cerrar sesión</button></form>
+    </nav>
+</div>
+{% endif %}
+<main>
+    {% block contenido %}{% endblock %}
+</main>
+<footer class="pie">MADeCa - Desarrollado por <a href="https://masoft.es" target="_blank" rel="noopener">Masoft.es</a></footer>
+</body>
+</html>
